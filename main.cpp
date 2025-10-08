@@ -3,7 +3,7 @@
 #include "GameClient.h"
 #include "GameServer.h"
 
-
+// simple demo of two clients sending a JoinGame message to the server
 int main()
 {
     int CLIENT_1_ID = 100;
@@ -24,7 +24,8 @@ int main()
 
     client1->sendMessageToServer(msg1);
     client2->sendMessageToServer(msg2);
-    // outputs:
+
+    // Expected output:
     // [server] Got message from client (ID=100) : JoinGame("joe")
     // [server] Got message from client (ID=101) : JoinGame("amy")
 }

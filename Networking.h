@@ -7,6 +7,7 @@
 class GameServer;
 class GameClient;
 
+// Handles passing messages between clients and server
 class NetworkingInterface
 {
     public:
@@ -15,6 +16,7 @@ class NetworkingInterface
 
 };
 
+// Networking interface that passes messages between clients and server in memory
 class InMemoryNetworking : public NetworkingInterface
 {
     public:

@@ -7,6 +7,8 @@
 
 class NetworkingInterface;
 
+// Handles game application logic server-side
+// Communicates with clients via NetworkingInterface
 class GameServer
 {
     public:

@@ -1,0 +1,125 @@
+=====
+Lowercase Single Letter
+=====
+
+configuration {
+  name: ""
+  player range: (0, 0)
+  audience: false
+  setup: {}
+}
+constants {
+  a: 0
+}
+variables {}
+per-player {}
+per-audience {}
+rules {}
+
+-----
+
+(game
+  (configuration
+    (quoted_string)
+    (number_range
+      (number)
+      (number))
+    (boolean))
+  (constants
+    (value_map
+      (map_entry
+        (identifier)
+        (expression
+          (number)))))
+  (variables
+    (value_map))
+  (per_player
+    (value_map))
+  (per_audience
+    (value_map))
+  (rules
+    (body)))
+
+=====
+Leading Underscore
+=====
+
+configuration {
+  name: ""
+  player range: (0, 0)
+  audience: false
+  setup: {}
+}
+constants {
+  _: 0
+}
+variables {}
+per-player {}
+per-audience {}
+rules {}
+
+-----
+
+(game
+  (configuration
+    (quoted_string)
+    (number_range
+      (number)
+      (number))
+    (boolean))
+  (constants
+    (value_map
+      (map_entry
+        (identifier)
+        (expression
+          (number)))))
+  (variables
+    (value_map))
+  (per_player
+    (value_map))
+  (per_audience
+    (value_map))
+  (rules
+    (body)))
+
+=====
+All valid characters mixed
+=====
+
+configuration {
+  name: ""
+  player range: (0, 0)
+  audience: false
+  setup: {}
+}
+constants {
+  AbC__23: 0
+}
+variables {}
+per-player {}
+per-audience {}
+rules {}
+
+-----
+
+(game
+  (configuration
+    (quoted_string)
+    (number_range
+      (number)
+      (number))
+    (boolean))
+  (constants
+    (value_map
+      (map_entry
+        (identifier)
+        (expression
+          (number)))))
+  (variables
+    (value_map))
+  (per_player
+    (value_map))
+  (per_audience
+    (value_map))
+  (rules
+    (body)))

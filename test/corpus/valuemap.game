@@ -1,0 +1,748 @@
+=====
+Single Number
+=====
+
+configuration {
+  name: ""
+  player range: (0, 0)
+  audience: false
+  setup: {}
+}
+constants {
+  a: 123456
+}
+variables {}
+per-player {}
+per-audience {}
+rules {}
+
+-----
+
+(game
+  (configuration
+    (quoted_string)
+    (number_range
+      (number)
+      (number))
+    (boolean))
+  (constants
+    (value_map
+      (map_entry
+        (identifier)
+        (expression
+          (number)))))
+  (variables
+    (value_map))
+  (per_player
+    (value_map))
+  (per_audience
+    (value_map))
+  (rules
+    (body)))
+
+=====
+Single String
+=====
+
+configuration {
+  name: ""
+  player range: (0, 0)
+  audience: false
+  setup: {}
+}
+constants {
+  a: "Hello"
+}
+variables {}
+per-player {}
+per-audience {}
+rules {}
+
+-----
+
+(game
+  (configuration
+    (quoted_string)
+    (number_range
+      (number)
+      (number))
+    (boolean))
+  (constants
+    (value_map
+      (map_entry
+        (identifier)
+        (expression
+          (quoted_string
+            (string_text))))))
+  (variables
+    (value_map))
+  (per_player
+    (value_map))
+  (per_audience
+    (value_map))
+  (rules
+    (body)))
+
+=====
+Single Boolean
+=====
+
+configuration {
+  name: ""
+  player range: (0, 0)
+  audience: false
+  setup: {}
+}
+constants {
+  a: false
+}
+variables {}
+per-player {}
+per-audience {}
+rules {}
+
+-----
+
+(game
+  (configuration
+    (quoted_string)
+    (number_range
+      (number)
+      (number))
+    (boolean))
+  (constants
+    (value_map
+      (map_entry
+        (identifier)
+        (expression
+          (boolean)))))
+  (variables
+    (value_map))
+  (per_player
+    (value_map))
+  (per_audience
+    (value_map))
+  (rules
+    (body)))
+
+=====
+Single Empty List
+=====
+
+configuration {
+  name: ""
+  player range: (0, 0)
+  audience: false
+  setup: {}
+}
+constants {
+  a: []
+}
+variables {}
+per-player {}
+per-audience {}
+rules {}
+
+-----
+
+(game
+  (configuration
+    (quoted_string)
+    (number_range
+      (number)
+      (number))
+    (boolean))
+  (constants
+    (value_map
+      (map_entry
+        (identifier)
+        (expression
+          (list_literal)))))
+  (variables
+    (value_map))
+  (per_player
+    (value_map))
+  (per_audience
+    (value_map))
+  (rules
+    (body)))
+
+=====
+Single Identifier
+=====
+
+configuration {
+  name: ""
+  player range: (0, 0)
+  audience: false
+  setup: {}
+}
+constants {
+  a: b
+}
+variables {}
+per-player {}
+per-audience {}
+rules {}
+
+-----
+
+(game
+  (configuration
+    (quoted_string)
+    (number_range
+      (number)
+      (number))
+    (boolean))
+  (constants
+    (value_map
+      (map_entry
+        (identifier)
+        (expression
+          (identifier)))))
+  (variables
+    (value_map))
+  (per_player
+    (value_map))
+  (per_audience
+    (value_map))
+  (rules
+    (body)))
+
+=====
+Empty Map
+=====
+
+configuration {
+  name: ""
+  player range: (0, 0)
+  audience: false
+  setup: {}
+}
+constants {
+  a: {}
+}
+variables {}
+per-player {}
+per-audience {}
+rules {}
+
+-----
+
+(game
+  (configuration
+    (quoted_string)
+    (number_range
+      (number)
+      (number))
+    (boolean))
+  (constants
+    (value_map
+      (map_entry
+        (identifier)
+        (expression
+          (value_map)))))
+  (variables
+    (value_map))
+  (per_player
+    (value_map))
+  (per_audience
+    (value_map))
+  (rules
+    (body)))
+
+=====
+Multiple Entries
+=====
+
+configuration {
+  name: ""
+  player range: (0, 0)
+  audience: false
+  setup: {}
+}
+constants {
+  a: 0,
+  b: 1,
+}
+variables {}
+per-player {}
+per-audience {}
+rules {}
+
+-----
+
+(game
+  (configuration
+    (quoted_string)
+    (number_range
+      (number)
+      (number))
+    (boolean))
+  (constants
+    (value_map
+      (map_entry
+        (identifier)
+        (expression
+          (number)))
+      (map_entry
+        (identifier)
+        (expression
+          (number)))))
+  (variables
+    (value_map))
+  (per_player
+    (value_map))
+  (per_audience
+    (value_map))
+  (rules
+    (body)))
+
+=====
+Arithmetic Expressions
+=====
+
+configuration {
+  name: ""
+  player range: (0, 0)
+  audience: false
+  setup: {}
+}
+constants {
+  a: 1 + 2 * (3 + 4) / 5 % 6 - 7,
+}
+variables {}
+per-player {}
+per-audience {}
+rules {}
+
+-----
+
+(game
+  (configuration
+    (quoted_string)
+    (number_range
+      (number)
+      (number))
+    (boolean))
+  (constants
+    (value_map
+      (map_entry
+        (identifier)
+        (expression
+          (expression
+            (expression
+              (number))
+            (expression
+              (expression
+                (expression
+                  (expression
+                    (number))
+                  (expression
+                    (expression
+                      (expression
+                        (number))
+                      (expression
+                        (number)))))
+                (expression
+                  (number)))
+              (expression
+                (number))))
+          (expression
+            (number))))))
+
+  (variables
+    (value_map))
+  (per_player
+    (value_map))
+  (per_audience
+    (value_map))
+  (rules
+    (body)))
+
+=====
+Relational Expressions
+=====
+
+configuration {
+  name: ""
+  player range: (0, 0)
+  audience: false
+  setup: {}
+}
+constants {
+  a: 1 < 2,
+  b: 1 <= 2,
+  c: 1 >= 2,
+  d: 1 > 2,
+  e: 1 = 2,
+  f: 1 != 2,
+}
+variables {}
+per-player {}
+per-audience {}
+rules {}
+
+-----
+
+(game
+  (configuration
+    (quoted_string)
+    (number_range
+      (number)
+      (number))
+    (boolean))
+  (constants
+    (value_map
+      (map_entry
+        (identifier)
+        (expression
+          (expression
+            (number))
+          (expression
+            (number))))
+      (map_entry
+        (identifier)
+        (expression
+          (expression
+            (number))
+          (expression
+            (number))))
+      (map_entry
+        (identifier)
+        (expression
+          (expression
+            (number))
+          (expression
+            (number))))
+      (map_entry
+        (identifier)
+        (expression
+          (expression
+            (number))
+          (expression
+            (number))))
+      (map_entry
+        (identifier)
+        (expression
+          (expression
+            (number))
+          (expression
+            (number))))
+      (map_entry
+        (identifier)
+        (expression
+          (expression
+            (number))
+          (expression
+            (number))))))
+
+  (variables
+    (value_map))
+  (per_player
+    (value_map))
+  (per_audience
+    (value_map))
+  (rules
+    (body)))
+
+=====
+Logical Expressions
+=====
+
+configuration {
+  name: ""
+  player range: (0, 0)
+  audience: false
+  setup: {}
+}
+constants {
+  a: true || false,
+  b: true && false,
+  c: (true || false) && (true || false),
+  d: true || false && true || false,
+}
+variables {}
+per-player {}
+per-audience {}
+rules {}
+
+-----
+
+(game
+  (configuration
+    (quoted_string)
+    (number_range
+      (number)
+      (number))
+    (boolean))
+  (constants
+    (value_map
+      (map_entry
+        (identifier)
+        (expression
+          (expression
+            (boolean))
+          (expression
+            (boolean))))
+      (map_entry
+        (identifier)
+        (expression
+          (expression
+            (boolean))
+          (expression
+            (boolean))))
+      (map_entry
+        (identifier)
+        (expression
+          (expression
+            (expression
+              (expression
+                (boolean))
+              (expression
+                (boolean))))
+          (expression
+            (expression
+              (expression
+                (boolean))
+              (expression
+                (boolean))))))
+      (map_entry
+        (identifier)
+        (expression
+          (expression
+            (expression
+              (boolean))
+            (expression
+              (expression
+                (boolean))
+              (expression
+                (boolean))))
+          (expression
+            (boolean))))))
+  (variables
+    (value_map))
+  (per_player
+    (value_map))
+  (per_audience
+    (value_map))
+  (rules
+    (body)))
+
+=====
+Builtins
+=====
+
+configuration {
+  name: ""
+  player range: (0, 0)
+  audience: false
+  setup: {}
+}
+constants {
+  a: 3.upfrom(1),
+  b: [].size(),
+  c: [].contains(7),
+  d: [].collect(x, x < 7),
+}
+variables {}
+per-player {}
+per-audience {}
+rules {}
+
+-----
+
+(game
+  (configuration
+    (quoted_string)
+    (number_range
+      (number)
+      (number))
+    (boolean))
+  (constants
+    (value_map
+      (map_entry
+        (identifier)
+        (expression
+          (expression
+            (number))
+          (builtin)
+          (argument_list
+            (expression_list
+              (expression
+                (number))))))
+      (map_entry
+        (identifier)
+        (expression
+          (expression
+            (list_literal))
+          (builtin)
+          (argument_list)))
+      (map_entry
+        (identifier)
+        (expression
+          (expression
+            (list_literal))
+          (builtin)
+          (argument_list
+            (expression_list
+              (expression
+                (number))))))
+      (map_entry
+        (identifier)
+        (expression
+          (expression
+            (list_literal))
+          (builtin)
+          (argument_list
+            (expression_list
+              (expression
+                (identifier))
+              (expression
+                (expression
+                  (identifier))
+                (expression
+                  (number)))))))))
+  (variables
+    (value_map))
+  (per_player
+    (value_map))
+  (per_audience
+    (value_map))
+  (rules
+    (body)))
+
+=====
+Operations on Non-numerics
+=====
+
+configuration {
+  name: ""
+  player range: (0, 0)
+  audience: false
+  setup: {}
+}
+constants {
+  a: [] + [],
+  b: {c:0} + {d:1},
+  c: "hi" + "there",
+  d: "hi" + 0,
+}
+variables {}
+per-player {}
+per-audience {}
+rules {}
+
+-----
+
+(game
+  (configuration
+    (quoted_string)
+    (number_range
+      (number)
+      (number))
+    (boolean))
+  (constants
+    (value_map
+      (map_entry
+        (identifier)
+        (expression
+          (expression
+            (list_literal))
+          (expression
+            (list_literal))))
+      (map_entry
+        (identifier)
+        (expression
+          (expression
+            (value_map
+              (map_entry
+                (identifier)
+                (expression
+                  (number)))))
+          (expression
+            (value_map
+              (map_entry
+                (identifier)
+                (expression
+                  (number)))))))
+      (map_entry
+        (identifier)
+        (expression
+          (expression
+            (quoted_string
+              (string_text)))
+          (expression
+            (quoted_string
+              (string_text)))))
+      (map_entry
+        (identifier)
+        (expression
+          (expression
+            (quoted_string
+              (string_text)))
+          (expression
+            (number))))))
+  (variables
+    (value_map))
+  (per_player
+    (value_map))
+  (per_audience
+    (value_map))
+  (rules
+    (body)))
+
+=====
+Interpolated Strings
+=====
+
+configuration {
+  name: ""
+  player range: (0, 0)
+  audience: false
+  setup: {}
+}
+constants {
+  a: "abc{5+4}{{text}}{def.ghi}"
+}
+variables {}
+per-player {}
+per-audience {}
+rules {}
+
+-----
+
+(game
+  (configuration
+    (quoted_string)
+    (number_range
+      (number)
+      (number))
+    (boolean))
+  (constants
+    (value_map
+      (map_entry
+        (identifier)
+        (expression
+          (quoted_string
+            (string_text)
+            (string_interpolation
+              (expression
+                (expression
+                  (number))
+                (expression
+                  (number))))
+            (string_text)
+            (string_interpolation
+              (expression
+                (expression
+                  (identifier))
+                (identifier))))))))
+  (variables
+    (value_map))
+  (per_player
+    (value_map))
+  (per_audience
+    (value_map))
+  (rules
+    (body)))

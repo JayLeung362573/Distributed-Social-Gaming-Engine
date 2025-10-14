@@ -1,7 +1,3 @@
-//
-// Created by Caiden Merklin on 10/13/25.
-//
-
 #ifndef MAIN_GAMESPECLOADER_H
 #define MAIN_GAMESPECLOADER_H
 #include "GameSpec.h"
@@ -26,6 +22,7 @@ public:
           }
         })";
      */
+    bool HelloWorldSmokeTest(const char* path);
 private:
 };
 

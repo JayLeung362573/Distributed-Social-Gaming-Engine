@@ -390,6 +390,7 @@
   {
     "type": "game",
     "named": true,
+    "root": true,
     "fields": {
       "configuration": {
         "multiple": false,
@@ -1510,7 +1511,8 @@
   },
   {
     "type": "comment",
-    "named": true
+    "named": true,
+    "extra": true
   },
   {
     "type": "configuration",

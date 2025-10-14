@@ -28,10 +28,12 @@ public:
 
     void setServer(std::shared_ptr<GameServer> server);
 
+    std::vector<int> getConnectedClientIDs() const override;
 private:
     std::unique_ptr<networking::Server> net_server;
     std::shared_ptr<GameServer> m_server;
     std::unordered_map<int, std::shared_ptr<GameClient>> m_clients;
+    std::unordered_map<int, networking::Connection> m_connections;
 
     std::string serialize(const Message& msg);
     Message deserialize(const std::string& payload);

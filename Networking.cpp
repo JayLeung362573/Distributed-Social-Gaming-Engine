@@ -28,3 +28,12 @@ void InMemoryNetworking::sendMessageToServer(int fromClientID, Message &message)
         m_server->onMessageFromClient(fromClientID, message);
     }
 }
+
+std::vector<int> InMemoryNetworking::getConnectedClientIDs() const{
+    std::vector<int> ids;
+    ids.reserve(m_clients.size());
+    for(const auto &client : m_clients){
+        ids.push_back(client.first);
+    };
+    return ids;
+}

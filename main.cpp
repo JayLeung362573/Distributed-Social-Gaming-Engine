@@ -40,6 +40,9 @@ int main(int argc, char* argv[])
         client1->sendMessageToServer(msg1);
         client2->sendMessageToServer(msg2);
 
+        int cycle = 1;
+        auto last = std::chrono::steady_clock::now();
+
         while (true) {
             ws->update();
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -48,6 +51,12 @@ int main(int argc, char* argv[])
             // [WebSocket] Client connected (id=1360)
             // [WebSocket] Received: JoinGame: Hello server! from client 89129161327952
             // [server] Got message from client (id=1360) : JoinGame(" Hello server!")
+
+            auto now = std::chrono::steady_clock::now();
+            if (now - last >= std::chrono::seconds(1)) {
+                server->broadcastUpdate(cycle++);
+                last = now;
+            }
         }
     } else {
         auto networking = std::make_shared<InMemoryNetworking>();

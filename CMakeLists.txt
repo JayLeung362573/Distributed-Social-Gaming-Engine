@@ -20,20 +20,6 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/src/CMakeLists.txt")
   add_subdirectory(src)
 endif()
 
-add_executable(main)
-target_sources(main
-  PRIVATE
-    main.cpp
-    GameClient.cpp
-    GameServer.cpp
-    Networking.cpp
-)
-
-target_compile_features(main
-  PUBLIC
-    cxx_std_23
-)
-
 option(BUILD_TESTS "Build unit tests" ON)
 if(BUILD_TESTS)
   add_subdirectory(tests)

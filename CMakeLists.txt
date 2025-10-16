@@ -10,6 +10,16 @@ if (NOT CMAKE_BUILD_TYPE)
       STRING "Build type (default Debug):" FORCE)
 endif()
 
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+enable_testing()
+
+if(EXISTS "${CMAKE_SOURCE_DIR}/src/CMakeLists.txt")
+  add_subdirectory(src)
+endif()
+
 add_executable(main)
 target_sources(main
   PRIVATE
@@ -23,3 +33,8 @@ target_compile_features(main
   PUBLIC
     cxx_std_23
 )
+
+option(BUILD_TESTS "Build unit tests" ON)
+if(BUILD_TESTS)
+  add_subdirectory(tests)
+endif()

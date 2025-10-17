@@ -29,9 +29,10 @@ CPMAddPackage(
   GIT_TAG master
 )
 
-option(ENABLE_NCURSES_CLIENT "Build the NCurses client" ON)
-option(ENABLE_FLUTTER_CLIENT "Build the Flutter client" OFF) # Manually turn build off
-option(ENABLE_FTXUI_CLIENT   "Build the FTXUI client" OFF) # Manually turn build off
+# Override web-socket-networking options after the package is added
+set(ENABLE_NCURSES_CLIENT ON CACHE BOOL "Enable NCurses client" FORCE)
+set(ENABLE_FLUTTER_CLIENT OFF CACHE BOOL "Disable Flutter client" FORCE)
+set(ENABLE_FTXUI_CLIENT OFF CACHE BOOL "Disable FTXUI client" FORCE)
 
 add_executable(main)
 target_sources(main

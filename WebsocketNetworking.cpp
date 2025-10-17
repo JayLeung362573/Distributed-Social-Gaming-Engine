@@ -85,6 +85,11 @@ void WebSocketNetworking::sendMessageToServer(int fromClientID, Message& message
     }
 }
 
+// TODO: Return a list of currently connected client IDs.
+std::vector<int> WebSocketNetworking::getConnectedClientIDs() const {
+    return {}; // empty placeholder
+}
+
 // tokenize payload to client
 std::string WebSocketNetworking::serialize(const Message& msg)
 {

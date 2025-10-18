@@ -39,6 +39,51 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 enable_testing()
 
+# Tree-sitter C runtime library - using FetchContent instead of submodule
+include(FetchContent)
+
+FetchContent_Declare(
+  tree-sitter
+  GIT_REPOSITORY https://github.com/tree-sitter/tree-sitter.git
+  GIT_TAG        v0.26.0-pre-61-gb3bc7701
+)
+
+FetchContent_MakeAvailable(tree-sitter)
+
+# Build tree-sitter library from fetched content
+add_library(treesitter STATIC
+  ${tree-sitter_SOURCE_DIR}/lib/src/lib.c
+)
+target_include_directories(treesitter PUBLIC
+  ${tree-sitter_SOURCE_DIR}/lib/include
+)
+
+# Generated SocialGaming parser.c
+# (run "tree-sitter generate" in your grammar repo)
+add_library(ts_socialgaming STATIC
+  parser/tree_sitter/parser.c
+)
+
+# It uses the Tree-sitter headers
+target_include_directories(ts_socialgaming PUBLIC
+  ${tree-sitter_SOURCE_DIR}/lib/include
+)
+target_link_libraries(ts_socialgaming PUBLIC treesitter)
+
+# Our C++ loader for the grammar
+add_library(parser STATIC
+  parser/GameSpecLoader.cpp
+)
+# Add the project root as an include dir so we can `#include "parser/GameSpecLoader.h"`
+# and also expose tree-sitter headers to this target.
+target_include_directories(parser PUBLIC
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${tree-sitter_SOURCE_DIR}/lib/include
+)
+# Link the generated grammar into our loader
+target_link_libraries(parser PUBLIC ts_socialgaming)
+
+# Add src and tests subdirectories
 if(EXISTS "${CMAKE_SOURCE_DIR}/src/CMakeLists.txt")
   add_subdirectory(src)
 endif()

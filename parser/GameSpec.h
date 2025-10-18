@@ -4,7 +4,7 @@
 #include <vector>
 #include <optional>
 
-// This is currently based upon the third_party/socialgaming-grammar/games/rock-paper-scissors.game
+// This is currently based upon the games/rock-paper-scissors.game
 //this can be expanded in the future once we have more bits
 struct PlayerRange {
     int min = 0;

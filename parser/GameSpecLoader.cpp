@@ -97,3 +97,62 @@ bool GameSpecLoader::HelloWorldSmokeTest(const char *path) {
 
 }
 
+GameSpec GameSpecLoader::loadFile(const char *path) {
+    const std::string src = slurp(path);
+    return loadString(src);
+}
+
+GameSpec GameSpecLoader::loadString(const std::string &text) {
+    GameSpec spec;
+
+    //Parse using Tree-Sitter.
+    TSParser *parser = ts_parser_new();
+    ts_parser_set_language(parser, tree_sitter_socialgaming());
+    TSTree *tree = ts_parser_parse_string(parser, nullptr, text.c_str(), text.size());
+
+    if (!tree) {
+        ts_parser_delete(parser);
+        throw std::runtime_error("Parse failed");
+    }
+
+    TSNode root = ts_tree_root_node(tree);
+
+    //loop through the children to parse the config of each
+    uint32_t child_count = ts_node_child_count(root);
+
+    for (uint32_t i = 0; i < child_count; ++i) {
+        TSNode child = ts_node_child(root, i);
+        const char *type = ts_node_type(child);
+
+        //if it's config we will use a diff function because this can vary quite a bit.
+        if (strcmp(type, "configuration") == 0) {
+            parseConfiguration(text, child, spec);
+        } else if (strcmp(type, "constants") == 0) {
+            spec.constants = slice(text, child);
+        } else if (strcmp(type, "variables") == 0) {
+            spec.variables = slice(text, child);
+        }
+    }
+
+
+    //no memory leaks :).
+    ts_tree_delete(tree);
+    ts_parser_delete(parser);
+    return spec;
+}
+
+void GameSpecLoader::parseConfiguration(const std::string &src, TSNode node, GameSpec &spec) {
+
+
+    // Walk through children of the configuration block
+    uint32_t child_count = ts_node_child_count(node);
+    for (uint32_t i = 0; i < child_count; ++i) {
+        TSNode child = ts_node_child(node,i);
+        const char* type = ts_node_type(child);
+
+        std::cout << "Config child " << i << ": " << type << std::endl;
+    }
+}
+
+
+

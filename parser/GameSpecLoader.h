@@ -2,6 +2,7 @@
 #define MAIN_GAMESPECLOADER_H
 #include "GameSpec.h"
 #include "TreeSitterUtil.h"
+
 class GameSpecLoader {
 public:
     GameSpec loadFile(const char* path);
@@ -24,6 +25,7 @@ public:
      */
     bool HelloWorldSmokeTest(const char* path);
 private:
+    static void parseConfiguration(const std::string& src, TSNode node, GameSpec& spec);
 };
 
 

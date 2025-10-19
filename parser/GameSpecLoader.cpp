@@ -150,7 +150,16 @@ void GameSpecLoader::parseConfiguration(const std::string &src, TSNode node, Gam
         TSNode child = ts_node_child(node,i);
         const char* type = ts_node_type(child);
 
-        std::cout << "Config child " << i << ": " << type << std::endl;
+        //if you want to see what all the children of the config are called.
+//        std::cout << "Config child " << i << ": " << type << std::endl;
+        //parse name
+
+        if (strcmp(type,"quoted_string") == 0){
+            std::string nameWithQuotes = slice(src, child);
+            if (nameWithQuotes.size() >= 2) {
+                spec.name = nameWithQuotes.substr(1, nameWithQuotes.size() - 2);
+            }
+        }
     }
 }
 

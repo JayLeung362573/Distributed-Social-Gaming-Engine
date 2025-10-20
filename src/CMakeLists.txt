@@ -1,4 +1,7 @@
 cmake_minimum_required(VERSION 3.28.2)
+
+add_subdirectory(GameEngine)
+
 add_library(core_lib
   lib/add.cpp
   GameClient.cpp
@@ -9,6 +12,8 @@ add_library(core_lib
 target_include_directories(core_lib PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}/lib
 )
+
+target_link_libraries(core_lib PUBLIC GameEngine)
 
 add_executable(main main.cpp)
 target_link_libraries(main PRIVATE core_lib)

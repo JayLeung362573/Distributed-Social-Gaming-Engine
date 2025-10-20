@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.28.2) 
+cmake_minimum_required(VERSION 3.28.2)
 
 include(FetchContent)
 
@@ -16,6 +16,8 @@ FetchContent_MakeAvailable(googletest)
 
 add_executable(unit_tests
   test_add.cpp
+  GameTest.cpp
+  ForLoopRuleTest.cpp
 )
 
 # Link with gtest (the Quickstart uses GTest::gtest_main)

@@ -15,7 +15,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/tests")
 FetchContent_MakeAvailable(googletest)
 
 add_executable(unit_tests
-  test_add.cpp
   GameTest.cpp
   ForLoopRuleTest.cpp
 )

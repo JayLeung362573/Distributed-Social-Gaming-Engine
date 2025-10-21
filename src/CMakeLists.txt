@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.28.2)
 add_subdirectory(GameEngine)
 
 add_library(core_lib
-  lib/add.cpp
   GameClient.cpp
   GameServer.cpp
   Networking.cpp

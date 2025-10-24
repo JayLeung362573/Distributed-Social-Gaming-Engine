@@ -79,7 +79,7 @@ void Game::runRule(std::shared_ptr<RuleInstance> ruleInstance)
     }
 }
 
-void Game::processRuleCommands(std::vector<RuleCommand> commands)
+void Game::processRuleCommands(std::vector<RuleCommand>& commands)
 {
     for (const RuleCommand& command : commands)
     {

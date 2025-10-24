@@ -31,7 +31,7 @@ class Game
     private:
         void runRule(std::shared_ptr<RuleInstance> ruleInstance);
 
-        void processRuleCommands(std::vector<RuleCommand> commands);
+        void processRuleCommands(std::vector<RuleCommand>& commands);
         void processRuleCommand(const RunRuleCommand& command);
 
         std::vector<std::shared_ptr<RuleBlueprint>> m_ruleBlueprints;

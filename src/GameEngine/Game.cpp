@@ -22,6 +22,7 @@ void Game::tick()
         case State::Init:
         {
             m_state = m_ruleBlueprints.empty() ? State::GameOver : State::InGame;
+            break;
         }
         case State::InGame:
         {

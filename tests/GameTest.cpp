@@ -71,6 +71,9 @@ TEST(GameTest, inGameToGameOverWhenRuleDone)
     ASSERT_EQ( Game::State::InGame, game.getState());
 
     game.tick();
+    ASSERT_EQ( Game::State::InGame, game.getState());
+
+    game.tick();
     ASSERT_EQ(Game::State::GameOver, game.getState());
 }
 
@@ -85,14 +88,11 @@ TEST(GameTest, runMultipleRules)
     Game game(rules, players);
     ASSERT_EQ( Game::State::Init, game.getState());
 
-    game.tick();
-    ASSERT_EQ( Game::State::InGame, game.getState());
-
-    game.tick();
-    ASSERT_EQ( Game::State::InGame, game.getState());
-
-    game.tick();
-    ASSERT_EQ( Game::State::InGame, game.getState());
+    for (auto i = 0; i < 4; i++)
+    {
+        game.tick();
+        ASSERT_EQ( Game::State::InGame, game.getState());
+    }
 
     game.tick();
     ASSERT_EQ(Game::State::GameOver, game.getState());

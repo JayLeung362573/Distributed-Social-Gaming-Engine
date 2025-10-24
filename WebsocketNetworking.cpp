@@ -1,10 +1,16 @@
 #include "WebSocketNetworking.h"
 #include "GameServer.h"
 #include "GameClient.h"
+#include <fstream>
 
-WebSocketNetworking::WebSocketNetworking(unsigned short port)
+static std::string readFile(const std::string& path) {
+    std::ifstream file(path);
+    return {std::istreambuf_iterator<char>(file), { }};
+}
+
+WebSocketNetworking::WebSocketNetworking(unsigned short port, const std::string& htmlPath)
 {
-    std::string httpPage = "<html><body><h1>WebSocket Server Ready</h1></body></html>";
+    std::string httpPage = readFile(htmlPath);
 
     // Create server with callbacks
     net_server = std::make_unique<networking::Server>(
@@ -87,7 +93,11 @@ void WebSocketNetworking::sendMessageToServer(int fromClientID, Message& message
 
 // TODO: Return a list of currently connected client IDs.
 std::vector<int> WebSocketNetworking::getConnectedClientIDs() const {
-    return {}; // empty placeholder
+    std::vector<int> ids;
+    for (const auto& pair : m_clients) {
+        ids.push_back(pair.first);
+    }
+    return ids;
 }
 
 // tokenize payload to client
@@ -96,6 +106,10 @@ std::string WebSocketNetworking::serialize(const Message& msg)
     if (msg.type == MessageType::JoinGame) {
         auto& data = std::get<JoinGameMessage>(msg.data);
         return "JoinGame:" + data.playerName;
+    }
+    if (msg.type == MessageType::UpdateCycle) {
+        auto& data = std::get<UpdateCycleMessage>(msg.data);
+        return "UpdateCycle:" + std::to_string(data.cycle);
     }
     return "Empty";
 }

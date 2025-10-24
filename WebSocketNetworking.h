@@ -17,7 +17,7 @@ class GameClient;
 class WebSocketNetworking : public NetworkingInterface, public std::enable_shared_from_this<WebSocketNetworking>
 {
 public:
-    WebSocketNetworking(unsigned short port);
+    WebSocketNetworking(unsigned short port, const std::string& htmlPath);
     ~WebSocketNetworking() = default;
 
     void startServer();

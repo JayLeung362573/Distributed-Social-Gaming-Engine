@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
     
     if (useWebSocket) {
         // Create the WebSocket networking instance
-        std::shared_ptr<WebSocketNetworking> ws = std::make_shared<WebSocketNetworking>(8080);
+        std::shared_ptr<WebSocketNetworking> ws = std::make_shared<WebSocketNetworking>(8080, "../test.html");
         std::shared_ptr<NetworkingInterface> networking = ws;  // upcast automatically
 
         auto server  = std::make_shared<GameServer>(networking);

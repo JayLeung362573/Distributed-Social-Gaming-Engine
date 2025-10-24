@@ -142,24 +142,68 @@ GameSpec GameSpecLoader::loadString(const std::string &text) {
 }
 
 void GameSpecLoader::parseConfiguration(const std::string &src, TSNode node, GameSpec &spec) {
-
-
     // Walk through children of the configuration block
     uint32_t child_count = ts_node_child_count(node);
     for (uint32_t i = 0; i < child_count; ++i) {
-        TSNode child = ts_node_child(node,i);
+        TSNode child = ts_node_child(node, i);
         const char* type = ts_node_type(child);
 
-        //if you want to see what all the children of the config are called.
-//        std::cout << "Config child " << i << ": " << type << std::endl;
-        //parse name
-
-        if (strcmp(type,"quoted_string") == 0){
+        // Parse name (quoted string)
+        if (strcmp(type, "quoted_string") == 0) {
             std::string nameWithQuotes = slice(src, child);
             if (nameWithQuotes.size() >= 2) {
                 spec.name = nameWithQuotes.substr(1, nameWithQuotes.size() - 2);
             }
         }
+        // Parse player range
+        else if (strcmp(type, "number_range") == 0) {
+            parsePlayerRange(src, child, spec);
+        }
+        // Parse audience
+        else if (strcmp(type, "boolean") == 0) {
+            std::string boolVal = slice(src, child);
+            spec.hasAudience = (boolVal == "true");
+        }
+        // Parse setup block -- for later
+        else if (strcmp(type, "json_object") == 0 || strcmp(type, "setup_block") == 0) {
+            parseSetup(src, child, spec);
+        }
+    }
+}
+
+void GameSpecLoader::parsePlayerRange(const std::string &src, TSNode node, GameSpec &spec) {
+    // Player range is typically (min, max)
+    uint32_t child_count = ts_node_child_count(node);
+
+    for (uint32_t i = 0; i < child_count; ++i) {
+        TSNode child = ts_node_child(node, i);
+        const char* type = ts_node_type(child);
+
+        if (strcmp(type, "integer") == 0) {
+            std::string numStr = slice(src, child);
+            int value = std::stoi(numStr);
+
+            // First integer is min, second is max
+            if (spec.playerRange.min == 0) {
+                spec.playerRange.min = value;
+            } else {
+                spec.playerRange.max = value;
+            }
+        }
+    }
+}
+
+void GameSpecLoader::parseSetup(const std::string &src, TSNode node, GameSpec &spec) {
+    // For now, we'll just capture the setup rules without deep parsing
+    uint32_t child_count = ts_node_child_count(node);
+
+    for (uint32_t i = 0; i < child_count; ++i) {
+        TSNode child = ts_node_child(node, i);
+        const char* type = ts_node_type(child);
+
+        // Look for setup rule definitions
+        // Each rule will have an id, kind, prompt, and optional range
+
     }
 }
 

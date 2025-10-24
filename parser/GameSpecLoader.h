@@ -26,6 +26,8 @@ public:
     bool HelloWorldSmokeTest(const char* path);
 private:
     static void parseConfiguration(const std::string& src, TSNode node, GameSpec& spec);
+    static void parsePlayerRange(const std::string& src, TSNode node, GameSpec& spec);
+    static void parseSetup(const std::string& src, TSNode node, GameSpec& spec);
 };
 
 

@@ -12,8 +12,13 @@ target_include_directories(core_lib PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}/lib
 )
 
-target_link_libraries(core_lib PUBLIC GameEngine)
+target_link_libraries(core_lib PUBLIC GameEngine
+)
 
 add_executable(main main.cpp)
 target_link_libraries(main PRIVATE core_lib)
 target_compile_features(main PRIVATE cxx_std_23)
+
+add_executable(logger Logger.cpp)
+target_link_libraries(logger PRIVATE spdlog::spdlog)
+target_compile_features(logger PRIVATE cxx_std_23)

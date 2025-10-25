@@ -27,3 +27,12 @@ target_compile_features(unit_tests PRIVATE cxx_std_23)
 # Use CTest integration (can use to discover tests automatically)
 include(GoogleTest)
 gtest_discover_tests(unit_tests)
+
+add_executable(Logger_test
+  Logger_test.cpp
+)
+target_link_libraries(Logger_test PRIVATE GTest::gtest_main core_lib spdlog::spdlog)
+target_include_directories(Logger_test PRIVATE ${PROJECT_SOURCE_DIR}/src ${PROJECT_SOURCE_DIR}/src/lib)
+target_compile_features(Logger_test PRIVATE cxx_std_23)
+include(GoogleTest)
+gtest_discover_tests(Logger_test)

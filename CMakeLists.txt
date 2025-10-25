@@ -16,6 +16,10 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 enable_testing()
 
+if(NOT TARGET spdlog AND NOT TARGET "spdlog::spdlog")
+  add_subdirectory(external/spdlog)
+endif()
+
 if(EXISTS "${CMAKE_SOURCE_DIR}/src/CMakeLists.txt")
   add_subdirectory(src)
 endif()

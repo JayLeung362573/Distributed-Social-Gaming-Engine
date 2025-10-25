@@ -14,7 +14,8 @@ class GameServer
 {
     public:
         GameServer(std::shared_ptr<NetworkingInterface> networking);
-        void onMessageFromClient(int fromClientID, Message &message);
+        virtual ~GameServer() = default;
+        virtual void onMessageFromClient(int fromClientID, Message &message);
         void broadcastUpdate(int cycle);
 
     private:

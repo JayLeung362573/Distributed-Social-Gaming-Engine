@@ -27,21 +27,21 @@ CPMAddPackage(
   NAME web-socket-networking
   GITHUB_REPOSITORY nsumner/web-socket-networking
   GIT_TAG master
+  OPTIONS
+    "ENABLE_FLUTTER_CLIENT OFF"
+    "ENABLE_FTXUI_CLIENT OFF"
+    "ENABLE_NCURSES_CLIENT ON"
 )
-
-# Override web-socket-networking options after the package is added
-set(ENABLE_NCURSES_CLIENT ON CACHE BOOL "Enable NCurses client" FORCE)
-set(ENABLE_FLUTTER_CLIENT OFF CACHE BOOL "Disable Flutter client" FORCE)
-set(ENABLE_FTXUI_CLIENT OFF CACHE BOOL "Disable FTXUI client" FORCE)
 
 add_executable(main)
 target_sources(main
   PRIVATE
-        src/main.cpp
-        src/GameClient.cpp
-        src/GameServer.cpp
-        src/Networking.cpp
-        src/WebsocketNetworking.cpp
+    src/main.cpp
+    src/GameClient.cpp
+    src/GameServer.cpp
+    src/Networking.cpp
+    src/WebsocketNetworking.cpp
+    src/MessageTranslator.cpp
 )
 
 target_link_libraries(main

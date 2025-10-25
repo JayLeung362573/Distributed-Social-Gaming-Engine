@@ -4,6 +4,7 @@
 #include "GameServer.h"
 
 #include "WebSocketNetworking.h"
+#include "MessageTranslator.h"
 
 #include <thread>
 #include <chrono>
@@ -44,7 +45,21 @@ int main(int argc, char* argv[])
         auto last = std::chrono::steady_clock::now();
 
         while (true) {
-            ws->update();
+            auto messages = ws->update();
+            
+            // Translating the received message from clients
+            if (!messages.empty()) {
+                for (auto& [clientID, payload] : messages) {
+                    std::cout << "[Main] Raw payload from client " << clientID << ": " << payload << "\n";
+                    
+                    // Convert payload string -> Message object using MessageTranslator
+                    Message gameMsg = MessageTranslator::deserialize(payload);
+                    
+                    // Pass it up to the game logic
+                    ws->sendMessageToServer(clientID, gameMsg);
+                }
+            }
+
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
             // Expected output when launching test.html:

@@ -21,7 +21,7 @@ public:
     ~WebSocketNetworking() = default;
 
     void startServer();
-    void update();
+    std::vector<std::pair<int, std::string>> update();
 
     void sendMessageToClient(int toClientID, Message& message) override;
     void sendMessageToServer(int fromClientID, Message& message) override;
@@ -34,9 +34,6 @@ private:
     std::shared_ptr<GameServer> m_server;
     std::unordered_map<int, std::shared_ptr<GameClient>> m_clients;
     std::unordered_map<int, networking::Connection> m_connections;
-
-    std::string serialize(const Message& msg);
-    Message deserialize(const std::string& payload);
 
     bool has_server_started = false;
 };

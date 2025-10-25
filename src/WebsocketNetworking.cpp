@@ -3,6 +3,8 @@
 #include "GameClient.h"
 #include <fstream>
 
+#include "MessageTranslator.h"
+
 static std::string readFile(const std::string& path) {
     std::ifstream file(path);
     return {std::istreambuf_iterator<char>(file), { }};
@@ -47,33 +49,36 @@ void WebSocketNetworking::startServer()
     has_server_started = true;
 }
 
-void WebSocketNetworking::update()
+std::vector<std::pair<int, std::string>> WebSocketNetworking::update()
 {
     try {
         net_server->update();
 
         auto messages = net_server->receive();
+        
+        std::vector<std::pair<int, std::string>> received;
 
         for (auto& msg : messages) {
             std::cout << "[WebSocket] Received: " << msg.text << " from client " << msg.connection.id << "\n";
 
-            // convert incoming networking::Message to our custom Message object
-            Message gameMsg = deserialize(msg.text);
-
             int fromClientID  = msg.connection.id ? msg.connection.id : 0;
-
-            // Pass it up to the game logic
-            sendMessageToServer(fromClientID, gameMsg);
+            
+            received.emplace_back(fromClientID, msg.text);
         }
+
+        return received;
     }
     catch (const std::exception& e) {
         std::cerr << "Server error: " << e.what() << "\n";
     }
+
+    // No messages, returning defaults
+    return {};
 }
 
 void WebSocketNetworking::sendMessageToClient(int toClientID, Message& message)
 {
-    std::string payload = serialize(message);
+    std::string payload = MessageTranslator::serialize(message); // This is temporarily, hopefully I can decouple this further
 
     // Convert our message into network::Message compatible with the web-socket format to send over the network
     std::deque<networking::Message> out{
@@ -98,28 +103,4 @@ std::vector<int> WebSocketNetworking::getConnectedClientIDs() const {
         ids.push_back(pair.first);
     }
     return ids;
-}
-
-// tokenize payload to client
-std::string WebSocketNetworking::serialize(const Message& msg)
-{
-    if (msg.type == MessageType::JoinGame) {
-        auto& data = std::get<JoinGameMessage>(msg.data);
-        return "JoinGame:" + data.playerName;
-    }
-    if (msg.type == MessageType::UpdateCycle) {
-        auto& data = std::get<UpdateCycleMessage>(msg.data);
-        return "UpdateCycle:" + std::to_string(data.cycle);
-    }
-    return "Empty";
-}
-
-// parse the tokens from client
-Message WebSocketNetworking::deserialize(const std::string& payload)
-{
-    if (payload.starts_with("JoinGame:")) {
-        std::string name = payload.substr(9);
-        return {MessageType::JoinGame, JoinGameMessage{name}};
-    }
-    return {};
 }

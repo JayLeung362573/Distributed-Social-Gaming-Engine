@@ -72,92 +72,92 @@ include CMakeFiles/main.dir/flags.make
 CMakeFiles/main.dir/codegen:
 .PHONY : CMakeFiles/main.dir/codegen
 
-CMakeFiles/main.dir/main.cpp.o: CMakeFiles/main.dir/flags.make
-CMakeFiles/main.dir/main.cpp.o: /Users/jiawei/Desktop/373-25-gamjajeon/main.cpp
-CMakeFiles/main.dir/main.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/jiawei/Desktop/373-25-gamjajeon/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/main.dir/main.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/main.cpp.o -MF CMakeFiles/main.dir/main.cpp.o.d -o CMakeFiles/main.dir/main.cpp.o -c /Users/jiawei/Desktop/373-25-gamjajeon/main.cpp
+CMakeFiles/main.dir/src/main.cpp.o: CMakeFiles/main.dir/flags.make
+CMakeFiles/main.dir/src/main.cpp.o: /Users/jiawei/Desktop/373-25-gamjajeon/src/main.cpp
+CMakeFiles/main.dir/src/main.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/jiawei/Desktop/373-25-gamjajeon/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/main.dir/src/main.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/src/main.cpp.o -MF CMakeFiles/main.dir/src/main.cpp.o.d -o CMakeFiles/main.dir/src/main.cpp.o -c /Users/jiawei/Desktop/373-25-gamjajeon/src/main.cpp
 
-CMakeFiles/main.dir/main.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/main.dir/main.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/jiawei/Desktop/373-25-gamjajeon/main.cpp > CMakeFiles/main.dir/main.cpp.i
+CMakeFiles/main.dir/src/main.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/main.dir/src/main.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/jiawei/Desktop/373-25-gamjajeon/src/main.cpp > CMakeFiles/main.dir/src/main.cpp.i
 
-CMakeFiles/main.dir/main.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/main.dir/main.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/jiawei/Desktop/373-25-gamjajeon/main.cpp -o CMakeFiles/main.dir/main.cpp.s
+CMakeFiles/main.dir/src/main.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/main.dir/src/main.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/jiawei/Desktop/373-25-gamjajeon/src/main.cpp -o CMakeFiles/main.dir/src/main.cpp.s
 
-CMakeFiles/main.dir/GameClient.cpp.o: CMakeFiles/main.dir/flags.make
-CMakeFiles/main.dir/GameClient.cpp.o: /Users/jiawei/Desktop/373-25-gamjajeon/GameClient.cpp
-CMakeFiles/main.dir/GameClient.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/jiawei/Desktop/373-25-gamjajeon/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/main.dir/GameClient.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/GameClient.cpp.o -MF CMakeFiles/main.dir/GameClient.cpp.o.d -o CMakeFiles/main.dir/GameClient.cpp.o -c /Users/jiawei/Desktop/373-25-gamjajeon/GameClient.cpp
+CMakeFiles/main.dir/src/GameClient.cpp.o: CMakeFiles/main.dir/flags.make
+CMakeFiles/main.dir/src/GameClient.cpp.o: /Users/jiawei/Desktop/373-25-gamjajeon/src/GameClient.cpp
+CMakeFiles/main.dir/src/GameClient.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/jiawei/Desktop/373-25-gamjajeon/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/main.dir/src/GameClient.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/src/GameClient.cpp.o -MF CMakeFiles/main.dir/src/GameClient.cpp.o.d -o CMakeFiles/main.dir/src/GameClient.cpp.o -c /Users/jiawei/Desktop/373-25-gamjajeon/src/GameClient.cpp
 
-CMakeFiles/main.dir/GameClient.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/main.dir/GameClient.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/jiawei/Desktop/373-25-gamjajeon/GameClient.cpp > CMakeFiles/main.dir/GameClient.cpp.i
+CMakeFiles/main.dir/src/GameClient.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/main.dir/src/GameClient.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/jiawei/Desktop/373-25-gamjajeon/src/GameClient.cpp > CMakeFiles/main.dir/src/GameClient.cpp.i
 
-CMakeFiles/main.dir/GameClient.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/main.dir/GameClient.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/jiawei/Desktop/373-25-gamjajeon/GameClient.cpp -o CMakeFiles/main.dir/GameClient.cpp.s
+CMakeFiles/main.dir/src/GameClient.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/main.dir/src/GameClient.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/jiawei/Desktop/373-25-gamjajeon/src/GameClient.cpp -o CMakeFiles/main.dir/src/GameClient.cpp.s
 
-CMakeFiles/main.dir/GameServer.cpp.o: CMakeFiles/main.dir/flags.make
-CMakeFiles/main.dir/GameServer.cpp.o: /Users/jiawei/Desktop/373-25-gamjajeon/GameServer.cpp
-CMakeFiles/main.dir/GameServer.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/jiawei/Desktop/373-25-gamjajeon/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/main.dir/GameServer.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/GameServer.cpp.o -MF CMakeFiles/main.dir/GameServer.cpp.o.d -o CMakeFiles/main.dir/GameServer.cpp.o -c /Users/jiawei/Desktop/373-25-gamjajeon/GameServer.cpp
+CMakeFiles/main.dir/src/GameServer.cpp.o: CMakeFiles/main.dir/flags.make
+CMakeFiles/main.dir/src/GameServer.cpp.o: /Users/jiawei/Desktop/373-25-gamjajeon/src/GameServer.cpp
+CMakeFiles/main.dir/src/GameServer.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/jiawei/Desktop/373-25-gamjajeon/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/main.dir/src/GameServer.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/src/GameServer.cpp.o -MF CMakeFiles/main.dir/src/GameServer.cpp.o.d -o CMakeFiles/main.dir/src/GameServer.cpp.o -c /Users/jiawei/Desktop/373-25-gamjajeon/src/GameServer.cpp
 
-CMakeFiles/main.dir/GameServer.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/main.dir/GameServer.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/jiawei/Desktop/373-25-gamjajeon/GameServer.cpp > CMakeFiles/main.dir/GameServer.cpp.i
+CMakeFiles/main.dir/src/GameServer.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/main.dir/src/GameServer.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/jiawei/Desktop/373-25-gamjajeon/src/GameServer.cpp > CMakeFiles/main.dir/src/GameServer.cpp.i
 
-CMakeFiles/main.dir/GameServer.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/main.dir/GameServer.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/jiawei/Desktop/373-25-gamjajeon/GameServer.cpp -o CMakeFiles/main.dir/GameServer.cpp.s
+CMakeFiles/main.dir/src/GameServer.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/main.dir/src/GameServer.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/jiawei/Desktop/373-25-gamjajeon/src/GameServer.cpp -o CMakeFiles/main.dir/src/GameServer.cpp.s
 
-CMakeFiles/main.dir/Networking.cpp.o: CMakeFiles/main.dir/flags.make
-CMakeFiles/main.dir/Networking.cpp.o: /Users/jiawei/Desktop/373-25-gamjajeon/Networking.cpp
-CMakeFiles/main.dir/Networking.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/jiawei/Desktop/373-25-gamjajeon/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/main.dir/Networking.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/Networking.cpp.o -MF CMakeFiles/main.dir/Networking.cpp.o.d -o CMakeFiles/main.dir/Networking.cpp.o -c /Users/jiawei/Desktop/373-25-gamjajeon/Networking.cpp
+CMakeFiles/main.dir/src/Networking.cpp.o: CMakeFiles/main.dir/flags.make
+CMakeFiles/main.dir/src/Networking.cpp.o: /Users/jiawei/Desktop/373-25-gamjajeon/src/Networking.cpp
+CMakeFiles/main.dir/src/Networking.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/jiawei/Desktop/373-25-gamjajeon/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/main.dir/src/Networking.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/src/Networking.cpp.o -MF CMakeFiles/main.dir/src/Networking.cpp.o.d -o CMakeFiles/main.dir/src/Networking.cpp.o -c /Users/jiawei/Desktop/373-25-gamjajeon/src/Networking.cpp
 
-CMakeFiles/main.dir/Networking.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/main.dir/Networking.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/jiawei/Desktop/373-25-gamjajeon/Networking.cpp > CMakeFiles/main.dir/Networking.cpp.i
+CMakeFiles/main.dir/src/Networking.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/main.dir/src/Networking.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/jiawei/Desktop/373-25-gamjajeon/src/Networking.cpp > CMakeFiles/main.dir/src/Networking.cpp.i
 
-CMakeFiles/main.dir/Networking.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/main.dir/Networking.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/jiawei/Desktop/373-25-gamjajeon/Networking.cpp -o CMakeFiles/main.dir/Networking.cpp.s
+CMakeFiles/main.dir/src/Networking.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/main.dir/src/Networking.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/jiawei/Desktop/373-25-gamjajeon/src/Networking.cpp -o CMakeFiles/main.dir/src/Networking.cpp.s
 
-CMakeFiles/main.dir/WebsocketNetworking.cpp.o: CMakeFiles/main.dir/flags.make
-CMakeFiles/main.dir/WebsocketNetworking.cpp.o: /Users/jiawei/Desktop/373-25-gamjajeon/WebsocketNetworking.cpp
-CMakeFiles/main.dir/WebsocketNetworking.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/jiawei/Desktop/373-25-gamjajeon/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/main.dir/WebsocketNetworking.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/WebsocketNetworking.cpp.o -MF CMakeFiles/main.dir/WebsocketNetworking.cpp.o.d -o CMakeFiles/main.dir/WebsocketNetworking.cpp.o -c /Users/jiawei/Desktop/373-25-gamjajeon/WebsocketNetworking.cpp
+CMakeFiles/main.dir/src/WebsocketNetworking.cpp.o: CMakeFiles/main.dir/flags.make
+CMakeFiles/main.dir/src/WebsocketNetworking.cpp.o: /Users/jiawei/Desktop/373-25-gamjajeon/src/WebsocketNetworking.cpp
+CMakeFiles/main.dir/src/WebsocketNetworking.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/jiawei/Desktop/373-25-gamjajeon/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/main.dir/src/WebsocketNetworking.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/src/WebsocketNetworking.cpp.o -MF CMakeFiles/main.dir/src/WebsocketNetworking.cpp.o.d -o CMakeFiles/main.dir/src/WebsocketNetworking.cpp.o -c /Users/jiawei/Desktop/373-25-gamjajeon/src/WebsocketNetworking.cpp
 
-CMakeFiles/main.dir/WebsocketNetworking.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/main.dir/WebsocketNetworking.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/jiawei/Desktop/373-25-gamjajeon/WebsocketNetworking.cpp > CMakeFiles/main.dir/WebsocketNetworking.cpp.i
+CMakeFiles/main.dir/src/WebsocketNetworking.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/main.dir/src/WebsocketNetworking.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/jiawei/Desktop/373-25-gamjajeon/src/WebsocketNetworking.cpp > CMakeFiles/main.dir/src/WebsocketNetworking.cpp.i
 
-CMakeFiles/main.dir/WebsocketNetworking.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/main.dir/WebsocketNetworking.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/jiawei/Desktop/373-25-gamjajeon/WebsocketNetworking.cpp -o CMakeFiles/main.dir/WebsocketNetworking.cpp.s
+CMakeFiles/main.dir/src/WebsocketNetworking.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/main.dir/src/WebsocketNetworking.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/jiawei/Desktop/373-25-gamjajeon/src/WebsocketNetworking.cpp -o CMakeFiles/main.dir/src/WebsocketNetworking.cpp.s
 
 # Object files for target main
 main_OBJECTS = \
-"CMakeFiles/main.dir/main.cpp.o" \
-"CMakeFiles/main.dir/GameClient.cpp.o" \
-"CMakeFiles/main.dir/GameServer.cpp.o" \
-"CMakeFiles/main.dir/Networking.cpp.o" \
-"CMakeFiles/main.dir/WebsocketNetworking.cpp.o"
+"CMakeFiles/main.dir/src/main.cpp.o" \
+"CMakeFiles/main.dir/src/GameClient.cpp.o" \
+"CMakeFiles/main.dir/src/GameServer.cpp.o" \
+"CMakeFiles/main.dir/src/Networking.cpp.o" \
+"CMakeFiles/main.dir/src/WebsocketNetworking.cpp.o"
 
 # External object files for target main
 main_EXTERNAL_OBJECTS =
 
-bin/main: CMakeFiles/main.dir/main.cpp.o
-bin/main: CMakeFiles/main.dir/GameClient.cpp.o
-bin/main: CMakeFiles/main.dir/GameServer.cpp.o
-bin/main: CMakeFiles/main.dir/Networking.cpp.o
-bin/main: CMakeFiles/main.dir/WebsocketNetworking.cpp.o
+bin/main: CMakeFiles/main.dir/src/main.cpp.o
+bin/main: CMakeFiles/main.dir/src/GameClient.cpp.o
+bin/main: CMakeFiles/main.dir/src/GameServer.cpp.o
+bin/main: CMakeFiles/main.dir/src/Networking.cpp.o
+bin/main: CMakeFiles/main.dir/src/WebsocketNetworking.cpp.o
 bin/main: CMakeFiles/main.dir/build.make
 bin/main: _deps/web-socket-networking-build/lib/libnetworking.a
 bin/main: CMakeFiles/main.dir/link.txt

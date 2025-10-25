@@ -37,11 +37,11 @@ set(ENABLE_FTXUI_CLIENT OFF CACHE BOOL "Disable FTXUI client" FORCE)
 add_executable(main)
 target_sources(main
   PRIVATE
-    main.cpp
-    GameClient.cpp
-    GameServer.cpp
-    Networking.cpp
-    WebsocketNetworking.cpp
+        src/main.cpp
+        src/GameClient.cpp
+        src/GameServer.cpp
+        src/Networking.cpp
+        src/WebsocketNetworking.cpp
 )
 
 target_link_libraries(main

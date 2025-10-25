@@ -1,15 +1,6 @@
 /opt/homebrew/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/Applications/CLion.app/Contents/bin/ninja/mac/ninja -G Ninja -S /Users/jiawei/Desktop/373-25-gamjajeon -B /Users/jiawei/Desktop/373-25-gamjajeon/cmake-build-debug
 -- Running Debug build
 -- CPM: Adding package web-socket-networking@ (master)
--- Configuring done (0.9s)
-CMake Error at CMakeLists.txt:38 (target_sources):
-  Cannot find source file:
-
-    main.cpp
-
-
-CMake Error at CMakeLists.txt:37 (add_executable):
-  No SOURCES given to target: main
-
-
-CMake Generate step failed.  Build files cannot be regenerated correctly.
+-- Configuring done (0.8s)
+-- Generating done (0.0s)
+-- Build files have been written to: /Users/jiawei/Desktop/373-25-gamjajeon/cmake-build-debug

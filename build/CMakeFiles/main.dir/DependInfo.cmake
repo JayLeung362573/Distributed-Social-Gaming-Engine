@@ -8,11 +8,11 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/Users/jiawei/Desktop/373-25-gamjajeon/GameClient.cpp" "CMakeFiles/main.dir/GameClient.cpp.o" "gcc" "CMakeFiles/main.dir/GameClient.cpp.o.d"
-  "/Users/jiawei/Desktop/373-25-gamjajeon/GameServer.cpp" "CMakeFiles/main.dir/GameServer.cpp.o" "gcc" "CMakeFiles/main.dir/GameServer.cpp.o.d"
-  "/Users/jiawei/Desktop/373-25-gamjajeon/Networking.cpp" "CMakeFiles/main.dir/Networking.cpp.o" "gcc" "CMakeFiles/main.dir/Networking.cpp.o.d"
-  "/Users/jiawei/Desktop/373-25-gamjajeon/WebsocketNetworking.cpp" "CMakeFiles/main.dir/WebsocketNetworking.cpp.o" "gcc" "CMakeFiles/main.dir/WebsocketNetworking.cpp.o.d"
-  "/Users/jiawei/Desktop/373-25-gamjajeon/main.cpp" "CMakeFiles/main.dir/main.cpp.o" "gcc" "CMakeFiles/main.dir/main.cpp.o.d"
+  "/Users/jiawei/Desktop/373-25-gamjajeon/src/GameClient.cpp" "CMakeFiles/main.dir/src/GameClient.cpp.o" "gcc" "CMakeFiles/main.dir/src/GameClient.cpp.o.d"
+  "/Users/jiawei/Desktop/373-25-gamjajeon/src/GameServer.cpp" "CMakeFiles/main.dir/src/GameServer.cpp.o" "gcc" "CMakeFiles/main.dir/src/GameServer.cpp.o.d"
+  "/Users/jiawei/Desktop/373-25-gamjajeon/src/Networking.cpp" "CMakeFiles/main.dir/src/Networking.cpp.o" "gcc" "CMakeFiles/main.dir/src/Networking.cpp.o.d"
+  "/Users/jiawei/Desktop/373-25-gamjajeon/src/WebsocketNetworking.cpp" "CMakeFiles/main.dir/src/WebsocketNetworking.cpp.o" "gcc" "CMakeFiles/main.dir/src/WebsocketNetworking.cpp.o.d"
+  "/Users/jiawei/Desktop/373-25-gamjajeon/src/main.cpp" "CMakeFiles/main.dir/src/main.cpp.o" "gcc" "CMakeFiles/main.dir/src/main.cpp.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

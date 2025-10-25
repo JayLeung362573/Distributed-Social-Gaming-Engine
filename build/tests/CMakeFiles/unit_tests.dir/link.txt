@@ -1,0 +1,1 @@
+/usr/bin/c++  -Wall -fno-rtti -fsanitize=address,undefined -g -arch arm64 -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/unit_tests.dir/test_add.cpp.o -o unit_tests  ../lib/libgtest_main.a ../lib/libcore_lib.a ../lib/libgtest.a

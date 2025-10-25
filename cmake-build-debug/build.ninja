@@ -41,99 +41,72 @@ include CMakeFiles/rules.ninja
 
 cmake_ninja_workdir = /Users/jiawei/Desktop/373-25-gamjajeon/cmake-build-debug/
 # =============================================================================
-# Object build statements for STATIC_LIBRARY target game_logic
+# Object build statements for EXECUTABLE target main
 
 
 #############################################
-# Order-only phony target for game_logic
+# Order-only phony target for main
 
-build cmake_object_order_depends_target_game_logic: phony || cmake_object_order_depends_target_networking
+build cmake_object_order_depends_target_main: phony || cmake_object_order_depends_target_networking
 
-build CMakeFiles/game_logic.dir/GameClient.cpp.o: CXX_COMPILER__game_logic_unscanned_Debug /Users/jiawei/Desktop/373-25-gamjajeon/GameClient.cpp || cmake_object_order_depends_target_game_logic
+build CMakeFiles/main.dir/src/main.cpp.o: CXX_COMPILER__main_unscanned_Debug /Users/jiawei/Desktop/373-25-gamjajeon/src/main.cpp || cmake_object_order_depends_target_main
   CONFIG = Debug
-  DEP_FILE = CMakeFiles/game_logic.dir/GameClient.cpp.o.d
+  DEP_FILE = CMakeFiles/main.dir/src/main.cpp.o.d
   FLAGS = -Wall -fno-rtti -fsanitize=address,undefined -g -std=gnu++2b -arch arm64 -fcolor-diagnostics
   INCLUDES = -I/Users/jiawei/Desktop/373-25-gamjajeon/cmake-build-debug/_deps/web-socket-networking-src/lib/networking/include
-  OBJECT_DIR = CMakeFiles/game_logic.dir
-  OBJECT_FILE_DIR = CMakeFiles/game_logic.dir
+  OBJECT_DIR = CMakeFiles/main.dir
+  OBJECT_FILE_DIR = CMakeFiles/main.dir/src
 
-build CMakeFiles/game_logic.dir/GameServer.cpp.o: CXX_COMPILER__game_logic_unscanned_Debug /Users/jiawei/Desktop/373-25-gamjajeon/GameServer.cpp || cmake_object_order_depends_target_game_logic
+build CMakeFiles/main.dir/src/GameClient.cpp.o: CXX_COMPILER__main_unscanned_Debug /Users/jiawei/Desktop/373-25-gamjajeon/src/GameClient.cpp || cmake_object_order_depends_target_main
   CONFIG = Debug
-  DEP_FILE = CMakeFiles/game_logic.dir/GameServer.cpp.o.d
+  DEP_FILE = CMakeFiles/main.dir/src/GameClient.cpp.o.d
   FLAGS = -Wall -fno-rtti -fsanitize=address,undefined -g -std=gnu++2b -arch arm64 -fcolor-diagnostics
   INCLUDES = -I/Users/jiawei/Desktop/373-25-gamjajeon/cmake-build-debug/_deps/web-socket-networking-src/lib/networking/include
-  OBJECT_DIR = CMakeFiles/game_logic.dir
-  OBJECT_FILE_DIR = CMakeFiles/game_logic.dir
+  OBJECT_DIR = CMakeFiles/main.dir
+  OBJECT_FILE_DIR = CMakeFiles/main.dir/src
 
-build CMakeFiles/game_logic.dir/Networking.cpp.o: CXX_COMPILER__game_logic_unscanned_Debug /Users/jiawei/Desktop/373-25-gamjajeon/Networking.cpp || cmake_object_order_depends_target_game_logic
+build CMakeFiles/main.dir/src/GameServer.cpp.o: CXX_COMPILER__main_unscanned_Debug /Users/jiawei/Desktop/373-25-gamjajeon/src/GameServer.cpp || cmake_object_order_depends_target_main
   CONFIG = Debug
-  DEP_FILE = CMakeFiles/game_logic.dir/Networking.cpp.o.d
+  DEP_FILE = CMakeFiles/main.dir/src/GameServer.cpp.o.d
   FLAGS = -Wall -fno-rtti -fsanitize=address,undefined -g -std=gnu++2b -arch arm64 -fcolor-diagnostics
   INCLUDES = -I/Users/jiawei/Desktop/373-25-gamjajeon/cmake-build-debug/_deps/web-socket-networking-src/lib/networking/include
-  OBJECT_DIR = CMakeFiles/game_logic.dir
-  OBJECT_FILE_DIR = CMakeFiles/game_logic.dir
+  OBJECT_DIR = CMakeFiles/main.dir
+  OBJECT_FILE_DIR = CMakeFiles/main.dir/src
 
-build CMakeFiles/game_logic.dir/WebSocketNetworking.cpp.o: CXX_COMPILER__game_logic_unscanned_Debug /Users/jiawei/Desktop/373-25-gamjajeon/WebSocketNetworking.cpp || cmake_object_order_depends_target_game_logic
+build CMakeFiles/main.dir/src/Networking.cpp.o: CXX_COMPILER__main_unscanned_Debug /Users/jiawei/Desktop/373-25-gamjajeon/src/Networking.cpp || cmake_object_order_depends_target_main
   CONFIG = Debug
-  DEP_FILE = CMakeFiles/game_logic.dir/WebSocketNetworking.cpp.o.d
+  DEP_FILE = CMakeFiles/main.dir/src/Networking.cpp.o.d
   FLAGS = -Wall -fno-rtti -fsanitize=address,undefined -g -std=gnu++2b -arch arm64 -fcolor-diagnostics
   INCLUDES = -I/Users/jiawei/Desktop/373-25-gamjajeon/cmake-build-debug/_deps/web-socket-networking-src/lib/networking/include
-  OBJECT_DIR = CMakeFiles/game_logic.dir
-  OBJECT_FILE_DIR = CMakeFiles/game_logic.dir
+  OBJECT_DIR = CMakeFiles/main.dir
+  OBJECT_FILE_DIR = CMakeFiles/main.dir/src
+
+build CMakeFiles/main.dir/src/WebsocketNetworking.cpp.o: CXX_COMPILER__main_unscanned_Debug /Users/jiawei/Desktop/373-25-gamjajeon/src/WebsocketNetworking.cpp || cmake_object_order_depends_target_main
+  CONFIG = Debug
+  DEP_FILE = CMakeFiles/main.dir/src/WebsocketNetworking.cpp.o.d
+  FLAGS = -Wall -fno-rtti -fsanitize=address,undefined -g -std=gnu++2b -arch arm64 -fcolor-diagnostics
+  INCLUDES = -I/Users/jiawei/Desktop/373-25-gamjajeon/cmake-build-debug/_deps/web-socket-networking-src/lib/networking/include
+  OBJECT_DIR = CMakeFiles/main.dir
+  OBJECT_FILE_DIR = CMakeFiles/main.dir/src
 
 
 # =============================================================================
-# Link build statements for STATIC_LIBRARY target game_logic
+# Link build statements for EXECUTABLE target main
 
 
 #############################################
-# Link the static library lib/libgame_logic.a
+# Link the executable bin/main
 
-build lib/libgame_logic.a: CXX_STATIC_LIBRARY_LINKER__game_logic_Debug CMakeFiles/game_logic.dir/GameClient.cpp.o CMakeFiles/game_logic.dir/GameServer.cpp.o CMakeFiles/game_logic.dir/Networking.cpp.o CMakeFiles/game_logic.dir/WebSocketNetworking.cpp.o || _deps/web-socket-networking-build/lib/libnetworking.a
-  ARCH_FLAGS = -arch arm64
-  CONFIG = Debug
-  LANGUAGE_COMPILE_FLAGS = -Wall -fno-rtti -fsanitize=address,undefined -g
-  OBJECT_DIR = CMakeFiles/game_logic.dir
-  POST_BUILD = :
-  PRE_LINK = :
-  TARGET_FILE = lib/libgame_logic.a
-  TARGET_PDB = game_logic.a.dbg
-
-# =============================================================================
-# Object build statements for EXECUTABLE target run_tests
-
-
-#############################################
-# Order-only phony target for run_tests
-
-build cmake_object_order_depends_target_run_tests: phony || cmake_object_order_depends_target_game_logic cmake_object_order_depends_target_networking
-
-build CMakeFiles/run_tests.dir/run_tests.cpp.o: CXX_COMPILER__run_tests_unscanned_Debug /Users/jiawei/Desktop/373-25-gamjajeon/run_tests.cpp || cmake_object_order_depends_target_run_tests
-  CONFIG = Debug
-  DEP_FILE = CMakeFiles/run_tests.dir/run_tests.cpp.o.d
-  FLAGS = -Wall -fno-rtti -fsanitize=address,undefined -g -std=gnu++2b -arch arm64 -fcolor-diagnostics
-  INCLUDES = -I/Users/jiawei/Desktop/373-25-gamjajeon/cmake-build-debug/_deps/web-socket-networking-src/lib/networking/include
-  OBJECT_DIR = CMakeFiles/run_tests.dir
-  OBJECT_FILE_DIR = CMakeFiles/run_tests.dir
-
-
-# =============================================================================
-# Link build statements for EXECUTABLE target run_tests
-
-
-#############################################
-# Link the executable bin/run_tests
-
-build bin/run_tests: CXX_EXECUTABLE_LINKER__run_tests_Debug CMakeFiles/run_tests.dir/run_tests.cpp.o | lib/libgame_logic.a _deps/web-socket-networking-build/lib/libnetworking.a || _deps/web-socket-networking-build/lib/libnetworking.a lib/libgame_logic.a
+build bin/main: CXX_EXECUTABLE_LINKER__main_Debug CMakeFiles/main.dir/src/main.cpp.o CMakeFiles/main.dir/src/GameClient.cpp.o CMakeFiles/main.dir/src/GameServer.cpp.o CMakeFiles/main.dir/src/Networking.cpp.o CMakeFiles/main.dir/src/WebsocketNetworking.cpp.o | _deps/web-socket-networking-build/lib/libnetworking.a || _deps/web-socket-networking-build/lib/libnetworking.a
   CONFIG = Debug
   FLAGS = -Wall -fno-rtti -fsanitize=address,undefined -g -arch arm64
   LINK_FLAGS = -Wl,-search_paths_first -Wl,-headerpad_max_install_names
-  LINK_LIBRARIES = lib/libgame_logic.a  _deps/web-socket-networking-build/lib/libnetworking.a
-  OBJECT_DIR = CMakeFiles/run_tests.dir
+  LINK_LIBRARIES = _deps/web-socket-networking-build/lib/libnetworking.a
+  OBJECT_DIR = CMakeFiles/main.dir
   POST_BUILD = :
   PRE_LINK = :
-  TARGET_FILE = bin/run_tests
-  TARGET_PDB = run_tests.dbg
+  TARGET_FILE = bin/main
+  TARGET_PDB = main.dbg
 
 
 #############################################
@@ -925,15 +898,11 @@ build chatserver: phony _deps/web-socket-networking-build/bin/chatserver
 
 build client-ncurses: phony _deps/web-socket-networking-build/bin/client-ncurses
 
-build game_logic: phony lib/libgame_logic.a
-
-build libgame_logic.a: phony lib/libgame_logic.a
-
 build libnetworking.a: phony _deps/web-socket-networking-build/lib/libnetworking.a
 
-build networking: phony _deps/web-socket-networking-build/lib/libnetworking.a
+build main: phony bin/main
 
-build run_tests: phony bin/run_tests
+build networking: phony _deps/web-socket-networking-build/lib/libnetworking.a
 
 # =============================================================================
 # Folder targets.
@@ -943,7 +912,7 @@ build run_tests: phony bin/run_tests
 #############################################
 # Folder: /Users/jiawei/Desktop/373-25-gamjajeon/cmake-build-debug
 
-build all: phony lib/libgame_logic.a bin/run_tests _deps/web-socket-networking-build/all
+build all: phony bin/main _deps/web-socket-networking-build/all
 
 # =============================================================================
 

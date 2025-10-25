@@ -233,125 +233,125 @@ client-ncurses/fast:
 	$(MAKE) $(MAKESILENT) -f _deps/web-socket-networking-build/tools/client-ncurses/CMakeFiles/client-ncurses.dir/build.make _deps/web-socket-networking-build/tools/client-ncurses/CMakeFiles/client-ncurses.dir/build
 .PHONY : client-ncurses/fast
 
-GameClient.o: GameClient.cpp.o
-.PHONY : GameClient.o
+src/GameClient.o: src/GameClient.cpp.o
+.PHONY : src/GameClient.o
 
 # target to build an object file
-GameClient.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/GameClient.cpp.o
-.PHONY : GameClient.cpp.o
+src/GameClient.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/GameClient.cpp.o
+.PHONY : src/GameClient.cpp.o
 
-GameClient.i: GameClient.cpp.i
-.PHONY : GameClient.i
+src/GameClient.i: src/GameClient.cpp.i
+.PHONY : src/GameClient.i
 
 # target to preprocess a source file
-GameClient.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/GameClient.cpp.i
-.PHONY : GameClient.cpp.i
+src/GameClient.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/GameClient.cpp.i
+.PHONY : src/GameClient.cpp.i
 
-GameClient.s: GameClient.cpp.s
-.PHONY : GameClient.s
+src/GameClient.s: src/GameClient.cpp.s
+.PHONY : src/GameClient.s
 
 # target to generate assembly for a file
-GameClient.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/GameClient.cpp.s
-.PHONY : GameClient.cpp.s
+src/GameClient.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/GameClient.cpp.s
+.PHONY : src/GameClient.cpp.s
 
-GameServer.o: GameServer.cpp.o
-.PHONY : GameServer.o
+src/GameServer.o: src/GameServer.cpp.o
+.PHONY : src/GameServer.o
 
 # target to build an object file
-GameServer.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/GameServer.cpp.o
-.PHONY : GameServer.cpp.o
+src/GameServer.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/GameServer.cpp.o
+.PHONY : src/GameServer.cpp.o
 
-GameServer.i: GameServer.cpp.i
-.PHONY : GameServer.i
+src/GameServer.i: src/GameServer.cpp.i
+.PHONY : src/GameServer.i
 
 # target to preprocess a source file
-GameServer.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/GameServer.cpp.i
-.PHONY : GameServer.cpp.i
+src/GameServer.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/GameServer.cpp.i
+.PHONY : src/GameServer.cpp.i
 
-GameServer.s: GameServer.cpp.s
-.PHONY : GameServer.s
+src/GameServer.s: src/GameServer.cpp.s
+.PHONY : src/GameServer.s
 
 # target to generate assembly for a file
-GameServer.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/GameServer.cpp.s
-.PHONY : GameServer.cpp.s
+src/GameServer.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/GameServer.cpp.s
+.PHONY : src/GameServer.cpp.s
 
-Networking.o: Networking.cpp.o
-.PHONY : Networking.o
+src/Networking.o: src/Networking.cpp.o
+.PHONY : src/Networking.o
 
 # target to build an object file
-Networking.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/Networking.cpp.o
-.PHONY : Networking.cpp.o
+src/Networking.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/Networking.cpp.o
+.PHONY : src/Networking.cpp.o
 
-Networking.i: Networking.cpp.i
-.PHONY : Networking.i
+src/Networking.i: src/Networking.cpp.i
+.PHONY : src/Networking.i
 
 # target to preprocess a source file
-Networking.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/Networking.cpp.i
-.PHONY : Networking.cpp.i
+src/Networking.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/Networking.cpp.i
+.PHONY : src/Networking.cpp.i
 
-Networking.s: Networking.cpp.s
-.PHONY : Networking.s
+src/Networking.s: src/Networking.cpp.s
+.PHONY : src/Networking.s
 
 # target to generate assembly for a file
-Networking.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/Networking.cpp.s
-.PHONY : Networking.cpp.s
+src/Networking.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/Networking.cpp.s
+.PHONY : src/Networking.cpp.s
 
-WebsocketNetworking.o: WebsocketNetworking.cpp.o
-.PHONY : WebsocketNetworking.o
+src/WebsocketNetworking.o: src/WebsocketNetworking.cpp.o
+.PHONY : src/WebsocketNetworking.o
 
 # target to build an object file
-WebsocketNetworking.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/WebsocketNetworking.cpp.o
-.PHONY : WebsocketNetworking.cpp.o
+src/WebsocketNetworking.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/WebsocketNetworking.cpp.o
+.PHONY : src/WebsocketNetworking.cpp.o
 
-WebsocketNetworking.i: WebsocketNetworking.cpp.i
-.PHONY : WebsocketNetworking.i
+src/WebsocketNetworking.i: src/WebsocketNetworking.cpp.i
+.PHONY : src/WebsocketNetworking.i
 
 # target to preprocess a source file
-WebsocketNetworking.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/WebsocketNetworking.cpp.i
-.PHONY : WebsocketNetworking.cpp.i
+src/WebsocketNetworking.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/WebsocketNetworking.cpp.i
+.PHONY : src/WebsocketNetworking.cpp.i
 
-WebsocketNetworking.s: WebsocketNetworking.cpp.s
-.PHONY : WebsocketNetworking.s
+src/WebsocketNetworking.s: src/WebsocketNetworking.cpp.s
+.PHONY : src/WebsocketNetworking.s
 
 # target to generate assembly for a file
-WebsocketNetworking.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/WebsocketNetworking.cpp.s
-.PHONY : WebsocketNetworking.cpp.s
+src/WebsocketNetworking.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/WebsocketNetworking.cpp.s
+.PHONY : src/WebsocketNetworking.cpp.s
 
-main.o: main.cpp.o
-.PHONY : main.o
+src/main.o: src/main.cpp.o
+.PHONY : src/main.o
 
 # target to build an object file
-main.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/main.cpp.o
-.PHONY : main.cpp.o
+src/main.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/main.cpp.o
+.PHONY : src/main.cpp.o
 
-main.i: main.cpp.i
-.PHONY : main.i
+src/main.i: src/main.cpp.i
+.PHONY : src/main.i
 
 # target to preprocess a source file
-main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/main.cpp.i
-.PHONY : main.cpp.i
+src/main.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/main.cpp.i
+.PHONY : src/main.cpp.i
 
-main.s: main.cpp.s
-.PHONY : main.s
+src/main.s: src/main.cpp.s
+.PHONY : src/main.s
 
 # target to generate assembly for a file
-main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/main.cpp.s
-.PHONY : main.cpp.s
+src/main.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/main.cpp.s
+.PHONY : src/main.cpp.s
 
 # Help Target
 help:
@@ -371,21 +371,21 @@ help:
 	@echo "... client-ncurses"
 	@echo "... main"
 	@echo "... networking"
-	@echo "... GameClient.o"
-	@echo "... GameClient.i"
-	@echo "... GameClient.s"
-	@echo "... GameServer.o"
-	@echo "... GameServer.i"
-	@echo "... GameServer.s"
-	@echo "... Networking.o"
-	@echo "... Networking.i"
-	@echo "... Networking.s"
-	@echo "... WebsocketNetworking.o"
-	@echo "... WebsocketNetworking.i"
-	@echo "... WebsocketNetworking.s"
-	@echo "... main.o"
-	@echo "... main.i"
-	@echo "... main.s"
+	@echo "... src/GameClient.o"
+	@echo "... src/GameClient.i"
+	@echo "... src/GameClient.s"
+	@echo "... src/GameServer.o"
+	@echo "... src/GameServer.i"
+	@echo "... src/GameServer.s"
+	@echo "... src/Networking.o"
+	@echo "... src/Networking.i"
+	@echo "... src/Networking.s"
+	@echo "... src/WebsocketNetworking.o"
+	@echo "... src/WebsocketNetworking.i"
+	@echo "... src/WebsocketNetworking.s"
+	@echo "... src/main.o"
+	@echo "... src/main.i"
+	@echo "... src/main.s"
 .PHONY : help
 
 

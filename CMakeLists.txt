@@ -16,6 +16,30 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 enable_testing()
 
+# This part automatically initializes and updates git submodules (so we don't have to do run
+# it manually when cloning/pulling from the repo)
+find_package(Git QUIET)
+
+if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
+  message(STATUS "Checking for submodules...")
+
+  if(NOT EXISTS "${PROJECT_SOURCE_DIR}/external/spdlog/CMakeLists.txt")
+    message(STATUS "Submodules not found, running 'git submodule update --init --recursive'")
+    execute_process(
+      COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
+      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+      RESULT_VARIABLE GIT_SUBMOD_RESULT
+    )
+
+    if(NOT GIT_SUBMOD_RESULT EQUAL 0)
+      message(FATAL_ERROR
+        "Git submodule update failed. "
+        "Please run 'git submodule update --init --recursive' manually.")
+    endif()
+  endif()
+endif()
+## End of git submodule initialization
+
 if(NOT TARGET spdlog AND NOT TARGET "spdlog::spdlog")
   add_subdirectory(external/spdlog)
 endif()

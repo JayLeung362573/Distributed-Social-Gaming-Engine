@@ -3,7 +3,6 @@
 #include "Networking.h"
 #include "Message.h"
 
-
 GameServer::GameServer(std::shared_ptr<NetworkingInterface> networking)
     : m_networking(networking) {}
 

@@ -48,8 +48,17 @@ target_link_libraries(main
   PRIVATE
     networking
 )
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-target_compile_features(main
-  PUBLIC
-    cxx_std_23
-)
+enable_testing()
+
+if(EXISTS "${CMAKE_SOURCE_DIR}/src/CMakeLists.txt")
+  add_subdirectory(src)
+endif()
+
+option(BUILD_TESTS "Build unit tests" ON)
+if(BUILD_TESTS)
+  add_subdirectory(tests)
+endif()

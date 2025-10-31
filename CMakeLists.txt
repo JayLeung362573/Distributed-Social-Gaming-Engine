@@ -33,21 +33,6 @@ CPMAddPackage(
     "ENABLE_NCURSES_CLIENT ON"
 )
 
-add_executable(main)
-target_sources(main
-  PRIVATE
-    src/main.cpp
-    src/GameClient.cpp
-    src/GameServer.cpp
-    src/Networking.cpp
-    src/WebsocketNetworking.cpp
-    src/MessageTranslator.cpp
-)
-
-target_link_libraries(main
-  PRIVATE
-    networking
-)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)

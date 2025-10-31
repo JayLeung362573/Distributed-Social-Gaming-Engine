@@ -5,7 +5,7 @@
 #include <variant>
 
 class Game;
-class Player;
+struct Player;
 class RuleInstance;
 
 

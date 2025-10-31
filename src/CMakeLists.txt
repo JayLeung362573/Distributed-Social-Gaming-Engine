@@ -19,5 +19,5 @@ target_link_libraries(core_lib PUBLIC
         networking )
 
 add_executable(main main.cpp)
-target_link_libraries(main PRIVATE core_lib networking)
+target_link_libraries(main PRIVATE core_lib)
 target_compile_features(main PRIVATE cxx_std_23)

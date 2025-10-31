@@ -9,15 +9,12 @@ class NetworkingInterface;
 // Communicates with server via NetworkingInterface
 class GameClient
 {
-    public:
-        GameClient(int clientID, std::shared_ptr<NetworkingInterface> networking);
+public:
+    GameClient(int clientID);
+    Message prepareMessageToServer(const Message& message) const;
+    void onMessageFromServer(Message& message);
+    int getClientID();
 
-        void sendMessageToServer(Message& message);
-        void onMessageFromServer(Message& message);
-
-        int getClientID();
-
-    private:
-        int m_clientID;
-        std::shared_ptr<NetworkingInterface> m_networking;
+private:
+    int m_clientID;
 };

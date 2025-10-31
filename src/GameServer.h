@@ -12,11 +12,9 @@ class NetworkingInterface;
 // Communicates with clients via NetworkingInterface
 class GameServer
 {
-    public:
-        GameServer(std::shared_ptr<NetworkingInterface> networking);
-        void onMessageFromClient(int fromClientID, Message &message);
-        void broadcastUpdate(int cycle);
+public:
+    GameServer() = default;
+    void onMessageFromClient(int fromClientID, Message &message);
+private:
 
-    private:
-        std::shared_ptr<NetworkingInterface> m_networking;
 };

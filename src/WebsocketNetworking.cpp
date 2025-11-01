@@ -13,20 +13,20 @@ WebSocketNetworking::WebSocketNetworking(unsigned short port, const std::string&
 
     // Create server with callbacks
     net_server = std::make_unique<networking::Server>(
-            port,
-            httpPage,
-            [this](networking::Connection c) {
-                int fromClientID = c.id;
-                std::cout << "[WebSocket] Client connected (id=" << fromClientID << ")\n";
+        port,
+        httpPage,
+        [this](networking::Connection c) {
+            int fromClientID = c.id;
+            std::cout << "[WebSocket] Client connected (id=" << fromClientID << ")\n";
 
-                m_connections[fromClientID] = c;
-            },
-            [this](networking::Connection c) {
-                int fromClientID = c.id;
-                std::cout << "[WebSocket] Client disconnected (id=" << fromClientID << ")\n";
+            m_connections[fromClientID] = c;
+        },
+        [this](networking::Connection c) {
+            int fromClientID = c.id;
+            std::cout << "[WebSocket] Client disconnected (id=" << fromClientID << ")\n";
 
-                m_connections.erase(fromClientID);
-            }
+            m_connections.erase(fromClientID);
+        }
     );
 
     std::cout << "[WebSocket] Server initialized on port " << port << "\n";

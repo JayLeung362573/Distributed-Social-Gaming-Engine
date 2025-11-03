@@ -50,16 +50,6 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(tree-sitter)
 
-# Google Test for unit testing
-FetchContent_Declare(
-  googletest
-  GIT_REPOSITORY https://github.com/google/googletest.git
-  GIT_TAG        v1.15.2
-)
-# For Windows: Prevent overriding the parent project's compiler/linker settings
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
-
 # Build tree-sitter library from fetched content
 add_library(treesitter STATIC
   ${tree-sitter_SOURCE_DIR}/lib/src/lib.c

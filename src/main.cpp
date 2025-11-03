@@ -37,11 +37,21 @@ int main(int argc, char* argv[])
 
         while (true) {
             networking->update();
-            auto incomingMessages = networking->receiveFromClients();
 
+            // pass incoming network messages to game server
+            auto incomingMessages = networking->receiveFromClients();
             for(auto& [clientID, message] : incomingMessages){
                 std::cout << "[Network] Processing incoming messages" << '\n';
                 server->getClientMessages(clientID, message);
+            }
+
+            // process game logic in game server
+            server->tick();
+
+            // send outgoing processed gameServer messages
+            auto outgoingMessages = server->getOutgoingMessages();
+            for(const auto& clientMsg : outgoingMessages){
+                networking->sendToClient(clientMsg.clientID, clientMsg.message);
             }
 
             auto now = std::chrono::steady_clock::now();

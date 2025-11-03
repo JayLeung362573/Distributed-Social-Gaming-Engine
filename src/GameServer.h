@@ -14,10 +14,7 @@ class NetworkingInterface;
 class GameServer
 {
 public:
-    void getClientMessages(uintptr_t fromClientID, const Message &message);
-    std::vector<ClientMessage> getOutgoingMessages();
-    void tick();
+    static std::vector<ClientMessage> tick(const std::vector<ClientMessage>& incomingMessages);
 private:
-    std::vector<ClientMessage> m_incomingMessages;
-    std::vector<ClientMessage> m_outgoingMessages;
+
 };

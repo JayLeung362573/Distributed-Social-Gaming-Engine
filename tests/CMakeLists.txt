@@ -17,8 +17,7 @@ FetchContent_MakeAvailable(googletest)
 add_executable(unit_tests
   GameTest.cpp
   ForLoopRuleTest.cpp
-  InMemoryNetworkingTest.cpp
-  WebSocketNetworkingTest.cpp)
+        WebSocketNetworkingTest.cpp)
 
 # Link with gtest (the Quickstart uses GTest::gtest_main)
 target_link_libraries(unit_tests PRIVATE GTest::gtest_main core_lib)

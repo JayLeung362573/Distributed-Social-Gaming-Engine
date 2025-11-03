@@ -10,10 +10,6 @@ class NetworkingInterface;
 
 // Handles game application logic server-side
 // Communicates with clients via NetworkingInterface
-struct ClientMessage{
-    uintptr_t clientID = 0;
-    Message message;
-};
 
 class GameServer
 {

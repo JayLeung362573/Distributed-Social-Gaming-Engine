@@ -2,7 +2,7 @@
 #include <iostream>
 
 
-GameClient::GameClient(int clientID)
+GameClient::GameClient(uintptr_t clientID)
         : m_clientID(clientID) {}
 
 
@@ -19,7 +19,7 @@ void GameClient::onMessageFromServer(Message& message)
 }
 
 
-int GameClient::getClientID()
+uintptr_t GameClient::getClientID()
 {
     return m_clientID;
 }

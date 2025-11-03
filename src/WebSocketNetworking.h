@@ -7,7 +7,11 @@
 #include <string>
 #include <memory>
 #include <unordered_map>
+#include <deque>
 #include <iostream>
+
+class GameServer;
+class GameClient;
 
 class WebSocketNetworking : public NetworkingInterface, public std::enable_shared_from_this<WebSocketNetworking>
 {
@@ -16,14 +20,14 @@ public:
     ~WebSocketNetworking() = default;
 
     void startServer();
-    std::vector<std::pair<int, std::string>> update();
+    void update();
 
-    void sendToClient(int toClientID, const Message& message) override;
-    std::vector<std::pair<int, Message>> receiveFromClients() override;
-
-    std::vector<int> getConnectedClientIDs() const override;
+    void sendToClient(uintptr_t toClientID, const Message& message) override;
+    std::vector<std::pair<uintptr_t, Message>> receiveFromClients() override;
+    std::vector<uintptr_t> getConnectedClientIDs() const override;
 private:
     std::unique_ptr<networking::Server> net_server;
-    std::unordered_map<int, networking::Connection> m_connections;
+    std::unordered_map<uintptr_t, networking::Connection> m_connections;
     bool has_server_started = false;
+    std::vector<std::pair<uintptr_t, Message> > m_incomingMessages;
 };

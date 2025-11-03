@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
             if (now - last >= std::chrono::seconds(1)) {
                 auto clientIDs = networking->getConnectedClientIDs();
                 Message updateMsg{MessageType::UpdateCycle, UpdateCycleMessage{cycle}};
-                for(int clientID : clientIDs){
+                for(uintptr_t clientID : clientIDs){
                     networking->sendToClient(clientID, updateMsg);
                 }
                 cycle++;

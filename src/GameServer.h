@@ -11,14 +11,14 @@ class NetworkingInterface;
 // Handles game application logic server-side
 // Communicates with clients via NetworkingInterface
 struct ClientMessage{
-    int clientID = 0;
+    uintptr_t clientID = 0;
     Message message;
 };
 
 class GameServer
 {
 public:
-    void getClientMessages(int fromClientID, const Message &message);
+    void getClientMessages(uintptr_t fromClientID, const Message &message);
     std::vector<ClientMessage> getOutgoingMessages();
     void tick();
 private:

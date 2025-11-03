@@ -2,7 +2,7 @@
 #include "GameServer.h"
 #include "Message.h"
 
-void GameServer::getClientMessages(int fromClientID, const Message &message) {
+void GameServer::getClientMessages(uintptr_t fromClientID, const Message &message) {
     std::cout << "[server] Got message from client (id=" << fromClientID << ") : ";
     switch (message.type)
     {

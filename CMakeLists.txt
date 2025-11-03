@@ -68,30 +68,8 @@ target_include_directories(treesitter PUBLIC
   ${tree-sitter_SOURCE_DIR}/lib/include
 )
 
-# Generated SocialGaming parser.c
-# (run "tree-sitter generate" in your grammar repo to regenerate)
-add_library(ts_socialgaming STATIC
-  parser/tree_sitter/parser.c
-)
-
-# It uses the Tree-sitter headers
-target_include_directories(ts_socialgaming PUBLIC
-  ${tree-sitter_SOURCE_DIR}/lib/include
-)
-target_link_libraries(ts_socialgaming PUBLIC treesitter)
-
-# Our C++ loader for the grammar
-add_library(parser STATIC
-  parser/GameSpecLoader.cpp
-)
-# Add the project root as an include dir so we can `#include "parser/GameSpecLoader.h"`
-# and also expose tree-sitter headers to this target.
-target_include_directories(parser PUBLIC
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  ${tree-sitter_SOURCE_DIR}/lib/include
-)
-# Link the generated grammar into our loader
-target_link_libraries(parser PUBLIC ts_socialgaming)
+# Add parser subdirectory which contains the grammar and loader
+add_subdirectory(parser)
 
 # Add src and tests subdirectories
 if(EXISTS "${CMAKE_SOURCE_DIR}/src/CMakeLists.txt")

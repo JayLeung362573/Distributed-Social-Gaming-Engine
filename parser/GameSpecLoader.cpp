@@ -208,4 +208,3 @@ void GameSpecLoader::parseSetup(const std::string &src, TSNode node, GameSpec &s
 }
 
 
-

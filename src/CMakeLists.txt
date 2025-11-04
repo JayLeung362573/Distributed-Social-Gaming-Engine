@@ -5,8 +5,7 @@ add_subdirectory(GameEngine)
 add_library(core_lib
   GameClient.cpp
   GameServer.cpp
-  Networking.cpp
-  WebsocketNetworking.cpp
+        WebsocketNetworking.cpp
   MessageTranslator.cpp
 )
 

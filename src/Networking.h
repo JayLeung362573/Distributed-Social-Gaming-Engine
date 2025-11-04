@@ -11,26 +11,13 @@ class GameClient;
 // Handles passing messages between clients and server
 class NetworkingInterface
 {
-    public:
-        virtual void sendMessageToClient(int toClientID, Message &message) = 0;
-        virtual void sendMessageToServer(int fromClientID, Message &message) = 0;
-        virtual std::vector<int> getConnectedClientIDs() const = 0;
-};
+public:
+    virtual ~NetworkingInterface() = default;
 
-// Networking interface that passes messages between clients and server in memory
-class InMemoryNetworking : public NetworkingInterface
-{
-    public:
-        void setServer(std::shared_ptr<GameServer> server);
-        void addClient(std::shared_ptr<GameClient> client);
-
-        void sendMessageToClient(int toClientID, Message &message) override;
-        void sendMessageToServer(int fromClientID, Message &message) override;
-        std::vector<int> getConnectedClientIDs() const override;
-        
-    private:
-        std::unordered_map<int, std::shared_ptr<GameClient> > m_clients;
-        std::shared_ptr<GameServer> m_server;
+    virtual void sendToClient(uintptr_t toClientID, const Message &message) = 0;
+    // virtual void sendMessageToServer(int toClientID, const Message &message) = 0;
+    virtual std::vector<ClientMessage> receiveFromClients() = 0;
+    virtual std::vector<uintptr_t> getConnectedClientIDs() const = 0;
 };
 
 // TODO (if interface makes sense):

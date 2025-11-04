@@ -1,49 +1,38 @@
 #include <iostream>
 #include "GameServer.h"
-#include "Networking.h"
 #include "Message.h"
 
-GameServer::GameServer(std::shared_ptr<NetworkingInterface> networking)
-    : m_networking(networking) {}
+std::vector<ClientMessage>
+GameServer::tick(const std::vector<ClientMessage> &incomingMessages) {
+    std::vector<ClientMessage> outgoingMessages;
 
+    for(const auto& clientMsg : incomingMessages){
+        switch (clientMsg.message.type)
+        {
+            case MessageType::JoinGame:
+            {
+                auto& joinData = std::get<JoinGameMessage>(clientMsg.message.data);
+                std::cout << "JoinGame(\"" << joinData.playerName << "\")\n";
 
-void GameServer::onMessageFromClient(int fromClientID, Message &message)
-{
-    std::cout << "[server] Got message from client (id=" << fromClientID << ") : ";
-    switch (message.type)
-    {
-        case MessageType::JoinGame:
-        {
-            auto& data = std::get<JoinGameMessage>(message.data);
-            std::cout << "JoinGame(\"" << data.playerName << "\")\n";
-            break;
-        }
-        case MessageType::UpdateCycle:
-        {
-            auto& data = std::get<UpdateCycleMessage>(message.data);
-            std::cout << "UpdateCycle from client with cycle " << data.cycle << "\n";
-            break;
-        }
-        default:
-        {
-            std::cout << "Empty message" << "\n";
-            break;
+                Message response;
+                response.type = MessageType::JoinGame;
+                response.data = JoinGameMessage{joinData.playerName};
+
+                outgoingMessages.push_back({clientMsg.clientID, response});
+                continue;
+            }
+            case MessageType::UpdateCycle:
+            {
+                auto& data = std::get<UpdateCycleMessage>(clientMsg.message.data);
+                std::cout << "UpdateCycle from client with cycle " << data.cycle << "\n";
+                continue;
+            }
+            default:
+            {
+                std::cout << "Empty message" << "\n";
+                continue;
+            }
         }
     }
-}
-
-void GameServer::broadcastUpdate(int cycle)
-{
-    Message update{MessageType::UpdateCycle, UpdateCycleMessage{ cycle }};
-    const std::vector<int> ids = m_networking->getConnectedClientIDs();
-
-    std::cout << "[GameServer] update#" << cycle << " for clients: ";
-    bool first = true;
-    for (int id : ids) {
-        if (!first) std::cout << ", ";
-        std::cout << id;
-        m_networking->sendMessageToClient(id, update);
-        first = false;
-    }
-    std::cout << "\n";
+    return outgoingMessages;
 }

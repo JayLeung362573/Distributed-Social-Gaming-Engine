@@ -3,7 +3,7 @@
 #include <memory>
 #include <variant>
 #include <string>
-#include <utility>
+#include <cstdint>
 
 enum class MessageType : uint8_t
 {
@@ -17,18 +17,21 @@ struct JoinGameMessage
     std::string playerName;
 };
 
-struct UpdateCycleMessage{
+struct UpdateCycleMessage
+{
     int cycle;
 };
 
 using MessageData = std::variant<std::monostate, JoinGameMessage, UpdateCycleMessage>;
+
 struct Message
 {
     MessageType type = MessageType::Empty;
     MessageData data;
 };
 
-struct ClientMessage{
-    uintptr_t clientID = 0;
+struct ClientMessage
+{
+    uintptr_t clientID;
     Message message;
 };

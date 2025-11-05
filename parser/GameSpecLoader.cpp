@@ -123,13 +123,22 @@ GameSpec GameSpecLoader::loadString(const std::string &text) {
     for (uint32_t i = 0; i < child_count; ++i) {
         TSNode child = ts_node_child(root, i);
         const char *type = ts_node_type(child);
+        const char *field_name = ts_node_field_name_for_child(root, i);
 
-        //if it's config we will use a diff function because this can vary quite a bit.
-        if (strcmp(type, "configuration") == 0) {
+        // Skip unnamed nodes
+        if (!field_name) {
+            // Still check for top-level blocks by type if no field name
+            if (strcmp(type, "configuration") == 0) {
+                parseConfiguration(text, child, spec);
+            }
+            continue;
+        }
+
+        if (strcmp(field_name, "configuration") == 0 || strcmp(type, "configuration") == 0) {
             parseConfiguration(text, child, spec);
-        } else if (strcmp(type, "constants") == 0) {
+        } else if (strcmp(field_name, "constants") == 0 || strcmp(type, "constants") == 0) {
             spec.constants = slice(text, child);
-        } else if (strcmp(type, "variables") == 0) {
+        } else if (strcmp(field_name, "variables") == 0 || strcmp(type, "variables") == 0) {
             spec.variables = slice(text, child);
         }
     }
@@ -148,24 +157,27 @@ void GameSpecLoader::parseConfiguration(const std::string &src, TSNode node, Gam
         TSNode child = ts_node_child(node, i);
         const char* type = ts_node_type(child);
 
-        // Parse name (quoted string)
-        if (strcmp(type, "quoted_string") == 0) {
+        //Get the field name for this child (e.g., "name", "player_count", "audience")
+        const char* field_name = ts_node_field_name_for_child(node, i);
+
+        if (!field_name) continue;
+
+        // Parse based on field name, not just type
+        if (strcmp(field_name, "name") == 0 && strcmp(type, "quoted_string") == 0) {
             std::string nameWithQuotes = slice(src, child);
             if (nameWithQuotes.size() >= 2) {
                 spec.name = nameWithQuotes.substr(1, nameWithQuotes.size() - 2);
             }
         }
-        // Parse player range
-        else if (strcmp(type, "number_range") == 0) {
+        else if (strcmp(field_name, "player_count") == 0 && strcmp(type, "number_range") == 0) {
             parsePlayerRange(src, child, spec);
         }
-        // Parse audience
-        else if (strcmp(type, "boolean") == 0) {
+        else if (strcmp(field_name, "audience") == 0 && strcmp(type, "boolean") == 0) {
             std::string boolVal = slice(src, child);
             spec.hasAudience = (boolVal == "true");
         }
-        // Parse setup block -- for later
-        else if (strcmp(type, "json_object") == 0 || strcmp(type, "setup_block") == 0) {
+        else if (strcmp(field_name, "setup") == 0 &&
+                 (strcmp(type, "json_object") == 0 || strcmp(type, "setup_block") == 0)) {
             parseSetup(src, child, spec);
         }
     }
@@ -178,16 +190,26 @@ void GameSpecLoader::parsePlayerRange(const std::string &src, TSNode node, GameS
     for (uint32_t i = 0; i < child_count; ++i) {
         TSNode child = ts_node_child(node, i);
         const char* type = ts_node_type(child);
+        const char* field_name = ts_node_field_name_for_child(node, i);
+
+        if (!field_name && strcmp(type, "integer") != 0) continue;
 
         if (strcmp(type, "integer") == 0) {
             std::string numStr = slice(src, child);
             int value = std::stoi(numStr);
 
-            // First integer is min, second is max
-            if (spec.playerRange.min == 0) {
+            // Use field name to determine min vs max, fallback to order
+            if (field_name && strcmp(field_name, "min") == 0) {
                 spec.playerRange.min = value;
-            } else {
+            } else if (field_name && strcmp(field_name, "max") == 0) {
                 spec.playerRange.max = value;
+            } else {
+                // Fallback: first integer is min, second is max
+                if (spec.playerRange.min == 0) {
+                    spec.playerRange.min = value;
+                } else {
+                    spec.playerRange.max = value;
+                }
             }
         }
     }
@@ -200,9 +222,13 @@ void GameSpecLoader::parseSetup(const std::string &src, TSNode node, GameSpec &s
     for (uint32_t i = 0; i < child_count; ++i) {
         TSNode child = ts_node_child(node, i);
         const char* type = ts_node_type(child);
+        const char* field_name = ts_node_field_name_for_child(node, i);
+
+        if (!field_name) continue;
 
         // Look for setup rule definitions
-        // Each rule will have an id, kind, prompt, and optional range
+        // Each rule will have fields like: id, kind, prompt, and optional range
+        // TODO: Implement parsing for setup rules based on field names
 
     }
 }

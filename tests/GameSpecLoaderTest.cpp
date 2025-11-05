@@ -8,12 +8,12 @@ protected:
 };
 
 TEST_F(GameSpecLoaderTest, LoadGameName) {
-    GameSpec spec = loader.loadFile("games/hello-test.game");
+    GameSpec spec = loader.loadFile("../games/hello-test.game");
     EXPECT_EQ(spec.name, "Hello Test");
 }
 
 TEST_F(GameSpecLoaderTest, LoadRockPaperScissors) {
-    GameSpec spec = loader.loadFile("games/rock-paper-scissors.game");
+    GameSpec spec = loader.loadFile("../games/rock-paper-scissors.game");
     EXPECT_EQ(spec.name, "Rock, Paper, Scissors");
 }
 

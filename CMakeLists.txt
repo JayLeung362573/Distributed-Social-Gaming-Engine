@@ -39,7 +39,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 enable_testing()
 
-# Tree-sitter C runtime library - using FetchContent instead of submodule
+# Tree-sitter C runtime library - using FetchContent
 include(FetchContent)
 
 FetchContent_Declare(

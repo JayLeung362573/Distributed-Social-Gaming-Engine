@@ -44,6 +44,24 @@ static std::string slice(const std::string &src, TSNode node) {
 
 }
 
+static int parseInteger(const std::string &src, TSNode node) {
+    std::string numStr = slice(src, node);
+    return std::stoi(numStr);
+}
+
+static std::string parseQuotedString(const std::string &src, TSNode node) {
+    std::string withQuotes = slice(src, node);
+    if (withQuotes.size() >= 2) {
+        return withQuotes.substr(1, withQuotes.size() - 2);
+    }
+    return withQuotes;
+}
+
+static bool parseBoolean(const std::string &src, TSNode node) {
+    std::string boolStr = slice(src, node);
+    return boolStr == "true";
+}
+
 //this will read the hello-test.game, and print out to the terminal the config snippet, for testing that it can see the config block as a node
 bool GameSpecLoader::HelloWorldSmokeTest(const char *path) {
     try {
@@ -52,7 +70,11 @@ bool GameSpecLoader::HelloWorldSmokeTest(const char *path) {
 
         //parse with tree-sitter
         TSParser *parser = ts_parser_new();
-        ts_parser_set_language(parser, tree_sitter_socialgaming());
+        const TSLanguage* language = tree_sitter_socialgaming();
+        ts_parser_set_language(parser, language);
+
+        NodeType::init(language);
+
         TSTree *tree = ts_parser_parse_string(parser, nullptr, src.c_str(), static_cast<uint32_t>(src.size()));
 
         if (!tree) {
@@ -71,9 +93,8 @@ bool GameSpecLoader::HelloWorldSmokeTest(const char *path) {
         uint32_t child_count = ts_node_child_count(root);
         for (uint32_t i = 0; i < child_count; ++i) {
             TSNode ch = ts_node_child(root, i);
-            const char *ty = ts_node_type(ch);
-            if (std::strcmp(ty, "configuration") == 0 ||
-                std::strcmp(ty, "configuration_block") == 0) {
+            if (ts_node_symbol(ch) == NodeType::CONFIGURATION ||
+                ts_node_symbol(ch) == NodeType::CONFIGURATION_BLOCK) {
                 std::string snippet = slice(src, ch);
                 if (snippet.size() > 200) {
                     snippet.erase(200);
@@ -107,7 +128,11 @@ GameSpec GameSpecLoader::loadString(const std::string &text) {
 
     //Parse using Tree-Sitter.
     TSParser *parser = ts_parser_new();
-    ts_parser_set_language(parser, tree_sitter_socialgaming());
+    const TSLanguage* language = tree_sitter_socialgaming();
+    ts_parser_set_language(parser, language);
+
+    NodeType::init(language);
+
     TSTree *tree = ts_parser_parse_string(parser, nullptr, text.c_str(), text.size());
 
     if (!tree) {
@@ -122,23 +147,21 @@ GameSpec GameSpecLoader::loadString(const std::string &text) {
 
     for (uint32_t i = 0; i < child_count; ++i) {
         TSNode child = ts_node_child(root, i);
-        const char *type = ts_node_type(child);
         const char *field_name = ts_node_field_name_for_child(root, i);
 
-        // Skip unnamed nodes
         if (!field_name) {
-            // Still check for top-level blocks by type if no field name
-            if (strcmp(type, "configuration") == 0) {
+            if (ts_node_symbol(child) == NodeType::CONFIGURATION) {
                 parseConfiguration(text, child, spec);
             }
             continue;
         }
 
-        if (strcmp(field_name, "configuration") == 0 || strcmp(type, "configuration") == 0) {
+        //if it's config we will use a diff function because this can vary quite a bit.
+        if (strcmp(field_name, "configuration") == 0 || ts_node_symbol(child) == NodeType::CONFIGURATION) {
             parseConfiguration(text, child, spec);
-        } else if (strcmp(field_name, "constants") == 0 || strcmp(type, "constants") == 0) {
+        } else if (strcmp(field_name, "constants") == 0 || ts_node_symbol(child) == NodeType::CONSTANTS) {
             spec.constants = slice(text, child);
-        } else if (strcmp(field_name, "variables") == 0 || strcmp(type, "variables") == 0) {
+        } else if (strcmp(field_name, "variables") == 0 || ts_node_symbol(child) == NodeType::VARIABLES) {
             spec.variables = slice(text, child);
         }
     }
@@ -155,29 +178,22 @@ void GameSpecLoader::parseConfiguration(const std::string &src, TSNode node, Gam
     uint32_t child_count = ts_node_child_count(node);
     for (uint32_t i = 0; i < child_count; ++i) {
         TSNode child = ts_node_child(node, i);
-        const char* type = ts_node_type(child);
-
-        //Get the field name for this child (e.g., "name", "player_count", "audience")
         const char* field_name = ts_node_field_name_for_child(node, i);
 
         if (!field_name) continue;
 
         // Parse based on field name, not just type
-        if (strcmp(field_name, "name") == 0 && strcmp(type, "quoted_string") == 0) {
-            std::string nameWithQuotes = slice(src, child);
-            if (nameWithQuotes.size() >= 2) {
-                spec.name = nameWithQuotes.substr(1, nameWithQuotes.size() - 2);
-            }
+        if (strcmp(field_name, "name") == 0 && ts_node_symbol(child) == NodeType::QUOTED_STRING) {
+            spec.name = parseQuotedString(src, child);
         }
-        else if (strcmp(field_name, "player_count") == 0 && strcmp(type, "number_range") == 0) {
+        else if (strcmp(field_name, "player_count") == 0 && ts_node_symbol(child) == NodeType::NUMBER_RANGE) {
             parsePlayerRange(src, child, spec);
         }
-        else if (strcmp(field_name, "audience") == 0 && strcmp(type, "boolean") == 0) {
-            std::string boolVal = slice(src, child);
-            spec.hasAudience = (boolVal == "true");
+        else if (strcmp(field_name, "audience") == 0 && ts_node_symbol(child) == NodeType::BOOLEAN) {
+            spec.hasAudience = parseBoolean(src, child);
         }
         else if (strcmp(field_name, "setup") == 0 &&
-                 (strcmp(type, "json_object") == 0 || strcmp(type, "setup_block") == 0)) {
+                 (ts_node_symbol(child) == NodeType::JSON_OBJECT || ts_node_symbol(child) == NodeType::SETUP_BLOCK)) {
             parseSetup(src, child, spec);
         }
     }
@@ -189,14 +205,12 @@ void GameSpecLoader::parsePlayerRange(const std::string &src, TSNode node, GameS
 
     for (uint32_t i = 0; i < child_count; ++i) {
         TSNode child = ts_node_child(node, i);
-        const char* type = ts_node_type(child);
         const char* field_name = ts_node_field_name_for_child(node, i);
 
-        if (!field_name && strcmp(type, "integer") != 0) continue;
+        if (!field_name && ts_node_symbol(child) != NodeType::INTEGER) continue;
 
-        if (strcmp(type, "integer") == 0) {
-            std::string numStr = slice(src, child);
-            int value = std::stoi(numStr);
+        if (ts_node_symbol(child) == NodeType::INTEGER) {
+            int value = parseInteger(src, child);
 
             // Use field name to determine min vs max, fallback to order
             if (field_name && strcmp(field_name, "min") == 0) {
@@ -221,7 +235,6 @@ void GameSpecLoader::parseSetup(const std::string &src, TSNode node, GameSpec &s
 
     for (uint32_t i = 0; i < child_count; ++i) {
         TSNode child = ts_node_child(node, i);
-        const char* type = ts_node_type(child);
         const char* field_name = ts_node_field_name_for_child(node, i);
 
         if (!field_name) continue;

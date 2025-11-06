@@ -9,7 +9,7 @@ TEST(AddTest, Successful) {
 
 // testing adding failure
 TEST(AddTest, Failure) {
-  EXPECT_EQ(add(2,2), 5);
+  EXPECT_EQ(add(2,2), 4);
 }
 
 // Going to add some sample google test methods for reference later when testing game. (For reuse purposes)

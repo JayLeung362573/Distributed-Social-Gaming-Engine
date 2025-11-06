@@ -47,6 +47,44 @@ struct MessageTraits<JoinLobbyMessage> {
     }
 };
 
+template<>
+struct MessageTraits<LeaveLobbyMessage>{
+    static constexpr std::string_view prefix = "LeaveLobby:";
+    static std::string serialize(const LeaveLobbyMessage& d) {
+        return std::string(prefix) + d.playerName;
+    }
+    static Message deserialize(const std::string& payload) {
+        std::string name = payload.substr(prefix.size());
+        return { MessageType::LeaveLobby, LeaveLobbyMessage{name}};
+    }
+};
+
+template<>
+struct MessageTraits<LobbyStateMessage>{
+    static constexpr std::string_view prefix = "LobbyState:";
+    static std::string serialize(const LobbyStateMessage& d) {
+        return std::string(prefix) + d.currentLobbyID;
+    }
+    static Message deserialize(const std::string& payload) {
+        LobbyStateMessage msg;
+        msg.currentLobbyID = "";
+        return { MessageType::LobbyState, msg };
+    }
+};
+
+template<>
+struct MessageTraits<BrowseLobbiesMessage> {
+    static constexpr std::string_view prefix = "BrowseLobbies:";
+    static std::string serialize(const BrowseLobbiesMessage& d) {
+        return std::string(prefix) + std::to_string(static_cast<int>(d.gameType));
+    }
+    static Message deserialize(const std::string& payload) {
+        std::string gameTypeStr = payload.substr(prefix.size());
+        int gameTypeInt = gameTypeStr.empty() ? 0 : std::stoi(gameTypeStr);
+        return { MessageType::BrowseLobbies, BrowseLobbiesMessage{static_cast<GameType>(gameTypeInt)} };
+    }
+};
+
 std::string MessageTranslator::serialize(const Message& msg)
 {
     // using std::visit to access std::variant that MessageData contained
@@ -71,7 +109,20 @@ Message MessageTranslator::deserialize(const std::string& payload)
     }
     else if (payload.starts_with(MessageTraits<UpdateCycleMessage>::prefix)) {
         return MessageTraits<UpdateCycleMessage>::deserialize(payload);
-    } else {
+    }
+    else if(payload.starts_with(MessageTraits<JoinLobbyMessage>::prefix)) {
+        return MessageTraits<JoinLobbyMessage>::deserialize(payload);
+    }
+    else if(payload.starts_with(MessageTraits<LeaveLobbyMessage>::prefix)) {
+        return MessageTraits<LeaveLobbyMessage>::deserialize(payload);
+    }
+    else if(payload.starts_with(MessageTraits<LobbyStateMessage>::prefix)) {
+        return MessageTraits<LobbyStateMessage>::deserialize(payload);
+    }
+    else if(payload.starts_with(MessageTraits<BrowseLobbiesMessage>::prefix)) {
+        return MessageTraits<BrowseLobbiesMessage>::deserialize(payload);
+    }
+    else {
         return { MessageType::Empty, {} };
     }
 }

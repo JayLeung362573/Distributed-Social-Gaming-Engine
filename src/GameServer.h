@@ -5,6 +5,7 @@
 #include <vector>
 #include "Message.h"
 #include "Lobby.h"
+#include "LobbyRegistry.h"
 
 
 class NetworkingInterface;
@@ -31,7 +32,7 @@ private:
     std::vector<ClientMessage> handleGameMessages(const std::vector<ClientMessage>& incomingMessages);
 
     std::vector<ClientMessage> broadcastLobbyState();
-    Lobby m_lobby;
+    LobbyRegistry m_lobbyRegistry;
     bool m_gameStarted;
     bool m_gameOver;
 };

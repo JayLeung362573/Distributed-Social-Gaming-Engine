@@ -28,12 +28,6 @@ GameServer::handleLobbyMessages(const std::vector<ClientMessage> &incomingMessag
                 std::cout << "[Lobby] Player {" << joinData.playerName <<
                           "} joined (clientID = " << clientMsg.clientID << ")\n";
 
-                /// set the first client in lobby to be Host
-                LobbyRole role = m_lobby.getHostID().has_value()
-                                 ? LobbyRole::Player : LobbyRole::Host;
-
-                m_lobby.addPlayer(clientMsg.clientID, role);
-
                 Message response;
                 response.type = MessageType::JoinLobby;
                 response.data = JoinLobbyMessage{joinData.playerName};
@@ -99,4 +93,10 @@ GameServer::getState() const {
     if(m_gameStarted) return ServerState::InGame;
     if(m_gameOver) return ServerState::GameOver;
     return ServerState::InLobby;
+}
+
+std::vector<ClientMessage>
+GameServer::broadcastLobbyState() {
+
+    return {};
 }

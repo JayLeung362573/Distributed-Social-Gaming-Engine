@@ -33,6 +33,20 @@ struct MessageTraits<UpdateCycleMessage> {
     }
 };
 
+template<>
+struct MessageTraits<JoinLobbyMessage> {
+    static constexpr std::string_view prefix = "JoinLobby:";
+
+    static std::string serialize(const JoinLobbyMessage& d) {
+        return std::string(prefix) + d.playerName;
+    }
+
+    static Message deserialize(const std::string& payload) {
+        std::string name = payload.substr(prefix.size());
+        return { MessageType::JoinLobby, JoinLobbyMessage{name}};
+    }
+};
+
 std::string MessageTranslator::serialize(const Message& msg)
 {
     // using std::visit to access std::variant that MessageData contained

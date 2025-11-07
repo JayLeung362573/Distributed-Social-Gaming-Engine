@@ -10,7 +10,9 @@ FetchContent_Declare(
 
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/tests")
-
+# Copy game files to build directory for testing
+file(COPY ${CMAKE_SOURCE_DIR}/games
+        DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/..)
 
 FetchContent_MakeAvailable(googletest)
 

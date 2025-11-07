@@ -13,14 +13,54 @@ extern "C" const TSLanguage *tree_sitter_socialgaming();
 //for tree-sitters TSLLanguage structure, it's rules etc.
 //tree_sitter_socialgaming() will generate when you run "tree-sitter generate" from the terminal
 
-// Read a file into memory as a single string
+/*
+ * Read a file into memory as a single string
+ */
 static std::string slurp(const std::string &path) {
     std::ifstream in(path, std::ios::binary);
     if (!in) throw std::runtime_error("Cannot open file: " + path);
 
     std::ostringstream ss;
-    ss << in.rdbuf();
-    return ss.str();
+    ss << in.rdbuf(); // read entire file stream
+    return ss.str(); // return as str
+
+    /*
+     ex: const std::string src = slurp("rock-paper-scissors.game");
+     - This will read the files text into memory and lets Tree-Sitter parse it.
+     */
+}
+
+/*
+ * Take the full source text and the TSNode (we has start/end indices) and extract the substring that node has
+ */
+static std::string slice(const std::string &src, TSNode node) {
+    auto start = ts_node_start_byte(node);
+    auto end = ts_node_end_byte(node);
+    auto size = static_cast<uint32_t>(src.size());
+
+    //make sure it's valid range
+    if (start >= size || end <= start) return {}; // returns an empty string
+
+    return {src.begin() + start, src.begin() + end};
+
+}
+
+static int parseInteger(const std::string &src, TSNode node) {
+    std::string numStr = slice(src, node);
+    return std::stoi(numStr);
+}
+
+static std::string parseQuotedString(const std::string &src, TSNode node) {
+    std::string withQuotes = slice(src, node);
+    if (withQuotes.size() >= 2) {
+        return withQuotes.substr(1, withQuotes.size() - 2);
+    }
+    return withQuotes;
+}
+
+static bool parseBoolean(const std::string &src, TSNode node) {
+    std::string boolStr = slice(src, node);
+    return boolStr == "true";
 }
 
 //this will read the hello-test.game, and print out to the terminal the config snippet, for testing that it can see the config block as a node
@@ -119,8 +159,6 @@ GameSpec GameSpecLoader::loadString(const std::string &text) {
             spec.constants = slice(text, child);
         } else if (strcmp(field_name, "variables") == 0 || ts_node_symbol(child) == NodeType::VARIABLES) {
             spec.variables = slice(text, child);
-        } else if (strcmp(field_name, "rules") == 0 || ts_node_symbol(child) == NodeType::RULES) {
-            parseRules(text, child, spec);
         }
     }
 
@@ -187,26 +225,8 @@ void GameSpecLoader::parsePlayerRange(const std::string &src, TSNode node, GameS
     }
 }
 
-// void GameSpecLoader::parseSetup(const std::string &src, TSNode node, GameSpec &spec) {
-//     // For now, we'll just capture the setup rules without deep parsing
-//     uint32_t child_count = ts_node_child_count(node);
-
-//     for (uint32_t i = 0; i < child_count; ++i) {
-//         TSNode child = ts_node_child(node, i);
-//         const char* field_name = ts_node_field_name_for_child(node, i);
-
-//         if (!field_name) continue;
-
-//         // Look for setup rule definitions
-//         // Each rule will have fields like: id, kind, prompt, and optional range
-//         // TODO: Implement parsing for setup rules based on field names
-
-//     }
-// }
-
-
 void GameSpecLoader::parseSetup(const std::string &src, TSNode node, GameSpec &spec) {
-    // Walk through children of the setup block to find setup_rule nodes
+    // For now, we'll just capture the setup rules without deep parsing
     uint32_t child_count = ts_node_child_count(node);
 
     for (uint32_t i = 0; i < child_count; ++i) {
@@ -216,156 +236,12 @@ void GameSpecLoader::parseSetup(const std::string &src, TSNode node, GameSpec &s
         if (!field_name) continue;
 
         // Look for setup rule definitions
-        if (strcmp(type, "setup_rule") == 0) {
-            SetupRule rule;
-            bool expecting_kind = false;
-            bool expecting_prompt = false;
-            bool expecting_range = false;
-            
-            // Parse the setup_rule node
-            uint32_t rule_child_count = ts_node_child_count(child);
-            for (uint32_t j = 0; j < rule_child_count; ++j) {
-                TSNode rule_child = ts_node_child(child, j);
-                const char* rule_child_type = ts_node_type(rule_child);
+        // Each rule will have fields like: id, kind, prompt, and optional range
+        // TODO: Implement parsing for setup rules based on field names
 
-                // Extract the identifier (rule id like "rounds")
-                if (strcmp(rule_child_type, "identifier") == 0) {
-                    rule.id = slice(src, rule_child);
-                }
-                // Check for "kind:" token
-                else if (strcmp(rule_child_type, "kind:") == 0) {
-                    expecting_kind = true;
-                }
-                // Extract kind value (integer, boolean, string, etc.) - comes after "kind:"
-                else if (expecting_kind && (strcmp(rule_child_type, "integer") == 0 ||
-                         strcmp(rule_child_type, "boolean") == 0 ||
-                         strcmp(rule_child_type, "string") == 0 ||
-                         strcmp(rule_child_type, "enum") == 0 ||
-                         strcmp(rule_child_type, "question-answer") == 0 ||
-                         strcmp(rule_child_type, "multiple-choice") == 0 ||
-                         strcmp(rule_child_type, "json") == 0)) {
-                    rule.kind = slice(src, rule_child);
-                    expecting_kind = false;
-                }                
-                // Check for "prompt:" token
-                else if (strcmp(rule_child_type, "prompt:") == 0) {
-                    expecting_prompt = true;
-                }
-                // Extract prompt (quoted string) - comes after "prompt:"
-                else if (expecting_prompt && strcmp(rule_child_type, "quoted_string") == 0) {
-                    std::string promptWithQuotes = slice(src, rule_child);
-                    if (promptWithQuotes.size() >= 2) {
-                        rule.prompt = promptWithQuotes.substr(1, promptWithQuotes.size() - 2);
-                    }
-                    expecting_prompt = false;
-                }
-                // Check for "range:" token
-                else if (strcmp(rule_child_type, "range:") == 0) {
-                    expecting_range = true;
-                }
-                // Extract range (number_range) - comes after "range:"
-                else if (expecting_range && strcmp(rule_child_type, "number_range") == 0) {
-                    PlayerRange range;
-                    range.min = 0;
-                    range.max = 0;
-                    
-                    uint32_t range_child_count = ts_node_child_count(rule_child);
-                    for (uint32_t k = 0; k < range_child_count; ++k) {
-                        TSNode range_child = ts_node_child(rule_child, k);
-                        const char* range_child_type = ts_node_type(range_child);
-                        
-                        if (strcmp(range_child_type, "integer") == 0) {
-                            std::string numStr = slice(src, range_child);
-                            int value = std::stoi(numStr);
-                            
-                            // First integer is min, second is max
-                            if (range.min == 0) {
-                                range.min = value;
-                            } else {
-                                range.max = value;
-                            }
-                        }
-                    }
-                    
-                    if (range.min != 0 || range.max != 0) {
-                        rule.range = range;
-                    }
-                    expecting_range = false;
-                }
-            
-            // Only add the rule if we have at least an id and kind
-            if (!rule.id.empty() && !rule.kind.empty()) {
-                spec.setup.push_back(rule);
-            }
-        }
     }
 }
+
 
 //TODO: PARSE RULES
 // AS they are read create an AST from that.
-
-
-//TODO: Change the couts into logging
-void GameSpecLoader::parseRules(const std::string &src, TSNode node, GameSpec &spec) {
-    // The rules node might contain a body node, so we need to check
-    uint32_t child_count = ts_node_named_child_count(node);
-
-    std::cout << "\nPARSING RULES " << std::endl;
-
-    // If there's only one child and it's a body, parse that instead.
-    // This is specified in the grammar, it's a hidden node that comes after the rules bit now ma
-    TSNode statementsNode = node;
-    if (child_count == 1) {
-        TSNode firstChild = ts_node_named_child(node, 0);
-        if (ts_node_symbol(firstChild) == NodeType::BODY) {
-            std::cout << "Rules contains a body node, parsing its contents" << std::endl;
-            statementsNode = firstChild;
-            child_count = ts_node_named_child_count(statementsNode);
-        }
-    }
-
-    std::cout << "Found " << child_count << " statements" << std::endl;
-
-    for (uint32_t i = 0; i < child_count; ++i) {
-        TSNode child = ts_node_named_child(statementsNode, i);
-        TSSymbol symbol = ts_node_symbol(child);
-
-        // Each statement might be wrapped in a "rule" node,
-        TSNode statementNode = child;
-        if (symbol == NodeType::RULE) {
-            // Get the actual statement inside the rule wrapper
-            if (ts_node_named_child_count(child) > 0) {
-                statementNode = ts_node_named_child(child, 0);
-                symbol = ts_node_symbol(statementNode);
-            }
-        }
-
-        // Check if this is an assignment
-        if (symbol == NodeType::ASSIGNMENT) {
-            std::cout << "\n[Statement " << i << "] Assignment found" << std::endl;
-
-            // Use field names to get target and value directly
-            TSNode target = ts_node_child_by_field_name(statementNode, "target", 6);
-            TSNode value = ts_node_child_by_field_name(statementNode, "value", 5);
-
-            if (!ts_node_is_null(target) && !ts_node_is_null(value)) {
-                std::string targetText = slice(src, target);
-                std::string valueText = slice(src, value);
-                std::string targetType = ts_node_type(target);
-                std::string valueType = ts_node_type(value);
-
-                std::cout << "  Target: " << targetText << " (type: " << targetType << ")" << std::endl;
-                std::cout << "  Value: " << valueText << " (type: " << valueType << ")" << std::endl;
-
-                // TODO: Build AST nodes from target and value
-            } else {
-                std::cerr << "  Warning: Assignment missing target or value" << std::endl;
-            }
-        } else {
-            // For now, skip non-assignment statements
-            // TODO: Do all non-assignment sections
-        }
-    }
-
-    std::cout << " END PARSING RULES " << std::endl;
-}

@@ -31,9 +31,8 @@ private:
     std::vector<ClientMessage> handleLobbyMessages(const std::vector<ClientMessage>& incomingMessages);
     std::vector<ClientMessage> handleGameMessages(const std::vector<ClientMessage>& incomingMessages);
 
-    std::vector<ClientMessage> broadcastLobbyState();
+    std::vector<ClientMessage> broadcastLobbyStateToLobby(const LobbyID& lobbyID);
     LobbyRegistry m_lobbyRegistry;
     bool m_gameStarted;
     bool m_gameOver;
-    std::unordered_map<ClientID, LobbyID> m_clientToLobby;
 };

@@ -243,3 +243,5 @@ void GameSpecLoader::parseSetup(const std::string &src, TSNode node, GameSpec &s
 }
 
 
+//TODO: PARSE RULES
+// AS they are read create an AST from that.

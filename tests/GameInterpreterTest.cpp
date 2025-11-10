@@ -13,6 +13,33 @@ doAssignment(GameInterpreter& interpreter, std::unique_ptr<ast::Assignment> assi
     EXPECT_FALSE(result.isReference());
 }
 
+void
+doExtend(GameInterpreter& interpreter, std::unique_ptr<ast::Extend> extend)
+{
+    VisitResult result = extend->accept(interpreter);
+    EXPECT_TRUE(result.isDone());
+    EXPECT_FALSE(result.hasValue());
+    EXPECT_FALSE(result.isReference());
+}
+
+void
+doReverse(GameInterpreter& interpreter, std::unique_ptr<ast::Reverse> reverse)
+{
+    VisitResult result = reverse->accept(interpreter);
+    EXPECT_TRUE(result.isDone());
+    EXPECT_FALSE(result.hasValue());
+    EXPECT_FALSE(result.isReference());
+}
+
+void
+doShuffle(GameInterpreter& interpreter, std::unique_ptr<ast::Shuffle> shuffle)
+{
+    VisitResult result = shuffle->accept(interpreter);
+    EXPECT_TRUE(result.isDone());
+    EXPECT_FALSE(result.hasValue());
+    EXPECT_FALSE(result.isReference());
+}
+
 Value
 loadVariable(GameInterpreter& interpreter, Name targetName)
 {
@@ -277,6 +304,173 @@ TEST(GameInterpreterTest, AssignUndefinedAttribute)
 
     EXPECT_THROW({
         doAssignment(interpreter, std::move(invalidVar2Assignment));
+    }, std::runtime_error);
+}
+
+TEST(GameInterpreterTest, ExtendList)
+{
+    GameInterpreter interpreter;
+    List<Value> list1{Value{String{"a"}}, Value{String{"b"}}};
+    List<Value> list2{Value{String{"c"}}};
+    List<Value> expectedExtendedList{
+        Value{String{"a"}},
+        Value{String{"b"}},
+        Value{String{"c"}}
+    };
+
+    auto listAssignment = ast::makeAssignment(
+        ast::makeVariable(Name{"list1"}),
+        ast::makeConstant(Value{list1})
+    );
+    doAssignment(interpreter, std::move(listAssignment));
+
+    auto extend = ast::makeExtend(
+        ast::makeVariable(Name{"list1"}),
+        ast::makeConstant(Value{list2})
+    );
+    doExtend(interpreter, std::move(extend));
+
+    auto storedList1 = loadVariable(interpreter, Name{"list1"});
+    EXPECT_EQ(storedList1.asList(), expectedExtendedList);
+}
+
+TEST(GameInterpreterTest, ExtendTargetNotAList)
+{
+    GameInterpreter interpreter;
+    List<Value> list{Value{String{"c"}}};
+
+    auto stringAssignment = ast::makeAssignment(
+        ast::makeVariable(Name{"notAList"}),
+        ast::makeConstant(Value{String{"a"}})
+    );
+    doAssignment(interpreter, std::move(stringAssignment));
+
+    auto extend = ast::makeExtend(
+        ast::makeVariable(Name{"notAList"}), // not a list!
+        ast::makeConstant(Value{list})
+    );
+
+    EXPECT_THROW({
+        doExtend(interpreter, std::move(extend));
+    }, std::runtime_error);
+}
+
+TEST(GameInterpreterTest, ExtendValueNotAList)
+{
+    GameInterpreter interpreter;
+    List<Value> list{Value{String{"a"}}, Value{String{"b"}}};
+
+    auto listAssignment = ast::makeAssignment(
+        ast::makeVariable(Name{"myList"}),
+        ast::makeConstant(Value{list})
+    );
+    doAssignment(interpreter, std::move(listAssignment));
+
+    auto extend = ast::makeExtend(
+        ast::makeVariable(Name{"myList"}),
+        ast::makeConstant(Value{String{"c"}}) // not a list!
+    );
+
+    EXPECT_THROW({
+        doExtend(interpreter, std::move(extend));
+    }, std::runtime_error);
+}
+
+TEST(GameInterpreterTest, ReverseList)
+{
+    GameInterpreter interpreter;
+    List<Value> list{Value{String{"a"}}, Value{String{"b"}}, Value{String{"c"}}};
+    List<Value> expectedReversedList{
+        Value{String{"c"}},
+        Value{String{"b"}},
+        Value{String{"a"}}
+    };
+
+    auto listAssignment = ast::makeAssignment(
+        ast::makeVariable(Name{"myList"}),
+        ast::makeConstant(Value{list})
+    );
+    doAssignment(interpreter, std::move(listAssignment));
+
+    auto reverse = ast::makeReverse(ast::makeVariable(Name{"myList"}));
+    doReverse(interpreter, std::move(reverse));
+
+    auto storedList = loadVariable(interpreter, Name{"myList"});
+    EXPECT_EQ(storedList.asList(), expectedReversedList);
+}
+
+TEST(GameInterpreterTest, ReverseTargetNotAList)
+{
+    GameInterpreter interpreter;
+
+    auto stringAssignment = ast::makeAssignment(
+        ast::makeVariable(Name{"notAList"}),
+        ast::makeConstant(Value{String{"a"}})
+    );
+    doAssignment(interpreter, std::move(stringAssignment));
+
+    auto reverse = ast::makeReverse(ast::makeVariable(Name{"notAList"}));
+
+    EXPECT_THROW({
+        doReverse(interpreter, std::move(reverse));
+    }, std::runtime_error);
+}
+
+TEST(GameInterpreterTest, ShuffleList)
+{
+    // Shuffle is a bit harder to test since the elements are randomly shuffled.
+    // But a good enough check might be that two calls to shuffle create different
+    // lists. Hopefully 10 distinct elements is enough to not produce the same list
+    // twice.
+    GameInterpreter interpreter;
+    List<Value> list{
+        Value{String{"a"}},
+        Value{String{"b"}},
+        Value{String{"c"}},
+        Value{String{"d"}},
+        Value{String{"e"}},
+        Value{String{"f"}},
+        Value{String{"g"}},
+        Value{String{"h"}},
+        Value{String{"i"}},
+        Value{String{"j"}}
+    };
+
+    auto listAssignment = ast::makeAssignment(
+        ast::makeVariable(Name{"myList"}),
+        ast::makeConstant(Value{list})
+    );
+    doAssignment(interpreter, std::move(listAssignment));
+
+    auto shuffle1 = ast::makeShuffle(ast::makeVariable(Name{"myList"}));
+    doShuffle(interpreter, std::move(shuffle1));
+
+    auto shuffle1List = loadVariable(interpreter, Name{"myList"});
+
+    auto shuffle2 = ast::makeShuffle(ast::makeVariable(Name{"myList"}));
+    doShuffle(interpreter, std::move(shuffle2));
+
+    auto shuffle2List = loadVariable(interpreter, Name{"myList"});
+
+    EXPECT_EQ(shuffle1List.asList().value.size(), list.value.size());
+    EXPECT_EQ(shuffle2List.asList().value.size(), list.value.size());
+    EXPECT_NE(shuffle1List, shuffle2List);
+}
+
+TEST(GameInterpreterTest, ShuffleTargetNotAList)
+{
+    GameInterpreter interpreter;
+
+    auto stringAssignment = ast::makeAssignment(
+        ast::makeVariable(Name{"notAList"}),
+        ast::makeConstant(Value{String{"a"}})
+    );
+    doAssignment(interpreter, std::move(stringAssignment));
+
+    auto shuffle = ast::makeShuffle(ast::makeVariable(Name{"notAList"}));
+
+    EXPECT_THROW({
+        doShuffle(interpreter, std::move(shuffle));
     }, std::runtime_error);
 }
 

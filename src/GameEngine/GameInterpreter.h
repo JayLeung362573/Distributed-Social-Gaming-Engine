@@ -17,7 +17,7 @@ class GameInterpreter : public ast::ASTVisitor
         /**
          * @brief Evaluates a constant.
          *
-         * @param constant The Constant to visit.
+         * @param constant The Constant node to visit.
          * @return VisitResult Containing the value of the Constant as a copy.
          */
         VisitResult visit(const ast::Constant& constant) override;
@@ -25,7 +25,7 @@ class GameInterpreter : public ast::ASTVisitor
         /**
          * @brief Evaluates a variable.
          *
-         * @param variable The Variable to visit.
+         * @param variable The Variable node to visit.
          * @return VisitResult Containing the value of the variable as a reference.
          *
          * @pre The variable exists in the Variable Map.
@@ -35,7 +35,7 @@ class GameInterpreter : public ast::ASTVisitor
         /**
          * @brief Evaluates an attribute.
          *
-         * @param attribute The Attribute to visit.
+         * @param attribute The Attribute node to visit.
          * @return VisitResult Containing the value of the attribute as a reference.
          *
          * @pre Any base attributes and variables exist in the Variable Map.
@@ -45,7 +45,7 @@ class GameInterpreter : public ast::ASTVisitor
         /**
          * @brief Assigns an expression to a variable or attribute.
          *
-         * @param assignment The Assignment to visit.
+         * @param assignment The Assignment node to visit.
          * @return VisitResult
          *
          * @pre Any attributes and variables referenced in the expression exist in the
@@ -54,6 +54,43 @@ class GameInterpreter : public ast::ASTVisitor
          *       the target variable or attribute.
          */
         VisitResult visit(const ast::Assignment& assignment) override;
+
+        /**
+         * @brief Extends a `target` list with elements of the `value` list.
+         *
+         * @param extend The Extend node to visit.
+         * @return VisitResult
+         *
+         * @pre `target` exists in the Variable Map.
+         * @pre `target` resolves to a List.
+         * @pre `value` evaluates to a List type.
+         * @post The elements of the `value` list are appended to the `target` list.
+         */
+        VisitResult visit(const ast::Extend& extend) override;
+
+        /**
+         * @brief Reverses the elements of the `target` list.
+         *
+         * @param reverse The Reverse node to visit.
+         * @return VisitResult
+         *
+         * @pre `target` exists in the Variable Map.
+         * @pre `target` resolves to a List.
+         * @post The elements of the `target` list are reversed.
+         */
+        VisitResult visit(const ast::Reverse& reverse) override;
+
+        /**
+         * @brief Randomly shuffles the elements of the `target` list.
+         *
+         * @param shuffle The Shuffle node to visit.
+         * @return VisitResult
+         *
+         * @pre `target` exists in the Variable Map.
+         * @pre `target` resolves to a List.
+         * @post The elements of the `target` list are randomly shuffled.
+         */
+        VisitResult visit(const ast::Shuffle& shuffle) override;
 
         /**
          * @brief Prompts and stores player text input.
@@ -92,6 +129,12 @@ class GameInterpreter : public ast::ASTVisitor
 
         VisitResult
         evaluateExpression(ast::Expression& expr);
+
+        VisitResult
+        resolveExpression(ast::Expression& expr);
+
+        VisitResult
+        resolveExpressionToList(ast::Expression& expr);
 
     private:
         VariableMap m_variableMap;

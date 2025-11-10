@@ -118,6 +118,46 @@ namespace ast
             std::unique_ptr<Expression> value;
     };
 
+    class Extend : public ASTNode
+    {
+        public:
+            Extend(std::unique_ptr<Expression> target, std::unique_ptr<Expression> value)
+            : target(std::move(target))
+            , value(std::move(value)) {}
+
+            VisitResult accept(ASTVisitor &visitor) override;
+            Expression* getTarget() const noexcept { return target.get(); };
+            Expression* getValue() const noexcept { return value.get(); };
+
+        private:
+            std::unique_ptr<Expression> target;
+            std::unique_ptr<Expression> value;
+    };
+
+    class Reverse : public ASTNode
+    {
+        public:
+            Reverse(std::unique_ptr<Expression> target) : target(std::move(target)) {}
+
+            VisitResult accept(ASTVisitor &visitor) override;
+            Expression* getTarget() const noexcept { return target.get(); };
+
+        private:
+            std::unique_ptr<Expression> target;
+    };
+
+    class Shuffle : public ASTNode
+    {
+        public:
+            Shuffle(std::unique_ptr<Expression> target) : target(std::move(target)) {}
+
+            VisitResult accept(ASTVisitor &visitor) override;
+            Expression* getTarget() const noexcept { return target.get(); };
+
+        private:
+            std::unique_ptr<Expression> target;
+    };
+
     class InputTextStatement : public ASTNode
     {
         public:
@@ -147,6 +187,9 @@ namespace ast
             virtual VisitResult visit(const Variable& variable) = 0;
             virtual VisitResult visit(const Attribute& attribute) = 0;
             virtual VisitResult visit(const Assignment& assignment) = 0;
+            virtual VisitResult visit(const Extend& extend) = 0;
+            virtual VisitResult visit(const Reverse& reverse) = 0;
+            virtual VisitResult visit(const Shuffle& shuffle) = 0;
             virtual VisitResult visit(const InputTextStatement& inputTextStatement) = 0;
     };
 
@@ -162,6 +205,16 @@ namespace ast
     std::unique_ptr<ast::Assignment>
     makeAssignment(std::unique_ptr<ast::Expression> targetExpr,
                 std::unique_ptr<ast::Expression> valueToAssign);
+
+    std::unique_ptr<ast::Extend>
+    makeExtend(std::unique_ptr<ast::Expression> target,
+               std::unique_ptr<ast::Expression> value);
+
+    std::unique_ptr<ast::Reverse>
+    makeReverse(std::unique_ptr<ast::Expression> target);
+
+    std::unique_ptr<ast::Shuffle>
+    makeShuffle(std::unique_ptr<ast::Expression> target);
 
     std::unique_ptr<ast::InputTextStatement>
     makeInputTextStmt(std::unique_ptr<ast::Variable> playerVar,

@@ -20,6 +20,21 @@ VisitResult ast::Assignment::accept(ast::ASTVisitor& visitor)
     return visitor.visit(*this);
 };
 
+VisitResult ast::Extend::accept(ast::ASTVisitor& visitor)
+{
+    return visitor.visit(*this);
+};
+
+VisitResult ast::Reverse::accept(ast::ASTVisitor& visitor)
+{
+    return visitor.visit(*this);
+};
+
+VisitResult ast::Shuffle::accept(ast::ASTVisitor& visitor)
+{
+    return visitor.visit(*this);
+};
+
 VisitResult ast::InputTextStatement::accept(ast::ASTVisitor& visitor)
 {
     return visitor.visit(*this);
@@ -48,6 +63,25 @@ ast::makeAssignment(std::unique_ptr<ast::Expression> targetExpr,
     return std::make_unique<ast::Assignment>(
         std::move(targetExpr), std::move(valueToAssign)
     );
+}
+
+std::unique_ptr<ast::Extend>
+ast::makeExtend(std::unique_ptr<ast::Expression> target,
+                std::unique_ptr<ast::Expression> value)
+{
+    return std::make_unique<ast::Extend>(std::move(target), std::move(value));
+}
+
+std::unique_ptr<ast::Reverse>
+ast::makeReverse(std::unique_ptr<ast::Expression> target)
+{
+    return std::make_unique<ast::Reverse>(std::move(target));
+}
+
+std::unique_ptr<ast::Shuffle>
+ast::makeShuffle(std::unique_ptr<ast::Expression> target)
+{
+    return std::make_unique<ast::Shuffle>(std::move(target));
 }
 
 std::unique_ptr<ast::InputTextStatement>

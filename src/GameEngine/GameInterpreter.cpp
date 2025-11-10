@@ -4,6 +4,8 @@
 #include <variant>
 #include <optional>
 
+#include <iostream>
+
 #include "GameInterpreter.h"
 
 VisitResult
@@ -41,14 +43,10 @@ GameInterpreter::visit(const ast::Attribute& attribute)
         throw std::runtime_error("Attribute base must be a Variable or Attribute");
     }
 
-    VisitResult baseResult = evaluateExpression(*baseExpr);
-    if (!baseResult.isReference())
-    {
-        throw std::runtime_error("Expected expression to evaluate to a reference");
-    }
-
+    VisitResult baseResult = resolveExpression(*baseExpr);
     Value& baseValue = baseResult.getValue();
     Value& attrValue = baseValue.getAttribute(attribute.getAttr());
+
     return VisitResult{VisitResult::Status::Done, &attrValue};
 }
 
@@ -70,6 +68,46 @@ GameInterpreter::visit(const ast::Assignment& assignment)
     {
         throw std::runtime_error("Assignment target must be a Variable or an Attribute");
     }
+    return VisitResult{VisitResult::Status::Done, {}};
+}
+
+VisitResult
+GameInterpreter::visit(const ast::Extend& extend)
+{
+    VisitResult targetResult = resolveExpressionToList(*extend.getTarget());
+    Value& target = targetResult.getValue();
+
+    VisitResult valueResult = evaluateExpression(*extend.getValue());
+    Value value = valueResult.getValue();
+    if (!value.isList())
+    {
+        throw std::runtime_error("Expression did not evaluate to a List");
+    }
+
+    target.asList().extend(value.asList());
+
+    return VisitResult{VisitResult::Status::Done, {}};
+}
+
+VisitResult
+GameInterpreter::visit(const ast::Reverse& reverse)
+{
+    VisitResult targetResult = resolveExpressionToList(*reverse.getTarget());
+    Value& target = targetResult.getValue();
+
+    target.asList().reverse();
+
+    return VisitResult{VisitResult::Status::Done, {}};
+}
+
+VisitResult
+GameInterpreter::visit(const ast::Shuffle& shuffle)
+{
+    VisitResult targetResult = resolveExpressionToList(*shuffle.getTarget());
+    Value& target = targetResult.getValue();
+
+    target.asList().shuffle();
+
     return VisitResult{VisitResult::Status::Done, {}};
 }
 
@@ -105,6 +143,33 @@ GameInterpreter::evaluateExpression(ast::Expression& expr)
     if (!result.hasValue())
     {
         throw std::runtime_error("Expression did not evaluate to a value");
+    }
+    return result;
+}
+
+VisitResult
+GameInterpreter::resolveExpression(ast::Expression& expr)
+{
+    VisitResult result = expr.accept(*this);
+    if (!result.hasValue())
+    {
+        throw std::runtime_error("Expression did not resolve to a Value");
+    }
+    if (!result.isReference())
+    {
+        throw std::runtime_error("Expression did not resolve to a Value reference");
+    }
+
+    return result;
+}
+
+VisitResult
+GameInterpreter::resolveExpressionToList(ast::Expression& expr)
+{
+    VisitResult result = resolveExpression(expr);
+    if (!result.getValue().isList())
+    {
+        throw std::runtime_error("Expression did not resolve to a List");
     }
     return result;
 }

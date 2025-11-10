@@ -8,6 +8,10 @@
 #include <vector>
 #include <stdexcept>
 #include <ostream>
+#include <algorithm>
+#include <random>
+
+#include <iostream>
 
 /// Represents a variable name in the AST.
 /// Used as a key in variable lookups.
@@ -65,6 +69,26 @@ template <typename T>
 struct List
 {
     std::vector<T> value;
+
+    List() = default;
+    List(std::initializer_list<T> init) : value(init) {}
+
+    void extend(const List<T>& list)
+    {
+        value.insert(value.end(), list.value.begin(), list.value.end());
+    }
+
+    void reverse()
+    {
+        std::reverse(value.begin(), value.end());
+    }
+
+    void shuffle()
+    {
+        std::random_device rd;
+        std::mt19937 g(rd());
+        std::shuffle(value.begin(), value.end(), g);
+    }
 
     // Print example: [ "a", "b", "c" ]
     friend std::ostream& operator<<(std::ostream& os, const List<T>& list)

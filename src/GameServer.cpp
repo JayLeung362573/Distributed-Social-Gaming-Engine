@@ -2,114 +2,213 @@
 #include "GameServer.h"
 #include "Message.h"
 
-std::vector<ClientMessage>
-GameServer::tick(const std::vector<ClientMessage> &incomingMessages) {
-    return handleClientMessages(incomingMessages);
-}
+GameServer::GameServer() = default;
+
+struct MessageHandlerVisitor {
+    uintptr_t clientID;
+    GameServer* server;
+
+    std::vector<ClientMessage> responses;
+
+    void operator()(const JoinLobbyMessage& data) {
+        responses = server->handleJoinLobbyMessages(clientID, data);
+    }
+
+    void operator()(const LeaveLobbyMessage& data) {
+        responses = server->handleLeaveLobbyMessages(clientID, data);
+    }
+
+    void operator()(const GetLobbyStateMessage& data) {
+        responses = server->handleGetLobbyStateMessages(clientID, data);
+    }
+
+    void operator()(const BrowseLobbiesMessage& data) {
+        responses = server->handleBrowseLobbiesMessages(clientID, data);
+    }
+
+    void operator()(const JoinGameMessage& data) {
+        responses = server->handleJoinGameMessages(clientID, data);
+    }
+
+    void operator()(const std::monostate& data) {}
+
+    void operator()(const LobbyStateMessage& data) {}
+
+    void operator()(const ErrorMessage& data) {}
+
+    void operator()(const UpdateCycleMessage& data) {
+        std::cout << "[GameServer]: Client should not send UpdateCycle\n";
+    }
+};
 
 std::vector<ClientMessage>
 GameServer::handleClientMessages(const std::vector<ClientMessage> &incomingMessages) {
     std::vector<ClientMessage> outgoingMessages;
 
     for(const auto& clientMsg : incomingMessages){
-        std::optional<ClientMessage> response;
+        MessageHandlerVisitor visitor {clientMsg.clientID, this};
 
-        switch(clientMsg.message.type)
-        {
-            case MessageType::Empty:
-                break;
-            case MessageType::JoinGame:
-                response = handleJoinGameMessages(clientMsg);
-                break;
-            case MessageType::UpdateCycle:
-                response = handleUpdateCycleMessages(clientMsg);
-                break;
-            case MessageType::JoinLobby:
-                response = handleJoinLobbyMessages(clientMsg);
-                break;
-            case MessageType::LeaveLobby:
-                response = handleLeaveLobbyMessages(clientMsg);
-                break;
-            case MessageType::LobbyState:
-                break;
-            case MessageType::BrowseLobbies:
-                break;
-            case MessageType::GetLobbyState:
-                break;
-            default:
-                std::cout << "Empty message\n";
-                break;
-        }
-        if(response){
-            outgoingMessages.push_back(*response);
-        }
+        /// visit the clientMsg.message.data and call the correct handler
+        std::visit(visitor, clientMsg.message.data);
+
+        outgoingMessages.insert(outgoingMessages.end(),
+                                visitor.responses.begin(),
+                                visitor.responses.end());
     }
     return outgoingMessages;
 }
 
-std::optional<ClientMessage>
-GameServer::handleJoinLobbyMessages(const ClientMessage& joinLobbyMsg) {
-    auto &joinData = std::get<JoinLobbyMessage>(joinLobbyMsg.message.data);
-    std::cout << "[GameServer] Player {" << joinData.playerName
-              << "} attempting to join lobby (clientID = " << joinLobbyMsg.clientID << ")\n";
+std::vector<ClientMessage>
+GameServer::handleJoinLobbyMessages(uintptr_t clientID, const JoinLobbyMessage& joinLobbyMsg) {
+    std::cout << "[GameServer] Player {" << joinLobbyMsg.playerName
+              << "} attempting to join lobby (clientID = " << clientID << ")\n";
 
     LobbyID lobbyID;
+    std::vector<ClientMessage> outgoingMessages;
 
-    if(joinData.lobbyName.empty()){
+    if(joinLobbyMsg.lobbyName.empty()){
         lobbyID = m_lobbyRegistry.createLobby(
-                joinLobbyMsg.clientID,
+                clientID,
                 GameType::Default,
-                joinData.playerName + "'s Lobby"
+                joinLobbyMsg.playerName + "'s Lobby"
         );
     } else {
-        lobbyID = joinData.lobbyName;
-        bool joined = m_lobbyRegistry.joinLobby(joinLobbyMsg.clientID, lobbyID);
+        lobbyID = joinLobbyMsg.lobbyName;
+        bool joined = m_lobbyRegistry.joinLobby(clientID, lobbyID);
 
         if(!joined){
             Message errorMsg;
-            errorMsg.type = MessageType::Empty;
-            return ClientMessage{joinLobbyMsg.clientID, errorMsg};
+            errorMsg.type = MessageType::Error;
+            errorMsg.data = ErrorMessage{"Lobby is full or not exist"};
+
+            outgoingMessages.push_back(ClientMessage{clientID, errorMsg});
+            return outgoingMessages;
         }
     }
 
-    Message response;
-    response.type = MessageType::JoinLobby;
-    response.data = JoinLobbyMessage{joinData.playerName, lobbyID};
-    return ClientMessage{joinLobbyMsg.clientID, response};
+    auto lobby = m_lobbyRegistry.getLobby(lobbyID);
+
+    Message lobbyStatePayload;
+    lobbyStatePayload.type = MessageType::LobbyState;
+    lobbyStatePayload.data = LobbyStateMessage{
+            {lobby->getInfo()},
+            lobbyID
+    };
+
+    auto players = lobby->getAllPlayer();
+    std::cout << "[GameServer] Broadcasting new lobby state to "
+              << players.size() << " clients.\n";
+
+    for(const auto& player : players) {
+        outgoingMessages.push_back(ClientMessage{player.clientID, lobbyStatePayload});
+    }
+
+    return outgoingMessages;
 }
 
-std::optional<ClientMessage>
-GameServer::handleLeaveLobbyMessages(const ClientMessage& leaveMsg)
+std::vector<ClientMessage>
+GameServer::handleLeaveLobbyMessages(uintptr_t clientID, const LeaveLobbyMessage& leaveLobbyMsg)
 {
-    auto& leaveData = std::get<LeaveLobbyMessage>(leaveMsg.message.data);
-    std::cout << "[GameServer] Player '" << leaveData.playerName << "' leaving lobby\n";
+    std::cout << "[GameServer] Player '" << leaveLobbyMsg.playerName
+              << "' leaving lobby (clientID = " << clientID << ")\n";
 
-    m_lobbyRegistry.leaveLobby(leaveMsg.clientID);
+    std::vector<ClientMessage> outgoingMessages;
 
-    Message response;
-    response.type = MessageType::LeaveLobby;
-    response.data = LeaveLobbyMessage{leaveData.playerName};
-    return ClientMessage{leaveMsg.clientID, response};
+    auto lobbyID = m_lobbyRegistry.findLobbyForClient(clientID);
+    if (!lobbyID) {
+        std::cout << "[GameServer] Player not in any lobby\n";
+        Message errorMsg;
+        errorMsg.type = MessageType::Error;
+        errorMsg.data = ErrorMessage{"Not in any lobby"};
+        outgoingMessages.push_back(ClientMessage{clientID, errorMsg});
+        return outgoingMessages;
+    }
+
+    m_lobbyRegistry.leaveLobby(clientID);
+
+    Message leaveConfirmation;
+    leaveConfirmation.type = MessageType::LeaveLobby;
+    leaveConfirmation.data = LeaveLobbyMessage{leaveLobbyMsg.playerName};
+    outgoingMessages.push_back(ClientMessage{clientID, leaveConfirmation});
+
+    auto lobby = m_lobbyRegistry.getLobby(*lobbyID);
+    if (!lobby) {
+        std::cout << "[GameServer] Lobby " << *lobbyID << " was destroyed (empty)\n";
+        return outgoingMessages;
+    }
+
+    Message lobbyStatePayload;
+    lobbyStatePayload.type = MessageType::LobbyState;
+    lobbyStatePayload.data = LobbyStateMessage{
+            {lobby->getInfo()},
+            *lobbyID
+    };
+
+    auto players = lobby->getAllPlayer();
+    std::cout << "[GameServer] Broadcasting lobby state to "
+              << players.size() << " remaining clients\n";
+
+    for(const auto& player : players) {
+        outgoingMessages.push_back(ClientMessage{player.clientID, lobbyStatePayload});
+    }
+
+    return outgoingMessages;
 }
 
+std::vector<ClientMessage>
+GameServer::handleGetLobbyStateMessages(uintptr_t clientID, const GetLobbyStateMessage &getLobbyMsg) const {
+    std::cout << "[GameServer] Client " << clientID
+              << " requesting lobby state\n";
 
-std::optional<ClientMessage>
-GameServer::handleJoinGameMessages(const ClientMessage& joinGameMsg){
-    auto& joinData = std::get<JoinGameMessage>(joinGameMsg.message.data);
-    std::cout << "[GameServer] JoinGame: " << joinData.playerName << "\n";
+    auto lobbyID = m_lobbyRegistry.findLobbyForClient(clientID);
+    if(!lobbyID){
+        std::cout << "[GameServer] Client not in any lobby\n";
+        Message errorMsg;
+        errorMsg.type = MessageType::Error;
+        errorMsg.data = ErrorMessage{"Client is not in a lobby"};
+        return {ClientMessage{clientID, errorMsg}};
+    }
+
+    auto lobby = m_lobbyRegistry.getLobby(*lobbyID);
+
+    Message response;
+    response.type = MessageType::LobbyState;
+    response.data = LobbyStateMessage{
+            {lobby->getInfo()},
+            {*lobbyID}
+    };
+    return {ClientMessage{clientID, response}};
+}
+
+std::vector<ClientMessage>
+GameServer::handleBrowseLobbiesMessages(uintptr_t clientID, const BrowseLobbiesMessage &browseLobbiesMsg) const {
+    std::cout << "[GameServer] Client " << clientID
+              << " browsing lobbies\n";
+
+    auto lobbies = m_lobbyRegistry.browseLobbies(browseLobbiesMsg.gameType);
+
+    Message response;
+    response.type = MessageType::LobbyState;
+    response.data = LobbyStateMessage{lobbies, ""};
+    return {ClientMessage{clientID, response}};
+}
+
+std::vector<ClientMessage>
+GameServer::handleJoinGameMessages(uintptr_t clientID, const JoinGameMessage& joinGameMsg){
+    std::cout << "[GameServer] JoinGame: " << joinGameMsg.playerName << "\n";
+
+    // TODO start the game
 
     Message response;
     response.type = MessageType::JoinGame;
-    response.data = JoinGameMessage{joinData.playerName};
-    return ClientMessage{joinGameMsg.clientID, response};
+    response.data = JoinGameMessage{joinGameMsg.playerName};
+    return {ClientMessage{clientID, response}};
 }
 
-std::optional<ClientMessage>
-GameServer::handleUpdateCycleMessages(const ClientMessage& updateMsg) {
-    auto& data = std::get<UpdateCycleMessage>(updateMsg.message.data);
-    std::cout << "[GameServer] UpdateCycle: " << data.cycle << "\n";
-
-    // No response needed
-    return std::nullopt;
+std::vector<ClientMessage>
+GameServer::tick(const std::vector<ClientMessage> &incomingMessages) {
+    return handleClientMessages(incomingMessages);
 }
+
+
 

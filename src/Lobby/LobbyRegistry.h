@@ -19,8 +19,8 @@ public:
     bool joinLobby(ClientID playerID, const LobbyID& lobbyID);
     void leaveLobby(ClientID playerID);
 
-    Lobby* getLobby(const LobbyID& lobbyID);
-    std::optional<LobbyID> findLobbyForClient(ClientID playerID);
+    Lobby * getLobby(const LobbyID& lobbyID) const;
+    std::optional<LobbyID> findLobbyForClient(ClientID playerID) const;
 private:
     LobbyID generateLobbyID();
 

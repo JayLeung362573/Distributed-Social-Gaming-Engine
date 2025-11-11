@@ -19,6 +19,7 @@ enum class MessageType : uint8_t
     LobbyState,
     BrowseLobbies,
     GetLobbyState, // client requests the current lobby state
+    Error,
 };
 
 struct JoinGameMessage
@@ -53,6 +54,10 @@ struct GetLobbyStateMessage{
 
 };
 
+struct ErrorMessage{
+    std::string reason;
+};
+
 using MessageData = std::variant<
         std::monostate,
         JoinGameMessage,
@@ -61,7 +66,9 @@ using MessageData = std::variant<
         JoinLobbyMessage,
         LeaveLobbyMessage,
         LobbyStateMessage,
-        BrowseLobbiesMessage
+        BrowseLobbiesMessage,
+        GetLobbyStateMessage,
+        ErrorMessage
         >;
 
 struct Message

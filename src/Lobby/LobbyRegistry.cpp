@@ -68,8 +68,8 @@ LobbyRegistry::leaveLobby(ClientID playerID) {
     }
 }
 
-Lobby*
-LobbyRegistry::getLobby(const LobbyID &lobbyID) {
+Lobby *
+LobbyRegistry::getLobby(const LobbyID &lobbyID) const {
     auto it = m_lobbies.find(lobbyID);
     if(it != m_lobbies.end()){
         return it->second.get();
@@ -78,7 +78,7 @@ LobbyRegistry::getLobby(const LobbyID &lobbyID) {
 }
 
 std::optional<LobbyID>
-LobbyRegistry::findLobbyForClient(ClientID playerID) {
+LobbyRegistry::findLobbyForClient(ClientID playerID) const {
     for(const auto& [lobbyID, lobby] : m_lobbies){
         if(lobby->hasPlayer(playerID)){
             return lobbyID;

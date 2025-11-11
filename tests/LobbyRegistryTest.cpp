@@ -47,7 +47,7 @@ TEST(LobbyTest, IsFullPreventsInsert) {
     // Fill up to maxPlayers (10)
     size_t max_players_size = lobby.getInfo().maxPlayers; // Maybe have a getter that access the max size directly (it seems like a reusable variable)
 
-    for (int i = 0; i < max_players_size; ++i) {
+    for (int i = 0; i < max_players_size - 1; ++i) {
         EXPECT_TRUE(lobby.insertPlayer(100 + i));
     }
 
@@ -72,7 +72,7 @@ TEST(LobbyRegistryTest, MovePlayerToExistingLobby) {
     LobbyRegistry registry;
     LobbyID id = registry.createLobby(1, GameType::Default, "Chess Match");
 
-    bool joined = registry.movePlayerToLobby(2, id);
+    bool joined = registry.joinLobby(2, id);
     EXPECT_TRUE(joined);
 
     const Lobby* lobby = registry.getLobby(id);
@@ -82,7 +82,7 @@ TEST(LobbyRegistryTest, MovePlayerToExistingLobby) {
 
 TEST(LobbyRegistryTest, MovePlayerToNonExistentLobbyFails) {
     LobbyRegistry registry;
-    bool joined = registry.movePlayerToLobby(1, "invalid_lobby_id");
+    bool joined = registry.joinLobby(1, "invalid_lobby_id");
     EXPECT_FALSE(joined);
 }
 
@@ -91,10 +91,10 @@ TEST(LobbyRegistryTest, RemovePlayerFromAllLobbies) {
     LobbyID id1 = registry.createLobby(1, GameType::Default, "Test1");
     LobbyID id2 = registry.createLobby(2, GameType::Default, "Test2");
 
-    registry.movePlayerToLobby(3, id1);
-    registry.movePlayerToLobby(3, id2);
+    registry.joinLobby(3, id1);
+    registry.joinLobby(3, id2);
 
-    registry.removePlayerFromAllLobbies(3);
+    registry.leaveLobby(3);
 
     EXPECT_FALSE(registry.getLobby(id1)->hasPlayer(3));
     EXPECT_FALSE(registry.getLobby(id2)->hasPlayer(3));
@@ -104,7 +104,7 @@ TEST(LobbyRegistryTest, FindLobbyForClientReturnsCorrectLobby) {
     LobbyRegistry registry;
     LobbyID id1 = registry.createLobby(1, GameType::Default, "FindTest");
 
-    registry.movePlayerToLobby(5, id1);
+    registry.joinLobby(5, id1);
     auto result = registry.findLobbyForClient(5);
 
     ASSERT_TRUE(result.has_value());

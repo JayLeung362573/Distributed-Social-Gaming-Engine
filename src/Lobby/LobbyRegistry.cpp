@@ -31,7 +31,7 @@ LobbyRegistry::browseLobbies(GameType gameType) const {
 }
 
 bool
-LobbyRegistry::movePlayerToLobby(ClientID playerID, const LobbyID &lobbyID) {
+LobbyRegistry::joinLobby(ClientID playerID, const LobbyID &lobbyID) {
     auto it = m_lobbies.find(lobbyID);
     if(it == m_lobbies.end()){
         std::cout << "[Registry] Lobby not found: " << lobbyID << "\n";
@@ -42,22 +42,38 @@ LobbyRegistry::movePlayerToLobby(ClientID playerID, const LobbyID &lobbyID) {
     return it->second->insertPlayer(playerID);
 }
 
+bool
+LobbyRegistry::destroyLobby(const LobbyID &lobbyID) {
+    auto it = m_lobbies.find(lobbyID);
+    if(it != m_lobbies.end()){
+        return false;
+    }
+    std::cout << "[Registry] Destroying lobby: " << lobbyID << "\n";
+    m_lobbies.erase(it);
+    return true;
+}
+
 void
-LobbyRegistry::removePlayerFromAllLobbies(ClientID playerID) {
+LobbyRegistry::leaveLobby(ClientID playerID) {
     for(auto& [lobbyID, lobby] : m_lobbies){
         if(lobby->hasPlayer(playerID)){
             lobby->deletePlayer(playerID);
+            std::cout << "[Registry] Player " << playerID << " left lobby: " << lobbyID << "\n";
+
+            if(lobby->getPlayerCount() == 0){
+                std::cout << "[Registry] Lobby " << lobbyID << " is empty, destroying\n";
+                destroyLobby(lobbyID);
+            }
         }
     }
 }
 
-const Lobby*
+Lobby*
 LobbyRegistry::getLobby(const LobbyID &lobbyID) {
     auto it = m_lobbies.find(lobbyID);
     if(it != m_lobbies.end()){
         return it->second.get();
     }
-
     return nullptr;
 }
 

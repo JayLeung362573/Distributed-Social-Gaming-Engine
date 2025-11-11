@@ -16,10 +16,10 @@ public:
 
     std::vector<LobbyInfo> browseLobbies(GameType gameType) const;
 
-    bool movePlayerToLobby(ClientID playerID, const LobbyID& lobbyID);
-    void removePlayerFromAllLobbies(ClientID playerID);
+    bool joinLobby(ClientID playerID, const LobbyID& lobbyID);
+    void leaveLobby(ClientID playerID);
 
-    const Lobby* getLobby(const LobbyID& lobbyID);
+    Lobby* getLobby(const LobbyID& lobbyID);
     std::optional<LobbyID> findLobbyForClient(ClientID playerID);
 private:
     LobbyID generateLobbyID();

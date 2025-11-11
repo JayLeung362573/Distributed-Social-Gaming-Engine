@@ -38,14 +38,19 @@ LobbyRegistry::joinLobby(ClientID playerID, const LobbyID &lobbyID) {
         return false;
     }
 
-    std::cout << "player: " << playerID << " joined Lobby: " << lobbyID << "\n";
-    return it->second->insertPlayer(playerID);
+    leaveLobby(playerID); /// prevent player in multiple lobbies
+
+    bool success = it->second->insertPlayer(playerID);
+    if(success){
+        std::cout << "[Registry] player: " << playerID << " joined Lobby: " << lobbyID << "\n";
+    }
+    return success;
 }
 
 bool
 LobbyRegistry::destroyLobby(const LobbyID &lobbyID) {
     auto it = m_lobbies.find(lobbyID);
-    if(it != m_lobbies.end()){
+    if(it == m_lobbies.end()){
         return false;
     }
     std::cout << "[Registry] Destroying lobby: " << lobbyID << "\n";
@@ -55,16 +60,20 @@ LobbyRegistry::destroyLobby(const LobbyID &lobbyID) {
 
 void
 LobbyRegistry::leaveLobby(ClientID playerID) {
-    for(auto& [lobbyID, lobby] : m_lobbies){
-        if(lobby->hasPlayer(playerID)){
-            lobby->deletePlayer(playerID);
-            std::cout << "[Registry] Player " << playerID << " left lobby: " << lobbyID << "\n";
+    auto lobbyIDToLeave = findLobbyForClient(playerID);
 
-            if(lobby->getPlayerCount() == 0){
-                std::cout << "[Registry] Lobby " << lobbyID << " is empty, destroying\n";
-                destroyLobby(lobbyID);
-            }
-        }
+    if(!lobbyIDToLeave){
+        return;
+    }
+
+    auto it = m_lobbies.find(*lobbyIDToLeave);
+    auto& lobby = it->second;
+    lobby->deletePlayer(playerID);
+    std::cout << "[Registry] Player " << playerID << " left lobby: " << *lobbyIDToLeave << "\n";
+
+    if(lobby->getPlayerCount() == 0){
+        std::cout << "[Registry] Lobby " << *lobbyIDToLeave << " is empty, destroying\n";
+        m_lobbies.erase(it);
     }
 }
 
@@ -89,8 +98,7 @@ LobbyRegistry::findLobbyForClient(ClientID playerID) const {
 
 LobbyID
 LobbyRegistry::generateLobbyID() {
-    size_t counter = 0;
-    counter++;
-    return "lobby_" + std::to_string(counter);
+    m_lobbyCounter++;
+    return "lobby_" + std::to_string(m_lobbyCounter);
 }
 

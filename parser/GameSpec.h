@@ -27,6 +27,7 @@ struct SetupRule { // from the config
     std::string prompt;
     std::optional<PlayerRange> range;
 };
+
 struct GameSpec {
     std::string name;
     PlayerRange playerRange;

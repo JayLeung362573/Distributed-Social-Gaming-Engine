@@ -253,7 +253,6 @@ void GameSpecLoader::parseSetup(const std::string &src, TSNode node, GameSpec &s
     }
 }
 
-
 //TODO: PARSE RULES
 // AS they are read create an AST from that.
 
@@ -304,8 +303,8 @@ void GameSpecLoader::parseRules(const std::string &src, TSNode node, GameSpec &s
             if (!ts_node_is_null(target) && !ts_node_is_null(value)) {
                 std::string targetText = slice(src, target);
                 std::string valueText = slice(src, value);
-                const char* targetType = ts_node_type(target);
-                const char* valueType = ts_node_type(value);
+                std::string targetType = ts_node_type(target);
+                std::string valueType = ts_node_type(value);
 
                 std::cout << "  Target: " << targetText << " (type: " << targetType << ")" << std::endl;
                 std::cout << "  Value: " << valueText << " (type: " << valueType << ")" << std::endl;

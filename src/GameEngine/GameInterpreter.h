@@ -93,6 +93,35 @@ class GameInterpreter : public ast::ASTVisitor
         VisitResult visit(const ast::Shuffle& shuffle) override;
 
         /**
+         * @brief Discards `amount` elements from the `target` list.
+         *
+         * @param discard The Discard node to visit.
+         * @return VisitResult
+         *
+         * @pre `target` exists in the Variable Map.
+         * @pre `target` resolves to a List.
+         * @pre `amount` resolves to an Integer.
+         * @post At most `amount` items from the `target` list items are removed.
+         */
+        VisitResult visit(const ast::Discard& discard) override;
+
+        /**
+         * @brief Sorts the `target` list in ascending order.
+         *
+         * @param sort The Sort node to visit.
+         * @return VisitResult
+         *
+         * @pre `target` exists in the Variable Map.
+         * @pre `target` resolves to a List.
+         * @pre The Values of the List are comparable.
+         * @pre If a key is provided, the Values of the List are Maps,
+         *      the key exists in all Map elements, and the Values at
+         *      the key are comparable.
+         * @post The elements of the `target` list are sorted.
+         */
+        VisitResult visit(const ast::Sort& sort) override;
+
+        /**
          * @brief Prompts and stores player text input.
          *
          * This method checks for player input in inGameMessages. If there's no input,
@@ -132,9 +161,6 @@ class GameInterpreter : public ast::ASTVisitor
 
         VisitResult
         resolveExpression(ast::Expression& expr);
-
-        VisitResult
-        resolveExpressionToList(ast::Expression& expr);
 
     private:
         VariableMap m_variableMap;

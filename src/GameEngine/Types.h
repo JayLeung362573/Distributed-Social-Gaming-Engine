@@ -10,6 +10,7 @@
 #include <ostream>
 #include <algorithm>
 #include <random>
+#include <utility>
 
 #include <iostream>
 
@@ -38,6 +39,23 @@ struct String
     friend std::ostream& operator<<(std::ostream& os, const String& s)
     {
         os << '"' << s.value << '"';
+        return os;
+    }
+};
+
+/// Represents an integer value.
+struct Integer
+{
+    int value;
+
+    bool operator==(const Integer& other) const noexcept
+    {
+        return value == other.value;
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const Integer& integer)
+    {
+        os << integer.value;
         return os;
     }
 };
@@ -73,6 +91,11 @@ struct List
     List() = default;
     List(std::initializer_list<T> init) : value(init) {}
 
+    Integer size()
+    {
+        return Integer{(int)(value.size())};
+    }
+
     void extend(const List<T>& list)
     {
         value.insert(value.end(), list.value.begin(), list.value.end());
@@ -88,6 +111,20 @@ struct List
         std::random_device rd;
         std::mt19937 g(rd());
         std::shuffle(value.begin(), value.end(), g);
+    }
+
+    /// Discards `amount` items starting from the start of the list (the top?)
+    /// `amount` will be clamped to min(amount, list.size())
+    /// A negative `amount` is a no-op
+    void discard(Integer amount)
+    {
+        if (amount.value < 0)
+        {
+            return;
+        }
+        int clampedAmount = std::min(amount.value, size().value);
+
+        value.erase(value.begin(), value.begin() + clampedAmount);
     }
 
     // Print example: [ "a", "b", "c" ]
@@ -122,18 +159,23 @@ struct Map
 
     /// Gets the value at an attribute as a reference.
     /// Throws if the attribute isn't set.
-    V& getAttribute(K attr)
+    const V& getAttribute(K attr) const
     {
         if (!value.contains(attr))
         {
             throw std::runtime_error("Attribute does not exist in Map");
         }
-        return value[attr];
+        return value.at(attr);
+    }
+
+    V& getAttribute(K attr)
+    {
+        return const_cast<V&>(std::as_const(*this).getAttribute(attr));
     }
 
     /// Sets or overwrites a named attribute.
     void setAttribute(K attr, V val)
-    {;
+    {
         value[attr] = val;
     }
 
@@ -166,11 +208,16 @@ struct Map
 /// through the asString(), asMap(), asList() methods respectively.
 struct Value
 {
-    std::variant<List<Value>, Map<String, Value>, String> value;
+    std::variant<List<Value>, Map<String, Value>, String, Integer> value;
 
     bool isString() const
     {
         return std::holds_alternative<String>(value);
+    }
+
+    bool isInteger() const
+    {
+        return std::holds_alternative<Integer>(value);
     }
 
     bool isList() const
@@ -183,37 +230,48 @@ struct Value
         return std::holds_alternative<Map<String, Value>>(value);
     }
 
-    String& asString()
+    const String& asString() const
     {
         if (!isString()) { throw std::runtime_error("Value is not a String"); }
         return std::get<String>(value);
     }
 
-    const String& asString() const
+    String& asString()
     {
-        return const_cast<Value*>(this)->asString();
+        return const_cast<String&>(std::as_const(*this).asString());
     }
 
-    List<Value>& asList()
+    const Integer& asInteger() const
+    {
+        if (!isInteger()) { throw std::runtime_error("Value is not an Integer"); }
+        return std::get<Integer>(value);
+    }
+
+    Integer& asInteger()
+    {
+        return const_cast<Integer&>(std::as_const(*this).asInteger());
+    }
+
+    const List<Value>& asList() const
     {
         if (!isList()) { throw std::runtime_error("Value is not a List"); }
         return std::get<List<Value>>(value);
     }
 
-    const List<Value>& asList() const
+    List<Value>& asList()
     {
-        return const_cast<Value*>(this)->asList();
+        return const_cast<List<Value>&>(std::as_const(*this).asList());
     }
 
-    Map<String, Value>& asMap()
+    const Map<String, Value>& asMap() const
     {
         if (!isMap()) { throw std::runtime_error("Value is not a Map"); }
         return std::get<Map<String, Value>>(value);
     }
 
-    const Map<String, Value>& asMap() const
+    Map<String, Value>& asMap()
     {
-        return const_cast<Value*>(this)->asMap();
+        return const_cast<Map<String, Value>&>(std::as_const(*this).asMap());
     }
 
     /// Gets the value at an attribute from a Map.
@@ -222,13 +280,18 @@ struct Value
     ///
     /// A reference is returned so the interpreter can modify nested
     /// structures on the original Map.
-    Value& getAttribute(String attr)
+    const Value& getAttribute(String attr) const
     {
         if (!isMap())
         {
             throw std::runtime_error("Only Maps have attributes");
         }
         return asMap().getAttribute(std::move(attr));
+    }
+
+    Value& getAttribute(String attr)
+    {
+        return const_cast<Value&>(std::as_const(*this).getAttribute(attr));
     }
 
     /// Sets or overwrites a named attribute on a Map.
@@ -245,6 +308,7 @@ struct Value
     friend std::ostream& operator<<(std::ostream& os, const Value& v)
     {
         if (v.isString()) { os << v.asString(); }
+        else if (v.isInteger()) { os << v.asInteger(); }
         else if (v.isList()) { os << v.asList(); }
         else if (v.isMap()) { os << v.asMap(); }
         return os;
@@ -252,6 +316,61 @@ struct Value
 
     bool operator==(const Value& other) const noexcept
     {
-        return value == other.value;
+        if (isString() && other.isString()) { return asString() == other.asString(); }
+        else if (isInteger() && other.isInteger()) { return asInteger() == other.asInteger(); }
+        else if (isList() && other.isList())  { return asList() == other.asList(); }
+        else if (isMap() && other.isMap()) { return asMap() == other.asMap(); }
+        return false;
     }
 };
+
+inline std::optional<bool> maybeCompareValues(const Value& lhs, const Value& rhs)
+{
+    if (lhs.isString() && rhs.isString())
+    {
+        return lhs.asString().value < rhs.asString().value;
+    }
+    if (lhs.isInteger() && rhs.isInteger())
+    {
+        return lhs.asInteger().value < rhs.asInteger().value;
+    }
+    return std::nullopt;
+}
+
+inline List<Value> sortList(const List<Value>& list, std::optional<String> key = {})
+{
+    List<Value> listCopy = list;
+
+    std::sort(listCopy.value.begin(), listCopy.value.end(),
+        [&key](const Value& lhs, const Value &rhs)
+        {
+            if (key.has_value())
+            {
+                // List elements are treated as maps, and values of the key are compared
+                const Value& lhsValue = lhs.getAttribute(*key);
+                const Value& rhsValue = rhs.getAttribute(*key);
+
+                auto res = maybeCompareValues(lhsValue, rhsValue);
+                if (res.has_value())
+                {
+                    return *res;
+                }
+            }
+            else
+            {
+                // Otherwise, try to compare values directly
+                auto res = maybeCompareValues(lhs, rhs);
+                if (res.has_value())
+                {
+                    return *res;
+                }
+            }
+            // If reached here, types couldn't be compared
+            throw std::runtime_error(
+                "List is not sortable because element types are not comparable"
+            );
+        }
+    );
+
+    return listCopy;
+}

@@ -40,6 +40,24 @@ doShuffle(GameInterpreter& interpreter, std::unique_ptr<ast::Shuffle> shuffle)
     EXPECT_FALSE(result.isReference());
 }
 
+void
+doDiscard(GameInterpreter& interpreter, std::unique_ptr<ast::Discard> discard)
+{
+    VisitResult result = discard->accept(interpreter);
+    EXPECT_TRUE(result.isDone());
+    EXPECT_FALSE(result.hasValue());
+    EXPECT_FALSE(result.isReference());
+}
+
+void
+doSort(GameInterpreter& interpreter, std::unique_ptr<ast::Sort> sort)
+{
+    VisitResult result = sort->accept(interpreter);
+    EXPECT_TRUE(result.isDone());
+    EXPECT_FALSE(result.hasValue());
+    EXPECT_FALSE(result.isReference());
+}
+
 Value
 loadVariable(GameInterpreter& interpreter, Name targetName)
 {
@@ -471,6 +489,135 @@ TEST(GameInterpreterTest, ShuffleTargetNotAList)
 
     EXPECT_THROW({
         doShuffle(interpreter, std::move(shuffle));
+    }, std::runtime_error);
+}
+
+TEST(GameInterpreterTest, DiscardList)
+{
+    GameInterpreter interpreter;
+    List<Value> myList{Value{String{"a"}}, Value{String{"b"}}};
+    List<Value> expectedListAfterDiscard{};
+
+    auto listAssignment = ast::makeAssignment(
+        ast::makeVariable(Name{"myList"}),
+        ast::makeConstant(Value{myList})
+    );
+    doAssignment(interpreter, std::move(listAssignment));
+
+    auto discard = ast::makeDiscard(
+        ast::makeVariable(Name{"myList"}),
+        ast::makeConstant(Value{Integer{2}}) // amount to discard
+    );
+    doDiscard(interpreter, std::move(discard));
+
+    auto storedList1 = loadVariable(interpreter, Name{"myList"});
+    EXPECT_EQ(storedList1.asList(), expectedListAfterDiscard);
+}
+
+TEST(GameInterpreterTest, DiscardTargetNotAList)
+{
+    GameInterpreter interpreter;
+
+    auto stringAssignment = ast::makeAssignment(
+        ast::makeVariable(Name{"notAList"}),
+        ast::makeConstant(Value{String{"a"}})
+    );
+    doAssignment(interpreter, std::move(stringAssignment));
+
+    auto discard = ast::makeDiscard(
+        ast::makeVariable(Name{"notAList"}), // not a list!
+        ast::makeConstant(Value{Integer{2}})
+    );
+
+    EXPECT_THROW({
+        doDiscard(interpreter, std::move(discard));
+    }, std::runtime_error);
+}
+
+TEST(GameInterpreterTest, DiscardAmountNotAnInteger)
+{
+    GameInterpreter interpreter;
+    List<Value> myList{Value{String{"a"}}, Value{String{"b"}}};
+
+    auto listAssignment = ast::makeAssignment(
+        ast::makeVariable(Name{"myList"}),
+        ast::makeConstant(Value{myList})
+    );
+    doAssignment(interpreter, std::move(listAssignment));
+
+    auto discard = ast::makeDiscard(
+        ast::makeVariable(Name{"myList"}),
+        ast::makeConstant(Value{String{"2"}}) // not an integer!
+    );
+
+    EXPECT_THROW({
+        doDiscard(interpreter, std::move(discard));
+    }, std::runtime_error);
+}
+
+TEST(GameInterpreterTest, SortList)
+{
+    GameInterpreter interpreter;
+    List<Value> myList{Value{String{"c"}}, Value{String{"a"}}, Value{String{"b"}}};
+    List<Value> expected{Value{String{"a"}}, Value{String{"b"}}, Value{String{"c"}}};
+
+    auto listAssignment = ast::makeAssignment(
+        ast::makeVariable(Name{"myList"}),
+        ast::makeConstant(Value{myList})
+    );
+    doAssignment(interpreter, std::move(listAssignment));
+
+    auto sort = ast::makeSort(ast::makeVariable(Name{"myList"}));
+    doSort(interpreter, std::move(sort));
+
+    auto storedList = loadVariable(interpreter, Name{"myList"});
+    EXPECT_EQ(storedList.asList(), expected);
+}
+
+TEST(GameInterpreterTest, SortListWithKey)
+{
+    GameInterpreter interpreter;
+    Map<String, Value> map1;
+    Map<String, Value> map2;
+    Map<String, Value> map3;
+    map1.setAttribute(String{"damage"}, Value{Integer{90}});
+    map2.setAttribute(String{"damage"}, Value{Integer{10}});
+    map3.setAttribute(String{"damage"}, Value{Integer{30}});
+
+    List<Value> myList{Value{map1}, Value{map2}, Value{map3}};
+    List<Value> expected{Value{map2}, Value{map3}, Value{map1}};
+
+    auto listAssignment = ast::makeAssignment(
+        ast::makeVariable(Name{"myList"}),
+        ast::makeConstant(Value{myList})
+    );
+    doAssignment(interpreter, std::move(listAssignment));
+
+    auto sort = ast::makeSort(
+        ast::makeVariable(Name{"myList"}), String{"damage"}
+    );
+    doSort(interpreter, std::move(sort));
+
+    auto storedList = loadVariable(interpreter, Name{"myList"});
+    EXPECT_EQ(storedList.asList(), expected);
+}
+
+TEST(GameInterpreterTest, SortTargetNotAList)
+{
+    GameInterpreter interpreter;
+
+    auto stringAssignment = ast::makeAssignment(
+        ast::makeVariable(Name{"notAList"}),
+        ast::makeConstant(Value{String{"a"}})
+    );
+    doAssignment(interpreter, std::move(stringAssignment));
+
+    auto sort = ast::makeSort(
+        ast::makeVariable(Name{"notAList"}) // not a list!
+    );
+
+    EXPECT_THROW({
+        doSort(interpreter, std::move(sort));
     }, std::runtime_error);
 }
 

@@ -18,6 +18,7 @@ add_executable(unit_tests
   WebSocketNetworkingTest.cpp
   GameServerTest.cpp
   GameInterpreterTest.cpp
+  TypesTest.cpp
   RulesTest.cpp
   GameSpecLoaderTest.cpp
 )

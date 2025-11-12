@@ -158,6 +158,38 @@ namespace ast
             std::unique_ptr<Expression> target;
     };
 
+    class Discard : public ASTNode
+    {
+        public:
+            Discard(std::unique_ptr<Expression> target, std::unique_ptr<Expression> amount)
+            : target(std::move(target))
+            , amount(std::move(amount)) {}
+
+            VisitResult accept(ASTVisitor &visitor) override;
+            Expression* getTarget() const noexcept { return target.get(); };
+            Expression* getAmount() const noexcept { return amount.get(); };
+
+        private:
+            std::unique_ptr<Expression> target;
+            std::unique_ptr<Expression> amount;
+    };
+
+    class Sort : public ASTNode
+    {
+        public:
+            Sort(std::unique_ptr<Expression> target, std::optional<String> key = {})
+            : target(std::move(target))
+            , key(key) {}
+
+            VisitResult accept(ASTVisitor &visitor) override;
+            Expression* getTarget() const noexcept { return target.get(); };
+            std::optional<String> getKey() const noexcept { return key; }
+
+        private:
+            std::unique_ptr<Expression> target;
+            std::optional<String> key;
+    };
+
     class InputTextStatement : public ASTNode
     {
         public:
@@ -190,6 +222,8 @@ namespace ast
             virtual VisitResult visit(const Extend& extend) = 0;
             virtual VisitResult visit(const Reverse& reverse) = 0;
             virtual VisitResult visit(const Shuffle& shuffle) = 0;
+            virtual VisitResult visit(const Discard& discard) = 0;
+            virtual VisitResult visit(const Sort& sort) = 0;
             virtual VisitResult visit(const InputTextStatement& inputTextStatement) = 0;
     };
 
@@ -215,6 +249,14 @@ namespace ast
 
     std::unique_ptr<ast::Shuffle>
     makeShuffle(std::unique_ptr<ast::Expression> target);
+
+    std::unique_ptr<ast::Discard>
+    makeDiscard(std::unique_ptr<ast::Expression> target,
+                std::unique_ptr<ast::Expression> amount);
+
+    std::unique_ptr<ast::Sort>
+    makeSort(std::unique_ptr<ast::Expression> target,
+             std::optional<String> key = {});
 
     std::unique_ptr<ast::InputTextStatement>
     makeInputTextStmt(std::unique_ptr<ast::Variable> playerVar,

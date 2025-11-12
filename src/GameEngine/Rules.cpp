@@ -35,6 +35,16 @@ VisitResult ast::Shuffle::accept(ast::ASTVisitor& visitor)
     return visitor.visit(*this);
 };
 
+VisitResult ast::Discard::accept(ast::ASTVisitor& visitor)
+{
+    return visitor.visit(*this);
+};
+
+VisitResult ast::Sort::accept(ast::ASTVisitor& visitor)
+{
+    return visitor.visit(*this);
+};
+
 VisitResult ast::InputTextStatement::accept(ast::ASTVisitor& visitor)
 {
     return visitor.visit(*this);
@@ -82,6 +92,19 @@ std::unique_ptr<ast::Shuffle>
 ast::makeShuffle(std::unique_ptr<ast::Expression> target)
 {
     return std::make_unique<ast::Shuffle>(std::move(target));
+}
+
+std::unique_ptr<ast::Discard>
+ast::makeDiscard(std::unique_ptr<ast::Expression> target,
+                 std::unique_ptr<ast::Expression> amount)
+{
+    return std::make_unique<ast::Discard>(std::move(target), std::move(amount));
+}
+
+std::unique_ptr<ast::Sort>
+ast::makeSort(std::unique_ptr<ast::Expression> target, std::optional<String> key)
+{
+    return std::make_unique<ast::Sort>(std::move(target), key);
 }
 
 std::unique_ptr<ast::InputTextStatement>

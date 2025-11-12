@@ -327,6 +327,86 @@ namespace ast
             String prompt;
     };
 
+    class InputChoiceStatement : public ASTNode
+    {
+        public:
+            InputChoiceStatement(std::unique_ptr<Variable> player,
+                               std::unique_ptr<Expression> target,
+                               String prompt,
+                               std::unique_ptr<Expression> choices)
+            : player(std::move(player))
+            , target(std::move(target))
+            , prompt(prompt)
+            , choices(std::move(choices)) {}
+
+            VisitResult accept(ASTVisitor& visitor) override;
+            Variable* getPlayer() const noexcept { return player.get(); }
+            Expression* getTarget() const noexcept { return target.get(); }
+            String getPrompt() const noexcept { return prompt; }
+            Expression* getChoices() const noexcept { return choices.get(); }
+
+        private:
+            std::unique_ptr<Variable> player;
+            std::unique_ptr<Expression> target;
+            String prompt;
+            std::unique_ptr<Expression> choices;
+    };
+
+    class InputRangeStatement : public ASTNode
+    {
+        public:
+            InputRangeStatement(std::unique_ptr<Variable> player,
+                               std::unique_ptr<Expression> target,
+                               String prompt,
+                               std::unique_ptr<Expression> minValue,
+                               std::unique_ptr<Expression> maxValue)
+            : player(std::move(player))
+            , target(std::move(target))
+            , prompt(prompt)
+            , minValue(std::move(minValue))
+            , maxValue(std::move(maxValue)) {}
+
+            VisitResult accept(ASTVisitor& visitor) override;
+            Variable* getPlayer() const noexcept { return player.get(); }
+            Expression* getTarget() const noexcept { return target.get(); }
+            String getPrompt() const noexcept { return prompt; }
+            Expression* getMinValue() const noexcept { return minValue.get(); }
+            Expression* getMaxValue() const noexcept { return maxValue.get(); }
+
+        private:
+            std::unique_ptr<Variable> player;
+            std::unique_ptr<Expression> target;
+            String prompt;
+            std::unique_ptr<Expression> minValue;
+            std::unique_ptr<Expression> maxValue;
+    };
+
+    class InputVoteStatement : public ASTNode
+    {
+        public:
+            InputVoteStatement(std::unique_ptr<Variable> player,
+                               std::unique_ptr<Expression> target,
+                               String prompt,
+                               std::unique_ptr<Expression> choices)
+            : player(std::move(player))
+            , target(std::move(target))
+            , prompt(prompt)
+            , choices(std::move(choices)) {}
+
+            VisitResult accept(ASTVisitor& visitor) override;
+            Variable* getPlayer() const noexcept { return player.get(); }
+            Expression* getTarget() const noexcept { return target.get(); }
+            String getPrompt() const noexcept { return prompt; }
+            Expression* getChoices() const noexcept { return choices.get(); }
+
+        private:
+            std::unique_ptr<Variable> player;
+            std::unique_ptr<Expression> target;
+            String prompt;
+            std::unique_ptr<Expression> choices;
+    };
+
+
     class ASTVisitor
     {
         public:
@@ -345,6 +425,9 @@ namespace ast
             virtual VisitResult visit(const Sort& sort) = 0;
             virtual VisitResult visit(const Match& match) = 0;
             virtual VisitResult visit(const InputTextStatement& inputTextStatement) = 0;
+            virtual VisitResult visit(const InputChoiceStatement& inputChoiceStatement) = 0;
+            virtual VisitResult visit(const InputRangeStatement& inputRangeStatement) = 0;
+            virtual VisitResult visit(const InputVoteStatement& inputVoteStatement) = 0;
     };
 
     std::unique_ptr<ast::Variable>
@@ -400,6 +483,25 @@ namespace ast
     makeInputTextStmt(std::unique_ptr<ast::Variable> playerVar,
                       std::unique_ptr<ast::Expression> targetExpr,
                       String prompt);
+    
+    std::unique_ptr<ast::InputChoiceStatement>
+    makeInputChoiceStmt(std::unique_ptr<ast::Variable> playerVar,
+                      std::unique_ptr<ast::Expression> targetExpr,
+                      String prompt,
+                      std::unique_ptr<ast::Expression> choices);
+                      
+    std::unique_ptr<ast::InputRangeStatement>
+    makeInputRangeStmt(std::unique_ptr<ast::Variable> playerVar,
+                      std::unique_ptr<ast::Expression> targetExpr,
+                      String prompt,
+                      std::unique_ptr<ast::Expression> minValue,
+                      std::unique_ptr<ast::Expression> maxValue);
+    
+    std::unique_ptr<ast::InputVoteStatement>
+    makeInputVoteStmt(std::unique_ptr<ast::Variable> playerVar,
+                      std::unique_ptr<ast::Expression> targetExpr,
+                      String prompt, 
+                      std::unique_ptr<ast::Expression> choices);
 
     std::unique_ptr<ast::Constant>
     cloneConstant(ast::Constant* constant);

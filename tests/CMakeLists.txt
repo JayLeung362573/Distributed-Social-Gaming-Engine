@@ -38,12 +38,14 @@ add_executable(unit_tests
   LobbyRegistryTest.cpp
   InputManagerTest.cpp
   GameSessionTest.cpp
+  GameInterpreterSmokeTest.cpp
 )
 
 # Link with gtest (the Quickstart uses GTest::gtest_main)
 target_link_libraries(unit_tests PRIVATE GTest::gtest_main core_lib parser)
 
 target_compile_features(unit_tests PRIVATE cxx_std_23)
+
 
 target_include_directories(unit_tests PRIVATE
         ${PROJECT_SOURCE_DIR}/src

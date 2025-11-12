@@ -20,6 +20,9 @@ target_link_libraries(ts_socialgaming PUBLIC treesitter)
 # Our C++ loader for the grammar
 add_library(parser STATIC
     GameSpecLoader.cpp
+    ParserUtil.cpp
+    ASTConverter.cpp
+
 )
 
 # Add the project root as an include dir so we can #include "parser/GameSpecLoader.h"

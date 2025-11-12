@@ -4,13 +4,15 @@
 
 #include "Types.h"
 #include "VariableMap.h"
+#include "InputManager.h"
 #include "GameMessage.h"
 #include "Rules.h"
 
 class GameInterpreter : public ast::ASTVisitor
 {
     public:
-        GameInterpreter() = default;
+        GameInterpreter(InputManager& inputManager) 
+            : m_inputManager(inputManager) {}
 
         VisitResult visit(const ast::ASTNode& node) override;
 
@@ -172,13 +174,25 @@ class GameInterpreter : public ast::ASTVisitor
          * @post The player's input is assigned to the target variable or attribute.
          */
         VisitResult visit(const ast::InputTextStatement& inputTextStatement) override;
+        /**
+         * @brief Prompts and stores player choice input.
+         */
+        VisitResult visit(const ast::InputChoiceStatement& inputChoiceStatement) override;
+        /**
+         * @brief Prompts and stores player range input.
+         */
+        VisitResult visit(const ast::InputRangeStatement& inputRangeStatement) override;
+        /**
+         * @brief Prompts and stores player vote input.
+         */
+        VisitResult visit(const ast::InputVoteStatement& inputVoteStatement) override;
 
-        void setInGameMessages(const std::vector<GameMessage>& inGameMessages);
-        std::vector<GameMessage> consumeOutGameMessages();
+        //void setInGameMessages(const std::vector<GameMessage>& inGameMessages);
+        //std::vector<GameMessage> consumeOutGameMessages();
 
     private:
-        std::optional<TextInputMessage>
-        getTextInputMsg(String playerID, String prompt) const;
+        //std::optional<TextInputMessage>
+        //getTextInputMsg(String playerID, String prompt) const;
 
         Value
         getPlayerAttribute(const ast::Variable& playerVar, String attr);
@@ -206,7 +220,8 @@ class GameInterpreter : public ast::ASTVisitor
 
     private:
         VariableMap m_variableMap;
+        InputManager& m_inputManager;
 
-        std::vector<GameMessage> m_inGameMessages;
-        std::vector<GameMessage> m_outGameMessages;
+        //std::vector<GameMessage> m_inGameMessages;
+        //std::vector<GameMessage> m_outGameMessages;
 };

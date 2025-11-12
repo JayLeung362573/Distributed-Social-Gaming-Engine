@@ -280,19 +280,146 @@ GameInterpreter::visit(const ast::InputTextStatement& inputTextStatement)
     String prompt = inputTextStatement.getPrompt();
     String playerID = getPlayerAttribute(*playerVar, String{"id"}).asString();
 
-    auto maybeInput = getTextInputMsg(playerID, prompt);
+    auto maybeInput = m_inputManager.getTextInput(playerID, prompt);
     if (!maybeInput)
     {
-        m_outGameMessages.push_back(
-            GameMessage{GetTextInputMessage{playerID, prompt}}
-        );
         return VisitResult{VisitResult::Status::Pending, {}};
     }
 
-    Value input{String{maybeInput->input}};
+    Value input{*maybeInput};
     auto assignment = ast::makeAssignment(
         ast::cloneExpression(targetExpr),
         ast::makeConstant(input)
+    );
+    assignment->accept(*this);
+
+    return VisitResult{VisitResult::Status::Done, {}};
+}
+
+VisitResult
+GameInterpreter::visit(const ast::InputChoiceStatement& inputChoiceStatement)
+{
+    auto playerVar = inputChoiceStatement.getPlayer();
+    auto targetExpr = inputChoiceStatement.getTarget();
+    String prompt = inputChoiceStatement.getPrompt();
+    auto choicesExpr = inputChoiceStatement.getChoices();
+    String playerID = getPlayerAttribute(*playerVar, String{"id"}).asString();
+
+    VisitResult choicesResult = evaluateExpression(*choicesExpr);
+    Value& choicesValue = choicesResult.getValue();
+
+    if (!choicesValue.isList())
+    {
+        throw std::runtime_error("Choices must evaluate to a list");
+    }
+
+    List<Value> choices = choicesValue.asList();
+
+    auto maybeChoice = m_inputManager.getChoiceInput(playerID, prompt, choices);
+    if (!maybeChoice)
+    {
+        return VisitResult{VisitResult::Status::Pending, {}};
+    }
+
+    Value choiceValue{*maybeChoice};
+    auto assignment = ast::makeAssignment(
+        ast::cloneExpression(targetExpr),
+        ast::makeConstant(choiceValue)
+    );
+    assignment->accept(*this);
+
+    return VisitResult{VisitResult::Status::Done, {}};
+}
+
+VisitResult
+GameInterpreter::visit(const ast::InputRangeStatement& inputRangeStatement)
+{
+    auto playerVar = inputRangeStatement.getPlayer();
+    auto targetExpr = inputRangeStatement.getTarget();
+    String prompt = inputRangeStatement.getPrompt();
+    auto minExpr = inputRangeStatement.getMinValue();
+    auto maxExpr = inputRangeStatement.getMaxValue();
+    
+    String playerID = getPlayerAttribute(*playerVar, String{"id"}).asString();
+    
+    // Evaluate min & max expressions
+    // assume values are constants and handle them as Strings
+    VisitResult minResult = evaluateExpression(*minExpr);
+    VisitResult maxResult = evaluateExpression(*maxExpr);
+    
+    // temporarily convert from String
+    int minValue = 0;
+    int maxValue = 10;
+    
+    // attempt conversion if minExpr is a constant and its value is a string
+    if (auto constMin = ast::castExpressionToConstant(minExpr))
+    {
+        Value minVal = constMin->getValue();
+        if (minVal.isString())
+        {
+            minValue = std::stoi(minVal.asString().value);
+        }
+    }
+    
+    if (auto constMax = ast::castExpressionToConstant(maxExpr))
+    {
+        Value maxVal = constMax->getValue();
+        if (maxVal.isString())
+        {
+            maxValue = std::stoi(maxVal.asString().value);
+        }
+    }
+    
+    auto maybeValue = m_inputManager.getRangeInput(playerID, prompt, minValue, maxValue);
+    
+    if (!maybeValue)
+    {
+        return VisitResult{VisitResult::Status::Pending, {}};
+    }
+
+    // numbers are stored as Strings for now
+    Value rangeValue{String{std::to_string(*maybeValue)}};
+    auto assignment = ast::makeAssignment(
+        ast::cloneExpression(targetExpr),
+        ast::makeConstant(rangeValue)
+    );
+    assignment->accept(*this);
+
+    return VisitResult{VisitResult::Status::Done, {}};
+}
+
+
+VisitResult
+GameInterpreter::visit(const ast::InputVoteStatement& inputVoteStatement)
+{
+    auto playerVar = inputVoteStatement.getPlayer();
+    auto targetExpr = inputVoteStatement.getTarget();
+    String prompt = inputVoteStatement.getPrompt();
+    auto choicesExpr = inputVoteStatement.getChoices();
+    
+    String playerID = getPlayerAttribute(*playerVar, String{"id"}).asString();
+    
+    VisitResult choicesResult = evaluateExpression(*choicesExpr);
+    Value& choicesValue = choicesResult.getValue();
+    
+    if (!choicesValue.isList())
+    {
+        throw std::runtime_error("Vote choices must evaluate to a list");
+    }
+    
+    List<Value> choices = choicesValue.asList();
+    
+    auto maybeVote = m_inputManager.getVoteInput(playerID, prompt, choices);
+    
+    if (!maybeVote)
+    {
+        return VisitResult{VisitResult::Status::Pending, {}};
+    }
+
+    Value voteValue{*maybeVote};
+    auto assignment = ast::makeAssignment(
+        ast::cloneExpression(targetExpr),
+        ast::makeConstant(voteValue)
     );
     assignment->accept(*this);
 
@@ -308,38 +435,38 @@ GameInterpreter::getPlayerAttribute(const ast::Variable& playerVar, String attr)
     if (!result.hasValue())
     {
         throw std::runtime_error(
-            std::format("Failed to get player attribute: {}", attr.value)
+            "Failed to get player attribute: " + attr.value
         );
     }
     return result.getValue();
 }
 
-std::optional<TextInputMessage>
-GameInterpreter::getTextInputMsg(String playerID, String prompt) const
-{
-    for (const auto& msg : m_inGameMessages)
-    {
-        if (const auto* inputMsg = std::get_if<TextInputMessage>(&msg.inner))
-        {
-            if (inputMsg->playerID == playerID && inputMsg->prompt == prompt)
-            {
-                return *inputMsg;
-            }
-        }
-    }
-    return std::nullopt;
-}
+// std::optional<TextInputMessage>
+// GameInterpreter::getTextInputMsg(String playerID, String prompt) const
+// {
+//     for (const auto& msg : m_inGameMessages)
+//     {
+//         if (const auto* inputMsg = std::get_if<TextInputMessage>(&msg.inner))
+//         {
+//             if (inputMsg->playerID == playerID && inputMsg->prompt == prompt)
+//             {
+//                 return *inputMsg;
+//             }
+//         }
+//     }
+//     return std::nullopt;
+// }
 
-void
-GameInterpreter::setInGameMessages(const std::vector<GameMessage>& inGameMessages)
-{
-    m_inGameMessages = inGameMessages;
-}
+// void
+// GameInterpreter::setInGameMessages(const std::vector<GameMessage>& inGameMessages)
+// {
+//     m_inGameMessages = inGameMessages;
+// }
 
-std::vector<GameMessage>
-GameInterpreter::consumeOutGameMessages()
-{
-    auto out = std::move(m_outGameMessages);
-    m_outGameMessages.clear();
-    return out;
-}
+// std::vector<GameMessage>
+// GameInterpreter::consumeOutGameMessages()
+// {
+//     auto out = std::move(m_outGameMessages);
+//     m_outGameMessages.clear();
+//     return out;
+// }

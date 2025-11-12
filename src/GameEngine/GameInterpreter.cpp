@@ -48,6 +48,54 @@ GameInterpreter::visit(const ast::Attribute& attribute)
 }
 
 VisitResult
+GameInterpreter::visit(const ast::Comparison& comparison)
+{
+    Value left = evaluateExpression(*comparison.getLeft()).getValue();
+    Value right = evaluateExpression(*comparison.getRight()).getValue();
+
+    Boolean boolResult;
+
+    switch (comparison.getKind())
+    {
+        case ast::Comparison::Kind::EQ: boolResult = isEqual(left, right); break;
+        case ast::Comparison::Kind::LT: boolResult = isLessThan(left, right); break;
+    }
+
+    return VisitResult{VisitResult::Status::Done, Value{boolResult}};
+}
+
+VisitResult
+GameInterpreter::visit(const ast::LogicalOperation& logicalOp)
+{
+    Value left = evaluateExpression(*logicalOp.getLeft()).getValue();
+    Value right = evaluateExpression(*logicalOp.getRight()).getValue();
+
+    Boolean boolResult;
+
+    switch (logicalOp.getKind())
+    {
+        case ast::LogicalOperation::Kind::OR: boolResult = Boolean{doLogicalOr(left, right)}; break;
+    }
+
+    return VisitResult{VisitResult::Status::Done, Value{boolResult}};
+}
+
+VisitResult
+GameInterpreter::visit(const ast::UnaryOperation& unaryOp)
+{
+    Value target = evaluateExpression(*unaryOp.getTarget()).getValue();
+
+    Boolean boolResult;
+
+    switch (unaryOp.getKind())
+    {
+        case ast::UnaryOperation::Kind::NOT: boolResult = Boolean{doUnaryNot(target)}; break;
+    }
+
+    return VisitResult{VisitResult::Status::Done, Value{boolResult}};
+}
+
+VisitResult
 GameInterpreter::visit(const ast::Assignment& assignment)
 {
     Value valueToAssign = assignment.getValue()->accept(*this).getValue();
@@ -176,6 +224,24 @@ GameInterpreter::resolveExpression(ast::Expression& expr)
     }
 
     return result;
+}
+
+Boolean
+GameInterpreter::isEqual(const Value& a, const Value& b)
+{
+    bool isEqual = (a == b);
+    return Boolean{isEqual};
+}
+
+Boolean
+GameInterpreter::isLessThan(const Value& left, const Value& right)
+{
+    auto maybeIsLessThan = maybeCompareValues(left, right);
+    if (maybeIsLessThan.has_value())
+    {
+        return Boolean{*maybeIsLessThan};
+    }
+    throw std::runtime_error("Values are not less-than comparable");
 }
 
 VisitResult

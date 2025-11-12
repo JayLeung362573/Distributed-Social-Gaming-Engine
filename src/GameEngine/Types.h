@@ -60,6 +60,23 @@ struct Integer
     }
 };
 
+/// Represents an boolean value.
+struct Boolean
+{
+    bool value;
+
+    bool operator==(const Boolean& other) const noexcept
+    {
+        return value == other.value;
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const Boolean& boolean)
+    {
+        os << boolean.value;
+        return os;
+    }
+};
+
 /// Hash specializations for Name and String so they can be used as keys in unordered_map.
 namespace std
 {
@@ -208,7 +225,7 @@ struct Map
 /// through the asString(), asMap(), asList() methods respectively.
 struct Value
 {
-    std::variant<List<Value>, Map<String, Value>, String, Integer> value;
+    std::variant<List<Value>, Map<String, Value>, String, Integer, Boolean> value;
 
     bool isString() const
     {
@@ -218,6 +235,11 @@ struct Value
     bool isInteger() const
     {
         return std::holds_alternative<Integer>(value);
+    }
+
+    bool isBoolean() const
+    {
+        return std::holds_alternative<Boolean>(value);
     }
 
     bool isList() const
@@ -250,6 +272,17 @@ struct Value
     Integer& asInteger()
     {
         return const_cast<Integer&>(std::as_const(*this).asInteger());
+    }
+
+    const Boolean& asBoolean() const
+    {
+        if (!isBoolean()) { throw std::runtime_error("Value is not a Boolean"); }
+        return std::get<Boolean>(value);
+    }
+
+    Boolean& asBoolean()
+    {
+        return const_cast<Boolean&>(std::as_const(*this).asBoolean());
     }
 
     const List<Value>& asList() const
@@ -309,6 +342,7 @@ struct Value
     {
         if (v.isString()) { os << v.asString(); }
         else if (v.isInteger()) { os << v.asInteger(); }
+        else if (v.isBoolean()) { os << v.asBoolean(); }
         else if (v.isList()) { os << v.asList(); }
         else if (v.isMap()) { os << v.asMap(); }
         return os;
@@ -318,6 +352,7 @@ struct Value
     {
         if (isString() && other.isString()) { return asString() == other.asString(); }
         else if (isInteger() && other.isInteger()) { return asInteger() == other.asInteger(); }
+        else if (isBoolean() && other.isBoolean()) { return asBoolean() == other.asBoolean(); }
         else if (isList() && other.isList())  { return asList() == other.asList(); }
         else if (isMap() && other.isMap()) { return asMap() == other.asMap(); }
         return false;
@@ -334,7 +369,27 @@ inline std::optional<bool> maybeCompareValues(const Value& lhs, const Value& rhs
     {
         return lhs.asInteger().value < rhs.asInteger().value;
     }
+    if (lhs.isBoolean() && rhs.isBoolean())
+    {
+        return lhs.asBoolean().value < rhs.asBoolean().value;
+    }
     return std::nullopt;
+}
+
+inline bool doLogicalOr(const Value& a, const Value& b)
+{
+    // For now, only booleans
+    // TODO: Support truthy for more flexibility? Could look like:
+    // return isTruthy(a) || isTruthy(b)
+    return a.asBoolean().value || b.asBoolean().value;
+}
+
+inline bool doUnaryNot(const Value& a)
+{
+    // For now, only booleans
+    // TODO: Support truthy for more flexibility? Could look like:
+    // return !isTruthy(a);
+    return !(a.asBoolean().value);
 }
 
 inline List<Value> sortList(const List<Value>& list, std::optional<String> key = {})

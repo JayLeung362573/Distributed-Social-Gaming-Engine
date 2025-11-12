@@ -38,20 +38,48 @@ class GameInterpreter : public ast::ASTVisitor
          * @param attribute The Attribute node to visit.
          * @return VisitResult Containing the value of the attribute as a reference.
          *
-         * @pre Any base attributes and variables exist in the Variable Map.
+         * @pre Base expression resolves to a value that has the attribute.
          */
         VisitResult visit(const ast::Attribute& attribute) override;
 
         /**
-         * @brief Assigns an expression to a variable or attribute.
+         * @brief Compares two values and returns a Boolean.
+         *
+         * @param comparison The Comparison node to visit.
+         * @return VisitResult Containing a Boolean
+         *
+         * @pre Values are comparable.
+         */
+        VisitResult visit(const ast::Comparison& comparison) override;
+
+        /**
+         * @brief Does a logical operation (e.g., OR) on two values.
+         *
+         * @param logicalOp The LogicalOperation node to visit.
+         * @return VisitResult Containing a Boolean
+         *
+         * @pre Left/right expressions evaluate to a Boolean.
+         */
+        VisitResult visit(const ast::LogicalOperation& logicalOp) override;
+
+        /**
+         * @brief Does a unary operation (e.g., NOT) on a value.
+         *
+         * @param unaryOp The UnaryOperation node to visit.
+         * @return VisitResult Containing a Boolean
+         *
+         * @pre Target expression evaluates to a Boolean.
+         */
+        VisitResult visit(const ast::UnaryOperation& unaryOp) override;
+
+        /**
+         * @brief Assigns an evaluated expression to a target.
          *
          * @param assignment The Assignment node to visit.
          * @return VisitResult
          *
-         * @pre Any attributes and variables referenced in the expression exist in the
-         *      Variable Map.
-         * @post A copy of the value produced by expression evaluation is assigned to
-         *       the target variable or attribute.
+         * @pre `target` resolves to a reference.
+         * @post A copy of the evaluated expression is assigned to the target.
          */
         VisitResult visit(const ast::Assignment& assignment) override;
 
@@ -61,7 +89,6 @@ class GameInterpreter : public ast::ASTVisitor
          * @param extend The Extend node to visit.
          * @return VisitResult
          *
-         * @pre `target` exists in the Variable Map.
          * @pre `target` resolves to a List.
          * @pre `value` evaluates to a List type.
          * @post The elements of the `value` list are appended to the `target` list.
@@ -74,7 +101,6 @@ class GameInterpreter : public ast::ASTVisitor
          * @param reverse The Reverse node to visit.
          * @return VisitResult
          *
-         * @pre `target` exists in the Variable Map.
          * @pre `target` resolves to a List.
          * @post The elements of the `target` list are reversed.
          */
@@ -86,7 +112,6 @@ class GameInterpreter : public ast::ASTVisitor
          * @param shuffle The Shuffle node to visit.
          * @return VisitResult
          *
-         * @pre `target` exists in the Variable Map.
          * @pre `target` resolves to a List.
          * @post The elements of the `target` list are randomly shuffled.
          */
@@ -98,7 +123,6 @@ class GameInterpreter : public ast::ASTVisitor
          * @param discard The Discard node to visit.
          * @return VisitResult
          *
-         * @pre `target` exists in the Variable Map.
          * @pre `target` resolves to a List.
          * @pre `amount` resolves to an Integer.
          * @post At most `amount` items from the `target` list items are removed.
@@ -111,7 +135,6 @@ class GameInterpreter : public ast::ASTVisitor
          * @param sort The Sort node to visit.
          * @return VisitResult
          *
-         * @pre `target` exists in the Variable Map.
          * @pre `target` resolves to a List.
          * @pre The Values of the List are comparable.
          * @pre If a key is provided, the Values of the List are Maps,
@@ -161,6 +184,12 @@ class GameInterpreter : public ast::ASTVisitor
 
         VisitResult
         resolveExpression(ast::Expression& expr);
+
+        Boolean
+        isEqual(const Value& a, const Value& b);
+
+        Boolean
+        isLessThan(const Value& left, const Value& right);
 
     private:
         VariableMap m_variableMap;

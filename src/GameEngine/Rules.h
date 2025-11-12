@@ -102,6 +102,72 @@ namespace ast
             String attr;
     };
 
+    class Comparison : public Expression
+    {
+        public:
+            enum class Kind { LT, EQ };
+
+            Comparison(std::unique_ptr<Expression> left,
+                       std::unique_ptr<Expression> right,
+                       Kind kind)
+            : left(std::move(left))
+            , right(std::move(right))
+            , kind(kind) {}
+
+            VisitResult accept(ASTVisitor &visitor) override;
+            Expression* getLeft() const noexcept { return left.get(); };
+            Expression* getRight() const noexcept { return right.get(); };
+            Kind getKind() const noexcept { return kind; };
+
+        private:
+            std::unique_ptr<Expression> left;
+            std::unique_ptr<Expression> right;
+
+            Kind kind;
+    };
+
+    class LogicalOperation : public Expression
+    {
+        public:
+            enum class Kind { OR };
+
+            LogicalOperation(std::unique_ptr<Expression> left,
+                             std::unique_ptr<Expression> right,
+                             Kind kind)
+            : left(std::move(left))
+            , right(std::move(right))
+            , kind(kind) {}
+
+            VisitResult accept(ASTVisitor &visitor) override;
+            Expression* getLeft() const noexcept { return left.get(); };
+            Expression* getRight() const noexcept { return right.get(); };
+            Kind getKind() const noexcept { return kind; };
+
+        private:
+            std::unique_ptr<Expression> left;
+            std::unique_ptr<Expression> right;
+
+            Kind kind;
+    };
+
+    class UnaryOperation : public Expression
+    {
+        public:
+            enum class Kind { NOT };
+
+            UnaryOperation(std::unique_ptr<Expression> target, Kind kind)
+            : target(std::move(target))
+            , kind(kind) {}
+
+            VisitResult accept(ASTVisitor &visitor) override;
+            Expression* getTarget() const noexcept { return target.get(); };
+            Kind getKind() const noexcept { return kind; };
+
+        private:
+            std::unique_ptr<Expression> target;
+            Kind kind;
+    };
+
     class Assignment : public ASTNode
     {
         public:
@@ -218,6 +284,9 @@ namespace ast
             virtual VisitResult visit(const Constant& constant) = 0;
             virtual VisitResult visit(const Variable& variable) = 0;
             virtual VisitResult visit(const Attribute& attribute) = 0;
+            virtual VisitResult visit(const Comparison& comparison) = 0;
+            virtual VisitResult visit(const LogicalOperation& logicalOp) = 0;
+            virtual VisitResult visit(const UnaryOperation& unaryOp) = 0;
             virtual VisitResult visit(const Assignment& assignment) = 0;
             virtual VisitResult visit(const Extend& extend) = 0;
             virtual VisitResult visit(const Reverse& reverse) = 0;
@@ -235,6 +304,20 @@ namespace ast
 
     std::unique_ptr<ast::Constant>
     makeConstant(Value value);
+
+    std::unique_ptr<ast::Comparison>
+    makeComparison(std::unique_ptr<ast::Expression> left,
+                   std::unique_ptr<ast::Expression> right,
+                   ast::Comparison::Kind kind);
+
+    std::unique_ptr<ast::LogicalOperation>
+    makeLogicalOperation(std::unique_ptr<ast::Expression> left,
+                         std::unique_ptr<ast::Expression> right,
+                         ast::LogicalOperation::Kind kind);
+
+    std::unique_ptr<ast::UnaryOperation>
+    makeUnaryOperation(std::unique_ptr<ast::Expression> target,
+                       ast::UnaryOperation::Kind kind);
 
     std::unique_ptr<ast::Assignment>
     makeAssignment(std::unique_ptr<ast::Expression> targetExpr,

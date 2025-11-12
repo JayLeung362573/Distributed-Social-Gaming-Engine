@@ -15,6 +15,21 @@ VisitResult ast::Attribute::accept(ast::ASTVisitor& visitor)
     return visitor.visit(*this);
 };
 
+VisitResult ast::Comparison::accept(ast::ASTVisitor& visitor)
+{
+    return visitor.visit(*this);
+};
+
+VisitResult ast::LogicalOperation::accept(ast::ASTVisitor& visitor)
+{
+    return visitor.visit(*this);
+};
+
+VisitResult ast::UnaryOperation::accept(ASTVisitor &visitor)
+{
+    return visitor.visit(*this);
+};
+
 VisitResult ast::Assignment::accept(ast::ASTVisitor& visitor)
 {
     return visitor.visit(*this);
@@ -64,6 +79,33 @@ ast::makeAttribute(std::unique_ptr<ast::Expression> expr, String attr)
 std::unique_ptr<ast::Constant>
 ast::makeConstant(Value value) {
     return std::make_unique<ast::Constant>(value);
+}
+
+std::unique_ptr<ast::Comparison>
+ast::makeComparison(std::unique_ptr<ast::Expression> left,
+                    std::unique_ptr<ast::Expression> right,
+                    ast::Comparison::Kind kind)
+{
+    return std::make_unique<ast::Comparison>(
+        std::move(left), std::move(right), kind
+    );
+}
+
+std::unique_ptr<ast::LogicalOperation>
+ast::makeLogicalOperation(std::unique_ptr<ast::Expression> left,
+                          std::unique_ptr<ast::Expression> right,
+                          ast::LogicalOperation::Kind kind)
+{
+    return std::make_unique<ast::LogicalOperation>(
+        std::move(left), std::move(right), kind
+    );
+}
+
+std::unique_ptr<ast::UnaryOperation>
+ast::makeUnaryOperation(std::unique_ptr<ast::Expression> target,
+                        ast::UnaryOperation::Kind kind)
+{
+    return std::make_unique<ast::UnaryOperation>(std::move(target), kind);
 }
 
 std::unique_ptr<ast::Assignment>

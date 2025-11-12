@@ -188,3 +188,40 @@ TEST(TypesTest, SortListOfMapsWithKeyMissing)
 
     EXPECT_EQ(list, expected); // original list should be unchanged
 }
+
+using CompareTestParams = std::tuple<Value, Value, std::optional<bool>>;
+
+class CompareValuesTest : public ::testing::TestWithParam<CompareTestParams> {};
+
+TEST_P(CompareValuesTest, ComparesValues)
+{
+    Value left = std::get<0>(GetParam());
+    Value right = std::get<1>(GetParam());
+    auto expected = std::get<2>(GetParam());
+
+    auto actual = maybeCompareValues(left, right);
+    EXPECT_EQ(actual, expected);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    TypesTest,
+    CompareValuesTest,
+    ::testing::Values(
+        std::make_tuple(Value{String{"a"}}, Value{String{"b"}}, true),
+        std::make_tuple(Value{String{"a"}}, Value{String{"a"}}, false),
+        std::make_tuple(Value{String{"b"}}, Value{String{"a"}}, false),
+        std::make_tuple(Value{Integer{99}}, Value{Integer{100}}, true),
+        std::make_tuple(Value{Integer{100}}, Value{Integer{100}}, false),
+        std::make_tuple(Value{Integer{101}}, Value{Integer{100}}, false),
+        std::make_tuple(Value{Boolean{false}}, Value{Boolean{true}}, true),
+        std::make_tuple(Value{Boolean{true}}, Value{Boolean{false}}, false),
+        // Comparing mixed types isn't supported
+        std::make_tuple(Value{String{"1"}}, Value{Integer{1}}, std::nullopt),
+        std::make_tuple(Value{String{"1"}}, Value{Boolean{true}}, std::nullopt),
+        std::make_tuple(Value{Integer{1}}, Value{Boolean{true}}, std::nullopt),
+        // Comparing Lists isn't supported
+        std::make_tuple(Value{List<Value>{}}, Value{List<Value>{}}, std::nullopt),
+        // Comparing Maps isn't supported
+        std::make_tuple(Value{Map<String, Value>{}}, Value{Map<String, Value>{}}, std::nullopt)
+    )
+);

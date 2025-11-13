@@ -20,7 +20,6 @@ class GameSession{
 public:
     GameSession(LobbyID lobbyID,
                 ast::GameRules rules,
-                std::vector<LobbyMember> players);
 
     void start();
 

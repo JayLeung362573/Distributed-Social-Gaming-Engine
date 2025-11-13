@@ -108,13 +108,6 @@ TEST(LobbyRegistryTest, RemovePlayerFromAllLobbies) {
     ASSERT_NE(lobby1After, nullptr);
     EXPECT_FALSE(lobby1After->hasPlayer(ClientID{3}));
     EXPECT_TRUE(lobby1After->hasPlayer(ClientID{1}));
-
-
-//    Lobby* lobby2After = registry.getLobby(id2);
-//
-//    if (lobby2After) {
-//        EXPECT_FALSE(lobby2After->hasPlayer(ClientID{3}));
-//    }
 }
 
 TEST(LobbyRegistryTest, FindLobbyForClientReturnsCorrectLobby) {

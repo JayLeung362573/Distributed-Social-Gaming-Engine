@@ -7,6 +7,9 @@ LobbyRegistry::createLobby(ClientID hostID, GameType gameType, const std::string
     auto lobbyID = generateLobbyID();
 
     auto lobby = std::make_unique<Lobby>(lobbyID, gameType, hostID, lobbyName);
+
+    lobby->insertPlayer(hostID, LobbyRole::Host);
+
     m_lobbies[lobbyID] = std::move(lobby);
 
     std::cout << "[Registry] Created lobby {" << lobbyName << "} (ID: "<< lobbyID << ")\n";

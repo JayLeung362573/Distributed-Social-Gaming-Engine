@@ -64,6 +64,14 @@ LobbyRegistry::destroyLobby(const LobbyID &lobbyID) {
     if(it == m_lobbies.end()){
         return false;
     }
+
+    auto& lobby = it->second;
+    auto players = lobby->getAllPlayer();
+
+    for(const auto& player : players){
+        m_clientLobbyMap.erase(player.clientID);
+    }
+
     std::cout << "[Registry] Destroying lobby: " << lobbyID << "\n";
     m_lobbies.erase(it);
     return true;

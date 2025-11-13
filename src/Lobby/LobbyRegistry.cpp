@@ -11,6 +11,7 @@ LobbyRegistry::createLobby(ClientID hostID, GameType gameType, const std::string
 
     auto* lobbyPtr = lobby.get();
     m_lobbies[lobbyID] = std::move(lobby);
+    m_clientLobbyMap[hostID] = lobbyID;
 
     std::cout << "[Registry] Created lobby {" << lobbyName << "} (ID: "<< lobbyID << ")\n";
 
@@ -34,18 +35,24 @@ LobbyRegistry::browseLobbies(GameType gameType) const {
 }
 
 Lobby*
-LobbyRegistry::joinLobby(ClientID playerID, const LobbyID &lobbyID) {
+LobbyRegistry::joinLobby(ClientID clientID, const LobbyID &lobbyID) {
+    if(m_clientLobbyMap.count(clientID)){
+        std::cout << "[LobbyRegistry] Client " << clientID << " already in a lobby.\n";
+        leaveLobby(clientID);
+    }
+
     auto it = m_lobbies.find(lobbyID);
     if(it == m_lobbies.end()){
         std::cout << "[Registry] Lobby not found: " << lobbyID << "\n";
         return nullptr;
     }
 
-    leaveLobby(playerID); /// prevent player in multiple lobbies
-
-    bool success = it->second->insertPlayer(playerID);
+    bool success = it->second->insertPlayer(clientID);
     if(success){
-        std::cout << "[Registry] player: " << playerID << " joined Lobby: " << lobbyID << "\n";
+        std::cout << "[Registry] player: " << clientID << " joined Lobby: " << lobbyID << "\n";
+
+        m_clientLobbyMap[clientID] = lobbyID;
+
         return it->second.get(); /// return the lobby pointer
     }
     return nullptr;
@@ -63,17 +70,24 @@ LobbyRegistry::destroyLobby(const LobbyID &lobbyID) {
 }
 
 void
-LobbyRegistry::leaveLobby(ClientID playerID) {
-    auto lobbyIDToLeave = findLobbyForClient(playerID);
+LobbyRegistry::leaveLobby(ClientID clientID) {
+    auto lobbyIDToLeave = findLobbyForClient(clientID);
 
     if(!lobbyIDToLeave){
         return;
     }
 
+    m_clientLobbyMap.erase(clientID);
+
     auto it = m_lobbies.find(*lobbyIDToLeave);
+    if (it == m_lobbies.end()) {
+        std::cout << "[Registry] Error: Client map has issue.\n";
+        return;
+    }
+
     auto& lobby = it->second;
-    lobby->deletePlayer(playerID);
-    std::cout << "[Registry] Player " << playerID << " left lobby: " << *lobbyIDToLeave << "\n";
+    lobby->deletePlayer(clientID);
+    std::cout << "[Registry] Player " << clientID << " left lobby: " << *lobbyIDToLeave << "\n";
 
     if(lobby->getPlayerCount() == 0){
         std::cout << "[Registry] Lobby " << *lobbyIDToLeave << " is empty, destroying\n";
@@ -91,11 +105,10 @@ LobbyRegistry::getLobby(const LobbyID &lobbyID) const {
 }
 
 std::optional<LobbyID>
-LobbyRegistry::findLobbyForClient(ClientID playerID) const {
-    for(const auto& [lobbyID, lobby] : m_lobbies){
-        if(lobby->hasPlayer(playerID)){
-            return lobbyID;
-        }
+LobbyRegistry::findLobbyForClient(ClientID clientID) const {
+    auto it = m_clientLobbyMap.find(clientID);
+    if(it != m_clientLobbyMap.end()){
+        return it->second;
     }
     return std::nullopt;
 }

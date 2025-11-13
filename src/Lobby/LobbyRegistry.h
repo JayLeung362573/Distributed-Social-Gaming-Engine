@@ -26,4 +26,5 @@ private:
 
     std::unordered_map<LobbyID, std::unique_ptr<Lobby>> m_lobbies;
     size_t m_lobbyCounter = 0;
+    std::unordered_map<ClientID, LobbyID> m_clientLobbyMap;
 };

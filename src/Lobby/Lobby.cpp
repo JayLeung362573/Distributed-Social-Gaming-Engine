@@ -68,6 +68,7 @@ Lobby::getInfo() const {
     info.hostID = m_hostID;
     info.currentPlayers = m_players.size();
     info.maxPlayers = m_maxPlayers;
+    info.minPlayers = 1;
     info.state = m_state;
 
     return info;

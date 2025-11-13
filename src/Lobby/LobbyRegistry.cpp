@@ -1,8 +1,7 @@
-#pragma once
 #include "LobbyRegistry.h"
 #include <iostream>
 
-LobbyID
+Lobby*
 LobbyRegistry::createLobby(ClientID hostID, GameType gameType, const std::string &lobbyName) {
     auto lobbyID = generateLobbyID();
 
@@ -10,11 +9,12 @@ LobbyRegistry::createLobby(ClientID hostID, GameType gameType, const std::string
 
     lobby->insertPlayer(hostID, LobbyRole::Host);
 
+    auto* lobbyPtr = lobby.get();
     m_lobbies[lobbyID] = std::move(lobby);
 
     std::cout << "[Registry] Created lobby {" << lobbyName << "} (ID: "<< lobbyID << ")\n";
 
-    return lobbyID;
+    return lobbyPtr;
 }
 
 std::vector<LobbyInfo>
@@ -33,12 +33,12 @@ LobbyRegistry::browseLobbies(GameType gameType) const {
     return result;
 }
 
-bool
+Lobby*
 LobbyRegistry::joinLobby(ClientID playerID, const LobbyID &lobbyID) {
     auto it = m_lobbies.find(lobbyID);
     if(it == m_lobbies.end()){
         std::cout << "[Registry] Lobby not found: " << lobbyID << "\n";
-        return false;
+        return nullptr;
     }
 
     leaveLobby(playerID); /// prevent player in multiple lobbies
@@ -46,8 +46,9 @@ LobbyRegistry::joinLobby(ClientID playerID, const LobbyID &lobbyID) {
     bool success = it->second->insertPlayer(playerID);
     if(success){
         std::cout << "[Registry] player: " << playerID << " joined Lobby: " << lobbyID << "\n";
+        return it->second.get(); /// return the lobby pointer
     }
-    return success;
+    return nullptr;
 }
 
 bool

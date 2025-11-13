@@ -99,21 +99,22 @@ TEST(LobbyRegistryTest, RemovePlayerFromAllLobbies) {
     EXPECT_TRUE(joined1->hasPlayer(ClientID{3}));
 
     Lobby* joined2 = registry.joinLobby(ClientID{3}, LobbyID{id2});
-    ASSERT_NE(joined2, nullptr);
-    EXPECT_TRUE(joined2->hasPlayer(ClientID{3}));
+    ASSERT_EQ(joined2, nullptr);
+    EXPECT_FALSE(lobby2->hasPlayer(ClientID{3}));
+
+    registry.leaveLobby(ClientID{3});
 
     Lobby* lobby1After = registry.getLobby(id1);
     ASSERT_NE(lobby1After, nullptr);
     EXPECT_FALSE(lobby1After->hasPlayer(ClientID{3}));
     EXPECT_TRUE(lobby1After->hasPlayer(ClientID{1}));
 
-    registry.leaveLobby(ClientID{3});
 
-    Lobby* lobby2After = registry.getLobby(id2);
-
-    if (lobby2After) {
-        EXPECT_FALSE(lobby2After->hasPlayer(ClientID{3}));
-    }
+//    Lobby* lobby2After = registry.getLobby(id2);
+//
+//    if (lobby2After) {
+//        EXPECT_FALSE(lobby2After->hasPlayer(ClientID{3}));
+//    }
 }
 
 TEST(LobbyRegistryTest, FindLobbyForClientReturnsCorrectLobby) {

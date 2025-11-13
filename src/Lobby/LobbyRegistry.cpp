@@ -7,8 +7,6 @@ LobbyRegistry::createLobby(ClientID hostID, GameType gameType, const std::string
 
     auto lobby = std::make_unique<Lobby>(lobbyID, gameType, hostID, lobbyName);
 
-    lobby->insertPlayer(hostID, LobbyRole::Host);
-
     auto* lobbyPtr = lobby.get();
     m_lobbies[lobbyID] = std::move(lobby);
     m_clientLobbyMap[hostID] = lobbyID;
@@ -38,7 +36,7 @@ Lobby*
 LobbyRegistry::joinLobby(ClientID clientID, const LobbyID &lobbyID) {
     if(m_clientLobbyMap.count(clientID)){
         std::cout << "[LobbyRegistry] Client " << clientID << " already in a lobby.\n";
-        leaveLobby(clientID);
+        return nullptr;
     }
 
     auto it = m_lobbies.find(lobbyID);

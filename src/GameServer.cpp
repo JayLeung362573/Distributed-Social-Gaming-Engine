@@ -52,8 +52,8 @@ GameServer::handleClientMessages(const std::vector<ClientMessage> &incomingMessa
         std::visit(visitor, clientMsg.message.data);
 
         outgoingMessages.insert(outgoingMessages.end(),
-                                visitor.responses.begin(),
-                                visitor.responses.end());
+                                std::make_move_iterator(visitor.responses.begin()),
+                                std::make_move_iterator(visitor.responses.end()));
     }
     return outgoingMessages;
 }
@@ -86,7 +86,7 @@ GameServer::handleJoinLobbyMessages(uintptr_t clientID, const JoinLobbyMessage& 
         return outgoingMessages;
     }
 
-    if(joinLobbyMsg.playerName.empty()){
+    if(joinLobbyMsg.lobbyName.empty()){
         lobbyID = lobby->getInfo().lobbyID;
     }
 

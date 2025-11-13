@@ -299,6 +299,9 @@ class GameInterpreter : public ast::ASTVisitor
 
         bool needsIO();
 
+        const VariableMap&
+        getGameState() const;
+
     private:
         Value
         getPlayerAttribute(const ast::Variable& playerVar, String attr);

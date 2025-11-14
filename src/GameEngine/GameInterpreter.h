@@ -145,6 +145,16 @@ class GameInterpreter : public ast::ASTVisitor
         VisitResult visit(const ast::Sort& sort) override;
 
         /**
+         * @brief In order, checks if the `target` expression matches the candidate expression.
+         * If there's a match, all statements for that candidate are executed in order.
+         * Breaks on first match.
+         *
+         * @param match The Match node to visit.
+         * @return VisitResult
+         */
+        VisitResult visit(const ast::Match& match) override;
+
+        /**
          * @brief Prompts and stores player text input.
          *
          * This method checks for player input in inGameMessages. If there's no input,
@@ -178,6 +188,9 @@ class GameInterpreter : public ast::ASTVisitor
 
         void
         doAttributeAssignment(ast::Attribute& attrTarget, Value valueToAssign);
+
+        void
+        executeStatements(std::vector<ast::Statement*>& statements);
 
         VisitResult
         evaluateExpression(ast::Expression& expr);

@@ -21,4 +21,7 @@ GameSession::start() {
 
     // TODO: then use tick() with player input
     m_runtime->run();
+
+    m_finished = true;
+    std::cout << "[GameSession] Game for lobby " << m_lobbyID << " finished\n";
 }

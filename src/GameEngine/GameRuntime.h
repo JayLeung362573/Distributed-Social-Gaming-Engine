@@ -7,9 +7,14 @@
 
 struct GameRules
 {
-    std::span<std::unique_ptr<ast::ASTNode>> statements;
+    std::span<std::unique_ptr<ast::Statement>> statements;
 };
 
+/**
+ * wrapper for interpreter for executing game logic
+ * Jobs:
+ * manage execution state (pause / resume for new input)
+ */
 class GameRuntime{
 public:
     GameRuntime(GameRules rules)

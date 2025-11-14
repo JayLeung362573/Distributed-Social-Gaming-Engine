@@ -8,7 +8,7 @@
 
 class GameSession{
 public:
-    GameSession(std::string gameID,
+    GameSession(LobbyID lobbyID,
                 GameRules rules,
                 std::vector<LobbyMember> players);
 
@@ -16,10 +16,12 @@ public:
 
     bool isActive() const {return m_active;}
     bool isFinished() const {return m_finished;}
-    std::string getGameID() const {return m_gameID;};
+    LobbyID getLobbyID() const {return m_lobbyID;}
+    std::vector<ClientMessage> getResultMessages() const;
 
 private:
-    std::string m_gameID;
+    LobbyID m_lobbyID;
+    std::vector<LobbyMember> m_players;
     std::unique_ptr<GameRuntime> m_runtime;
     bool m_active = false;
     bool m_finished = false;

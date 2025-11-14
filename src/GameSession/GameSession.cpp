@@ -2,13 +2,14 @@
 #include <iostream>
 #include <utility>
 
-GameSession::GameSession(std::string gameID, GameRules rules, std::vector<LobbyMember> players)
-    : m_gameID(std::move(gameID))
+GameSession::GameSession(LobbyID lobbyID, GameRules rules, std::vector<LobbyMember> players)
+    : m_lobbyID(std::move(lobbyID))
+    , m_players(std::move(players))
     , m_runtime(std::make_unique<GameRuntime>(rules))
     , m_active(true), m_finished(false){
 
-    std::cout << "[GameSession] Created session " << m_gameID << '\n';
-}
+    std::cout << "[GameSession] Created session for lobby " << m_lobbyID
+              << " with " << m_players.size() << " players\n";}
 
 void
 GameSession::start() {

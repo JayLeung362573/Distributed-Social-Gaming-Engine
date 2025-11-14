@@ -13,7 +13,7 @@ struct GameRules
 class GameRuntime{
 public:
     GameRuntime(GameRules rules)
-    : m_rules(std::move(rules)), m_interpreter()
+    : m_rules(rules), m_interpreter()
     {}
 
     void run(){

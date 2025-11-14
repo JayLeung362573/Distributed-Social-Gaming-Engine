@@ -17,6 +17,7 @@ class GameRuntime {
     public:
         GameRuntime(ast::GameRules& rules) : m_interpreter(rules) {}
 
+<<<<<<< HEAD
         // Run all rules of the game.
         // TODO: Doesn't support inputting or outputting game messages, because
         // input system is not fully developed yet in the interpreter.

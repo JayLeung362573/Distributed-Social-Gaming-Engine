@@ -23,6 +23,9 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
 # For Remote dependencies
 include(cmake/CPM.cmake)
 
+# compile all static libraries
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 CPMAddPackage(
   NAME web-socket-networking
   GITHUB_REPOSITORY nsumner/web-socket-networking

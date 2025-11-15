@@ -187,8 +187,26 @@ void GameSpecLoader::parsePlayerRange(const std::string &src, TSNode node, GameS
     }
 }
 
+// void GameSpecLoader::parseSetup(const std::string &src, TSNode node, GameSpec &spec) {
+//     // For now, we'll just capture the setup rules without deep parsing
+//     uint32_t child_count = ts_node_child_count(node);
+
+//     for (uint32_t i = 0; i < child_count; ++i) {
+//         TSNode child = ts_node_child(node, i);
+//         const char* field_name = ts_node_field_name_for_child(node, i);
+
+//         if (!field_name) continue;
+
+//         // Look for setup rule definitions
+//         // Each rule will have fields like: id, kind, prompt, and optional range
+//         // TODO: Implement parsing for setup rules based on field names
+
+//     }
+// }
+
+
 void GameSpecLoader::parseSetup(const std::string &src, TSNode node, GameSpec &spec) {
-    // For now, we'll just capture the setup rules without deep parsing
+    // Walk through children of the setup block to find setup_rule nodes
     uint32_t child_count = ts_node_child_count(node);
 
     for (uint32_t i = 0; i < child_count; ++i) {
@@ -198,9 +216,88 @@ void GameSpecLoader::parseSetup(const std::string &src, TSNode node, GameSpec &s
         if (!field_name) continue;
 
         // Look for setup rule definitions
-        // Each rule will have fields like: id, kind, prompt, and optional range
-        // TODO: Implement parsing for setup rules based on field names
+        if (strcmp(type, "setup_rule") == 0) {
+            SetupRule rule;
+            bool expecting_kind = false;
+            bool expecting_prompt = false;
+            bool expecting_range = false;
+            
+            // Parse the setup_rule node
+            uint32_t rule_child_count = ts_node_child_count(child);
+            for (uint32_t j = 0; j < rule_child_count; ++j) {
+                TSNode rule_child = ts_node_child(child, j);
+                const char* rule_child_type = ts_node_type(rule_child);
 
+                // Extract the identifier (rule id like "rounds")
+                if (strcmp(rule_child_type, "identifier") == 0) {
+                    rule.id = slice(src, rule_child);
+                }
+                // Check for "kind:" token
+                else if (strcmp(rule_child_type, "kind:") == 0) {
+                    expecting_kind = true;
+                }
+                // Extract kind value (integer, boolean, string, etc.) - comes after "kind:"
+                else if (expecting_kind && (strcmp(rule_child_type, "integer") == 0 ||
+                         strcmp(rule_child_type, "boolean") == 0 ||
+                         strcmp(rule_child_type, "string") == 0 ||
+                         strcmp(rule_child_type, "enum") == 0 ||
+                         strcmp(rule_child_type, "question-answer") == 0 ||
+                         strcmp(rule_child_type, "multiple-choice") == 0 ||
+                         strcmp(rule_child_type, "json") == 0)) {
+                    rule.kind = slice(src, rule_child);
+                    expecting_kind = false;
+                }                
+                // Check for "prompt:" token
+                else if (strcmp(rule_child_type, "prompt:") == 0) {
+                    expecting_prompt = true;
+                }
+                // Extract prompt (quoted string) - comes after "prompt:"
+                else if (expecting_prompt && strcmp(rule_child_type, "quoted_string") == 0) {
+                    std::string promptWithQuotes = slice(src, rule_child);
+                    if (promptWithQuotes.size() >= 2) {
+                        rule.prompt = promptWithQuotes.substr(1, promptWithQuotes.size() - 2);
+                    }
+                    expecting_prompt = false;
+                }
+                // Check for "range:" token
+                else if (strcmp(rule_child_type, "range:") == 0) {
+                    expecting_range = true;
+                }
+                // Extract range (number_range) - comes after "range:"
+                else if (expecting_range && strcmp(rule_child_type, "number_range") == 0) {
+                    PlayerRange range;
+                    range.min = 0;
+                    range.max = 0;
+                    
+                    uint32_t range_child_count = ts_node_child_count(rule_child);
+                    for (uint32_t k = 0; k < range_child_count; ++k) {
+                        TSNode range_child = ts_node_child(rule_child, k);
+                        const char* range_child_type = ts_node_type(range_child);
+                        
+                        if (strcmp(range_child_type, "integer") == 0) {
+                            std::string numStr = slice(src, range_child);
+                            int value = std::stoi(numStr);
+                            
+                            // First integer is min, second is max
+                            if (range.min == 0) {
+                                range.min = value;
+                            } else {
+                                range.max = value;
+                            }
+                        }
+                    }
+                    
+                    if (range.min != 0 || range.max != 0) {
+                        rule.range = range;
+                    }
+                    expecting_range = false;
+                }
+            
+            // Only add the rule if we have at least an id and kind
+            if (!rule.id.empty() && !rule.kind.empty()) {
+                spec.setup.push_back(rule);
+            }
+        }
     }
 }
 

@@ -5,61 +5,43 @@
 #include "GameInterpreter.h"
 #include "Rules.h"
 
-struct GameRules
-{
-    std::span<std::unique_ptr<ast::Statement>> statements;
-};
-
 /**
- * wrapper for interpreter for executing game logic
- * Jobs:
- * manage execution state (pause / resume for new input)
+ * Represents a running game. A call to `run()` will execute all rules of the game.
+ *
+ * Essentially a wrapper around GameInterpreter to encourage correct usage, since
+ * it doesn't expose the `visit` methods.
+ *
+ * TODO: Support player IO once that's supported in GameInterpreter
  */
-class GameRuntime{
-public:
-    GameRuntime(GameRules rules)
-    : m_rules(rules), m_interpreter()
-    {}
+class GameRuntime {
+    public:
+        GameRuntime(ast::GameRules& rules) : m_interpreter(rules) {}
 
-    void run(){
-        for(auto& statement : m_rules.statements){
-            statement->accept(m_interpreter);
-        }
-    }
-
-    std::vector<GameMessage>
-    tick(const std::vector<GameMessage>& inMessages){
-        if(m_finished){
-            return {};
-        }
-
-        m_interpreter.setInGameMessages(inMessages);
-
-        while(m_currentStatement < m_rules.statements.size()){
-            auto& statement = m_rules.statements[m_currentStatement];
-            VisitResult result = statement->accept(m_interpreter);
-
-            if(result.isPending()){
-                return m_interpreter.consumeOutGameMessages();
+        // Run all rules of the game.
+        // TODO: Doesn't support inputting or outputting game messages, because
+        // input system is not fully developed yet in the interpreter.
+        // In the future, the API may look something like this to support I/O:
+        //      std::vector<GameMessage>
+        //      tick(std::vector<GameMessage> inMessages)
+        void run() {
+            if (m_interpreter.isDone())
+            {
+                throw std::runtime_error("Calling run() on a finished game");
             }
-            m_currentStatement++;
+            m_interpreter.run();
         }
-        m_finished = true;
-        return m_interpreter.consumeOutGameMessages();
-    }
 
-    const VariableMap& getGameState() const{
-        return m_interpreter.getGameState();
-    }
+        // getGameState (read-only)
+        // Used mainly for tests to check if rules ran as expected
+        const VariableMap& getGameState() const {
+            return m_interpreter.getGameState();
+        }
 
-    bool
-    isFinished() const{
-        return m_finished;
-    }
+        bool
+        isFinished() const {
+            return m_interpreter.isDone();
+        }
 
-private:
-    GameRules m_rules;
-    GameInterpreter m_interpreter;
-    size_t m_currentStatement = 0;
-    bool m_finished = false;
+    private:
+        GameInterpreter m_interpreter;
 };

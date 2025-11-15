@@ -182,49 +182,6 @@ GameInterpreter::visit(const ast::Sort& sort)
 VisitResult
 GameInterpreter::visit(const ast::Match& match)
 {
-    if (m_currentIterator == nullptr)
-    {
-        throw std::runtime_error(
-            "Expected m_currentIterator to be set. Is there a program to execute?"
-        );
-    }
-
-    auto maybeCtx = m_currentIterator->currentContext<ProgramIterator::MatchExecutionContext>();
-    bool isFirstVisit = !maybeCtx.has_value();
-
-    if (isFirstVisit)
-    {
-        auto maybeCandidate = findMatch(match);
-        if (!maybeCandidate.has_value())
-        {
-            // No match, we're done
-            return {};
-        }
-
-        auto iterator = std::make_unique<ProgramIterator>(
-            ProgramRaw{{maybeCandidate.value().statements}}
-        );
-        m_currentIterator->setCurrentContext(
-            ProgramIterator::MatchExecutionContext{std::move(iterator)}
-        );
-    }
-
-    maybeCtx = m_currentIterator->currentContext<ProgramIterator::MatchExecutionContext>();
-    if (!maybeCtx.has_value())
-    {
-        throw std::runtime_error(
-            "Expected MatchExecutionContext to be set as the current context"
-        );
-    }
-
-    executeProgram(*(maybeCtx.value()->iterator));
-
-    return {};
-}
-
-std::optional<ast::Match::CandidateRaw>
-GameInterpreter::findMatch(const ast::Match& match)
-{
     Value targetValue = evaluateExpression(*match.getTarget()).getValue();
 
     for (auto& candidate : match.getCandidates())

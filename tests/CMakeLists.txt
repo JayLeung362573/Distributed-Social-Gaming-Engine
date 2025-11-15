@@ -34,6 +34,9 @@ add_executable(unit_tests
   GameSpecLoaderTest.cpp
   LobbyRegistryTest.cpp
   InputManagerTest.cpp
+  GameSessionTest.cpp
+  GameRuntimeTest.cpp
+  GameWorkflowTest.cpp
 )
 
 # Link with gtest (the Quickstart uses GTest::gtest_main)

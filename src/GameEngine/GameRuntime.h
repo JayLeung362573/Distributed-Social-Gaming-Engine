@@ -27,11 +27,39 @@ public:
         }
     }
 
+    std::vector<GameMessage>
+    tick(const std::vector<GameMessage>& inMessages){
+        if(m_finished){
+            return {};
+        }
+
+        m_interpreter.setInGameMessages(inMessages);
+
+        while(m_currentStatement < m_rules.statements.size()){
+            auto& statement = m_rules.statements[m_currentStatement];
+            VisitResult result = statement->accept(m_interpreter);
+
+            if(result.isPending()){
+                return m_interpreter.consumeOutGameMessages();
+            }
+            m_currentStatement++;
+        }
+        m_finished = true;
+        return m_interpreter.consumeOutGameMessages();
+    }
+
     const VariableMap& getGameState() const{
         return m_interpreter.getGameState();
+    }
+
+    bool
+    isFinished() const{
+        return m_finished;
     }
 
 private:
     GameRules m_rules;
     GameInterpreter m_interpreter;
+    size_t m_currentStatement = 0;
+    bool m_finished = false;
 };

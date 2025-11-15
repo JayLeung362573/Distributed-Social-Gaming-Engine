@@ -435,3 +435,56 @@ GameInterpreter::getPlayerAttribute(const ast::Variable& playerVar, String attr)
     }
     return result.getValue();
 }
+
+std::optional<TextInputMessage>
+GameInterpreter::getTextInputMsg(String playerID, String prompt) const
+{
+    for (const auto& msg : m_inGameMessages)
+    {
+        if (const auto* inputMsg = std::get_if<TextInputMessage>(&msg.inner))
+        {
+            if (inputMsg->playerID == playerID && inputMsg->prompt == prompt)
+            {
+                return *inputMsg;
+            }
+        }
+    }
+    return std::nullopt;
+}
+
+void
+GameInterpreter::setInGameMessages(const std::vector<GameMessage>& inGameMessages)
+{
+    m_inGameMessages = inGameMessages;
+}
+
+std::vector<GameMessage>
+GameInterpreter::consumeOutGameMessages()
+{
+    auto out = std::move(m_outGameMessages);
+    m_outGameMessages.clear();
+    return out;
+}
+
+const VariableMap &GameInterpreter::getGameState() const {
+    return m_variableMap;
+}
+
+void GameInterpreter::run()
+{
+    if (m_done) { return; }
+
+    std::vector<ast::Statement*> rawStatements;
+    for (auto& statement : m_rules.statements)
+    {
+        rawStatements.push_back(statement.get());
+    }
+    executeStatements(rawStatements);
+
+    m_done = true;
+}
+
+bool GameInterpreter::isDone() const
+{
+    return m_done;
+}

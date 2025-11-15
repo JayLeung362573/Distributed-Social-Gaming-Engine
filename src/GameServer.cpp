@@ -297,10 +297,5 @@ GameServer::createGameRules() {
     std::cout << "[GameServer] Created simple game with "
               << statements.size() << " statements\n";
 
-<<<<<<< HEAD
     return ast::GameRules{std::move(statements)};
-=======
-    return GameRules{std::span(statements)};
->>>>>>> 2050964 (use a new name for handleJoinMessages: handleStartGameMessage, and implement a start game workflow, remove m_active in GameSession, add some comments)
 }
-

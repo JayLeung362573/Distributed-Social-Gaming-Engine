@@ -566,4 +566,9 @@ namespace ast
     {
         std::vector<std::unique_ptr<ast::Statement>> statements;
     };
+
+    struct GameRules
+    {
+        std::vector<std::unique_ptr<ast::Statement>> statements;
+    };
 };

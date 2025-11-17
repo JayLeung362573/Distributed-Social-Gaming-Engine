@@ -306,12 +306,12 @@ namespace ast
             std::vector<ExpressionCandidateAndStatementsPair> pairs;
     };
 
-    class InputTextStatement : public Statement
+    class InputText : public Statement
     {
         public:
-            InputTextStatement(std::unique_ptr<Variable> player,
-                               std::unique_ptr<Expression> target,
-                               String prompt)
+            InputText(std::unique_ptr<Variable> player,
+                      std::unique_ptr<Expression> target,
+                      String prompt)
             : player(std::move(player))
             , target(std::move(target))
             , prompt(prompt) {}
@@ -327,13 +327,13 @@ namespace ast
             String prompt;
     };
 
-    class InputChoiceStatement : public ASTNode
+    class InputChoice : public ASTNode
     {
         public:
-            InputChoiceStatement(std::unique_ptr<Variable> player,
-                               std::unique_ptr<Expression> target,
-                               String prompt,
-                               std::unique_ptr<Expression> choices)
+            InputChoice(std::unique_ptr<Variable> player,
+                        std::unique_ptr<Expression> target,
+                        String prompt,
+                        std::unique_ptr<Expression> choices)
             : player(std::move(player))
             , target(std::move(target))
             , prompt(prompt)
@@ -352,14 +352,14 @@ namespace ast
             std::unique_ptr<Expression> choices;
     };
 
-    class InputRangeStatement : public ASTNode
+    class InputRange : public ASTNode
     {
         public:
-            InputRangeStatement(std::unique_ptr<Variable> player,
-                               std::unique_ptr<Expression> target,
-                               String prompt,
-                               std::unique_ptr<Expression> minValue,
-                               std::unique_ptr<Expression> maxValue)
+            InputRange(std::unique_ptr<Variable> player,
+                       std::unique_ptr<Expression> target,
+                       String prompt,
+                       std::unique_ptr<Expression> minValue,
+                       std::unique_ptr<Expression> maxValue)
             : player(std::move(player))
             , target(std::move(target))
             , prompt(prompt)
@@ -381,10 +381,10 @@ namespace ast
             std::unique_ptr<Expression> maxValue;
     };
 
-    class InputVoteStatement : public ASTNode
+    class InputVote : public ASTNode
     {
         public:
-            InputVoteStatement(std::unique_ptr<Variable> player,
+            InputVote(std::unique_ptr<Variable> player,
                                std::unique_ptr<Expression> target,
                                String prompt,
                                std::unique_ptr<Expression> choices)
@@ -424,10 +424,10 @@ namespace ast
             virtual VisitResult visit(const Discard& discard) = 0;
             virtual VisitResult visit(const Sort& sort) = 0;
             virtual VisitResult visit(const Match& match) = 0;
-            virtual VisitResult visit(const InputTextStatement& inputTextStatement) = 0;
-            virtual VisitResult visit(const InputChoiceStatement& inputChoiceStatement) = 0;
-            virtual VisitResult visit(const InputRangeStatement& inputRangeStatement) = 0;
-            virtual VisitResult visit(const InputVoteStatement& inputVoteStatement) = 0;
+            virtual VisitResult visit(const InputText& inputText) = 0;
+            virtual VisitResult visit(const InputChoice& inputChoice) = 0;
+            virtual VisitResult visit(const InputRange& inputRange) = 0;
+            virtual VisitResult visit(const InputVote& inputVote) = 0;
     };
 
     std::unique_ptr<ast::Variable>
@@ -479,29 +479,29 @@ namespace ast
     makeMatch(std::unique_ptr<ast::Expression> target,
               std::vector<ast::Match::ExpressionCandidateAndStatementsPair> pairs);
 
-    std::unique_ptr<ast::InputTextStatement>
-    makeInputTextStmt(std::unique_ptr<ast::Variable> playerVar,
-                      std::unique_ptr<ast::Expression> targetExpr,
-                      String prompt);
-    
-    std::unique_ptr<ast::InputChoiceStatement>
-    makeInputChoiceStmt(std::unique_ptr<ast::Variable> playerVar,
-                      std::unique_ptr<ast::Expression> targetExpr,
-                      String prompt,
-                      std::unique_ptr<ast::Expression> choices);
-                      
-    std::unique_ptr<ast::InputRangeStatement>
-    makeInputRangeStmt(std::unique_ptr<ast::Variable> playerVar,
-                      std::unique_ptr<ast::Expression> targetExpr,
-                      String prompt,
-                      std::unique_ptr<ast::Expression> minValue,
-                      std::unique_ptr<ast::Expression> maxValue);
-    
-    std::unique_ptr<ast::InputVoteStatement>
-    makeInputVoteStmt(std::unique_ptr<ast::Variable> playerVar,
-                      std::unique_ptr<ast::Expression> targetExpr,
-                      String prompt, 
-                      std::unique_ptr<ast::Expression> choices);
+    std::unique_ptr<ast::InputText>
+    makeInputText(std::unique_ptr<ast::Variable> playerVar,
+                  std::unique_ptr<ast::Expression> targetExpr,
+                  String prompt);
+
+    std::unique_ptr<ast::InputChoice>
+    makeInputChoice(std::unique_ptr<ast::Variable> playerVar,
+                    std::unique_ptr<ast::Expression> targetExpr,
+                    String prompt,
+                    std::unique_ptr<ast::Expression> choices);
+
+    std::unique_ptr<ast::InputRange>
+    makeInputRange(std::unique_ptr<ast::Variable> playerVar,
+                   std::unique_ptr<ast::Expression> targetExpr,
+                   String prompt,
+                   std::unique_ptr<ast::Expression> minValue,
+                   std::unique_ptr<ast::Expression> maxValue);
+
+    std::unique_ptr<ast::InputVote>
+    makeInputVote(std::unique_ptr<ast::Variable> playerVar,
+                  std::unique_ptr<ast::Expression> targetExpr,
+                  String prompt,
+                  std::unique_ptr<ast::Expression> choices);
 
     std::unique_ptr<ast::Constant>
     cloneConstant(ast::Constant* constant);

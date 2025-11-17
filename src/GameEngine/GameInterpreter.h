@@ -11,7 +11,7 @@
 class GameInterpreter : public ast::ASTVisitor
 {
     public:
-        GameInterpreter(InputManager& inputManager) 
+        GameInterpreter(InputManager& inputManager)
             : m_inputManager(inputManager) {}
 
         VisitResult visit(const ast::ASTNode& node) override;
@@ -167,25 +167,25 @@ class GameInterpreter : public ast::ASTVisitor
          *       Might add complexity if we need to handle not sending duplicate messages.
          *       Maybe we need some kind of InputManager?
          *
-         * @param inputTextStatement The InputTextStatement to visit.
+         * @param inputText The InputText to visit.
          * @return VisitResult Status of the input processing (Done or Pending).
          *
          * @pre The player variable exists in the Variable Map and has an "id" attribute.
          * @post The player's input is assigned to the target variable or attribute.
          */
-        VisitResult visit(const ast::InputTextStatement& inputTextStatement) override;
+        VisitResult visit(const ast::InputText& inputText) override;
         /**
          * @brief Prompts and stores player choice input.
          */
-        VisitResult visit(const ast::InputChoiceStatement& inputChoiceStatement) override;
+        VisitResult visit(const ast::InputChoice& inputChoice) override;
         /**
          * @brief Prompts and stores player range input.
          */
-        VisitResult visit(const ast::InputRangeStatement& inputRangeStatement) override;
+        VisitResult visit(const ast::InputRange& inputRange) override;
         /**
          * @brief Prompts and stores player vote input.
          */
-        VisitResult visit(const ast::InputVoteStatement& inputVoteStatement) override;
+        VisitResult visit(const ast::InputVote& inputVote) override;
 
         //void setInGameMessages(const std::vector<GameMessage>& inGameMessages);
         //std::vector<GameMessage> consumeOutGameMessages();

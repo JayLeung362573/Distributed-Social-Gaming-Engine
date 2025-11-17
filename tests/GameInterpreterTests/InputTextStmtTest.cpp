@@ -22,7 +22,7 @@ TEST(GameInterpreterTest, InputTextStatementOutputsMessageToGetInput)
     );
     doAssignment(interpreter, std::move(playerMapAssignment));
 
-    auto inputTextStmt = ast::makeInputTextStmt(
+    auto inputTextStmt = ast::makeInputText(
         ast::makeVariable(playerMapName),
         ast::makeVariable(targetName),
         String{"Enter your answer: "}
@@ -60,7 +60,7 @@ TEST(GameInterpreterTest, InputTextStatementHandlesInput)
     );
     doAssignment(interpreter, std::move(playerMapAssignment));
 
-    auto inputTextStmt = ast::makeInputTextStmt(
+    auto inputTextStmt = ast::makeInputText(
         ast::makeVariable(playerMapName),
         ast::makeVariable(targetName),
         String{"Enter your answer: "}

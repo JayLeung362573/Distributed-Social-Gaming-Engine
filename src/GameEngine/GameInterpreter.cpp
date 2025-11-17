@@ -273,11 +273,11 @@ GameInterpreter::isLessThan(const Value& left, const Value& right)
 }
 
 VisitResult
-GameInterpreter::visit(const ast::InputTextStatement& inputTextStatement)
+GameInterpreter::visit(const ast::InputText& inputText)
 {
-    auto playerVar = inputTextStatement.getPlayer();
-    auto targetExpr = inputTextStatement.getTarget();
-    String prompt = inputTextStatement.getPrompt();
+    auto playerVar = inputText.getPlayer();
+    auto targetExpr = inputText.getTarget();
+    String prompt = inputText.getPrompt();
     String playerID = getPlayerAttribute(*playerVar, String{"id"}).asString();
 
     auto maybeInput = m_inputManager.getTextInput(playerID, prompt);
@@ -297,12 +297,12 @@ GameInterpreter::visit(const ast::InputTextStatement& inputTextStatement)
 }
 
 VisitResult
-GameInterpreter::visit(const ast::InputChoiceStatement& inputChoiceStatement)
+GameInterpreter::visit(const ast::InputChoice& inputChoice)
 {
-    auto playerVar = inputChoiceStatement.getPlayer();
-    auto targetExpr = inputChoiceStatement.getTarget();
-    String prompt = inputChoiceStatement.getPrompt();
-    auto choicesExpr = inputChoiceStatement.getChoices();
+    auto playerVar = inputChoice.getPlayer();
+    auto targetExpr = inputChoice.getTarget();
+    String prompt = inputChoice.getPrompt();
+    auto choicesExpr = inputChoice.getChoices();
     String playerID = getPlayerAttribute(*playerVar, String{"id"}).asString();
 
     VisitResult choicesResult = evaluateExpression(*choicesExpr);
@@ -332,13 +332,13 @@ GameInterpreter::visit(const ast::InputChoiceStatement& inputChoiceStatement)
 }
 
 VisitResult
-GameInterpreter::visit(const ast::InputRangeStatement& inputRangeStatement)
+GameInterpreter::visit(const ast::InputRange& inputRange)
 {
-    auto playerVar = inputRangeStatement.getPlayer();
-    auto targetExpr = inputRangeStatement.getTarget();
-    String prompt = inputRangeStatement.getPrompt();
-    auto minExpr = inputRangeStatement.getMinValue();
-    auto maxExpr = inputRangeStatement.getMaxValue();
+    auto playerVar = inputRange.getPlayer();
+    auto targetExpr = inputRange.getTarget();
+    String prompt = inputRange.getPrompt();
+    auto minExpr = inputRange.getMinValue();
+    auto maxExpr = inputRange.getMaxValue();
 
     String playerID = getPlayerAttribute(*playerVar, String{"id"}).asString();
 
@@ -365,12 +365,12 @@ GameInterpreter::visit(const ast::InputRangeStatement& inputRangeStatement)
 
 
 VisitResult
-GameInterpreter::visit(const ast::InputVoteStatement& inputVoteStatement)
+GameInterpreter::visit(const ast::InputVote& inputVote)
 {
-    auto playerVar = inputVoteStatement.getPlayer();
-    auto targetExpr = inputVoteStatement.getTarget();
-    String prompt = inputVoteStatement.getPrompt();
-    auto choicesExpr = inputVoteStatement.getChoices();
+    auto playerVar = inputVote.getPlayer();
+    auto targetExpr = inputVote.getTarget();
+    String prompt = inputVote.getPrompt();
+    auto choicesExpr = inputVote.getChoices();
 
     String playerID = getPlayerAttribute(*playerVar, String{"id"}).asString();
 

@@ -158,20 +158,6 @@ class GameInterpreter : public ast::ASTVisitor
 
         /**
          * @brief Prompts and stores player text input.
-         *
-         * This method checks for player input in inGameMessages. If there's no input,
-         * it pushes a message to outGameMessages to prompt the player. If input is
-         * found, it assigns the input to the target variable or attribute.
-         *
-         * Note: This setup with the in/out messages may not be very practical??
-         *       Might add complexity if we need to handle not sending duplicate messages.
-         *       Maybe we need some kind of InputManager?
-         *
-         * @param inputText The InputText to visit.
-         * @return VisitResult Status of the input processing (Done or Pending).
-         *
-         * @pre The player variable exists in the Variable Map and has an "id" attribute.
-         * @post The player's input is assigned to the target variable or attribute.
          */
         VisitResult visit(const ast::InputText& inputText) override;
         /**
@@ -187,13 +173,7 @@ class GameInterpreter : public ast::ASTVisitor
          */
         VisitResult visit(const ast::InputVote& inputVote) override;
 
-        //void setInGameMessages(const std::vector<GameMessage>& inGameMessages);
-        //std::vector<GameMessage> consumeOutGameMessages();
-
     private:
-        //std::optional<TextInputMessage>
-        //getTextInputMsg(String playerID, String prompt) const;
-
         Value
         getPlayerAttribute(const ast::Variable& playerVar, String attr);
 
@@ -221,7 +201,4 @@ class GameInterpreter : public ast::ASTVisitor
     private:
         VariableMap m_variableMap;
         InputManager& m_inputManager;
-
-        //std::vector<GameMessage> m_inGameMessages;
-        //std::vector<GameMessage> m_outGameMessages;
 };

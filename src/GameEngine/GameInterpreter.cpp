@@ -280,13 +280,13 @@ GameInterpreter::visit(const ast::InputText& inputText)
     String prompt = inputText.getPrompt();
     String playerID = getPlayerAttribute(*playerVar, String{"id"}).asString();
 
-    auto maybeInput = m_inputManager.getTextInput(playerID, prompt);
-    if (!maybeInput)
+    auto maybeText = m_inputManager.getTextInput(playerID, prompt);
+    if (!maybeText)
     {
         return VisitResult{VisitResult::Status::Pending, {}};
     }
 
-    Value input{*maybeInput};
+    Value input{*maybeText};
     auto assignment = ast::makeAssignment(
         ast::cloneExpression(targetExpr),
         ast::makeConstant(input)
@@ -345,24 +345,23 @@ GameInterpreter::visit(const ast::InputRange& inputRange)
     Value minValue = evaluateExpression(*minExpr).getValue();
     Value maxValue = evaluateExpression(*maxExpr).getValue();
 
-    auto rangeInput = m_inputManager.getRangeInput(
+    auto maybeRange = m_inputManager.getRangeInput(
         playerID, prompt, minValue.asInteger(), maxValue.asInteger()
     );
 
-    if (!rangeInput)
+    if (!maybeRange)
     {
         return VisitResult{VisitResult::Status::Pending, {}};
     }
 
     auto assignment = ast::makeAssignment(
         ast::cloneExpression(targetExpr),
-        ast::makeConstant(Value{*rangeInput})
+        ast::makeConstant(Value{*maybeRange})
     );
     assignment->accept(*this);
 
     return VisitResult{VisitResult::Status::Done, {}};
 }
-
 
 VisitResult
 GameInterpreter::visit(const ast::InputVote& inputVote)
@@ -415,33 +414,3 @@ GameInterpreter::getPlayerAttribute(const ast::Variable& playerVar, String attr)
     }
     return result.getValue();
 }
-
-// std::optional<TextInputMessage>
-// GameInterpreter::getTextInputMsg(String playerID, String prompt) const
-// {
-//     for (const auto& msg : m_inGameMessages)
-//     {
-//         if (const auto* inputMsg = std::get_if<TextInputMessage>(&msg.inner))
-//         {
-//             if (inputMsg->playerID == playerID && inputMsg->prompt == prompt)
-//             {
-//                 return *inputMsg;
-//             }
-//         }
-//     }
-//     return std::nullopt;
-// }
-
-// void
-// GameInterpreter::setInGameMessages(const std::vector<GameMessage>& inGameMessages)
-// {
-//     m_inGameMessages = inGameMessages;
-// }
-
-// std::vector<GameMessage>
-// GameInterpreter::consumeOutGameMessages()
-// {
-//     auto out = std::move(m_outGameMessages);
-//     m_outGameMessages.clear();
-//     return out;
-// }

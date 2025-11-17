@@ -327,7 +327,7 @@ namespace ast
             String prompt;
     };
 
-    class InputChoice : public ASTNode
+    class InputChoice : public Statement
     {
         public:
             InputChoice(std::unique_ptr<Variable> player,
@@ -352,7 +352,7 @@ namespace ast
             std::unique_ptr<Expression> choices;
     };
 
-    class InputRange : public ASTNode
+    class InputRange : public Statement
     {
         public:
             InputRange(std::unique_ptr<Variable> player,
@@ -381,7 +381,7 @@ namespace ast
             std::unique_ptr<Expression> maxValue;
     };
 
-    class InputVote : public ASTNode
+    class InputVote : public Statement
     {
         public:
             InputVote(std::unique_ptr<Variable> player,

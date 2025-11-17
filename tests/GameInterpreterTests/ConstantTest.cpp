@@ -8,7 +8,9 @@
 
 TEST(ConstantTest, VisitConstant)
 {
-    GameInterpreter interpreter;
+    InputManager inputManager;
+    GameInterpreter interpreter(inputManager);
+
     Value value{String{"100"}};
     auto constant = ast::makeConstant(value);
 

@@ -8,7 +8,8 @@
 
 TEST(MatchTest, MatchWithMultipleCandidates)
 {
-    GameInterpreter interpreter;
+    InputManager inputManager;
+    GameInterpreter interpreter(inputManager);
 
     ast::StatementsBuilder statementsBuilder;
     ast::MatchBuilder matchBuilder;
@@ -47,7 +48,8 @@ TEST(MatchTest, MatchWithMultipleCandidates)
 
 TEST(MatchTest, NoMatch)
 {
-    GameInterpreter interpreter;
+    InputManager inputManager;
+    GameInterpreter interpreter(inputManager);
 
     ast::StatementsBuilder statementsBuilder;
     ast::MatchBuilder matchBuilder;
@@ -78,7 +80,8 @@ TEST(MatchTest, NoMatch)
 
 TEST(MatchTest, MultipleStatements)
 {
-    GameInterpreter interpreter;
+    InputManager inputManager;
+    GameInterpreter interpreter(inputManager);
 
     ast::StatementsBuilder statementsBuilder;
     ast::MatchBuilder matchBuilder;
@@ -113,7 +116,8 @@ TEST(MatchTest, MultipleStatements)
 
 TEST(MatchTest, MatchesMoreThanOneCandidate)
 {
-    GameInterpreter interpreter;
+    InputManager inputManager;
+    GameInterpreter interpreter(inputManager);
 
     ast::StatementsBuilder statementsBuilder;
     ast::MatchBuilder matchBuilder;

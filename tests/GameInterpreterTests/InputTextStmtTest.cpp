@@ -6,9 +6,10 @@
 #include "GameInterpreter.h"
 
 
-TEST(InputTextStmtTest, InputTextStatementOutputsMessageToGetInput)
+TEST(GameInterpreterTest, InputTextStatementOutputsMessageToGetInput)
 {
-    GameInterpreter interpreter;
+    InputManager inputManager;
+    GameInterpreter interpreter(inputManager);
 
     Map<String, Value> playerMap{};
     Name playerMapName{"player"};
@@ -31,7 +32,8 @@ TEST(InputTextStmtTest, InputTextStatementOutputsMessageToGetInput)
     EXPECT_TRUE(result.isPending());
     EXPECT_FALSE(result.hasValue());
 
-    std::vector<GameMessage> outMessages = interpreter.consumeOutGameMessages();
+    std::vector<GameMessage> outMessages = inputManager.getPendingRequests();
+    //std::vector<GameMessage> outMessages = interpreter.consumeOutGameMessages();
     ASSERT_EQ(outMessages.size(), 1);
 
     auto& msg = outMessages[0].inner;
@@ -42,9 +44,10 @@ TEST(InputTextStmtTest, InputTextStatementOutputsMessageToGetInput)
     EXPECT_EQ(getInputMsg.prompt, String{"Enter your answer: "});
 }
 
-TEST(InputTextStmtTest, InputTextStatementHandlesInput)
+TEST(GameInterpreterTest, InputTextStatementHandlesInput)
 {
-    GameInterpreter interpreter;
+    InputManager inputManager;
+    GameInterpreter interpreter(inputManager);
 
     Map<String, Value> playerMap{};
     Name playerMapName{"player"};
@@ -66,17 +69,18 @@ TEST(InputTextStmtTest, InputTextStatementHandlesInput)
     TextInputMessage giveInputMsg{
         String{"123"},
         String{"Enter your answer: "},
-        {"piano"}
+        String{"piano"}
     };
 
     std::vector<GameMessage> inMessages{GameMessage{giveInputMsg}};
-    interpreter.setInGameMessages(inMessages);
+    //interpreter.setInGameMessages(inMessages);
+    inputManager.handleIncomingMessages(inMessages);
 
     VisitResult result = inputTextStmt->accept(interpreter);
     EXPECT_TRUE(result.isDone());
     EXPECT_FALSE(result.hasValue());
 
-    std::vector<GameMessage> outMessages = interpreter.consumeOutGameMessages();
+    std::vector<GameMessage> outMessages = inputManager.getPendingRequests();
     ASSERT_EQ(outMessages.size(), 0);
 
     Value storedAnswer = loadVariable(interpreter, targetName);

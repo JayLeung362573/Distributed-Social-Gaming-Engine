@@ -9,40 +9,6 @@
 #include "Types.h"
 #include "GameMessage.h"
 
-struct TextInputRequest
-{
-    String playerID;
-    String prompt;
-};
-
-struct ChoiceInputRequest
-{
-    String playerID;
-    String prompt;
-    List<Value> choices;
-};
-
-struct RangeInputRequest
-{
-    String playerID;
-    String prompt;
-    Integer minValue;
-    Integer maxValue;
-};
-
-struct VoteInputRequest
-{
-    String playerID;
-    String prompt;
-    List<Value> choices;
-};
-
-using InputRequest = std::variant<
-    TextInputRequest,
-    ChoiceInputRequest,
-    RangeInputRequest,
-    VoteInputRequest
->;
 
 class InputManager {
 public:
@@ -60,10 +26,10 @@ public:
 private:
     std::optional<String> findResponse(const String& playerID, const String& prompt) const;
     bool hasRequestedInput(const String& playerID, const String& prompt) const;
-    void addPendingRequest(InputRequest request);
+    void addPendingRequest(GameMessage request);
 
 private:
     std::unordered_map<String, std::unordered_map<String, String>> m_responses;
-    std::vector<InputRequest> m_pendingRequests;
+    std::vector<GameMessage> m_pendingRequests;
     std::unordered_map<String, std::unordered_set<String>> m_sentRequests;
 };

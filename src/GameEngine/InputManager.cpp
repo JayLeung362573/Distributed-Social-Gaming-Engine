@@ -11,7 +11,7 @@ InputManager::getTextInput(String playerID, String prompt)
     }
 
     if (!hasRequestedInput(playerID, prompt)) {
-        addPendingRequest(TextInputRequest{playerID, prompt});
+        addPendingRequest(GameMessage{GetTextInputMessage{playerID, prompt}});
     }
 
     return std::nullopt;
@@ -26,7 +26,7 @@ InputManager::getChoiceInput(String playerID, String prompt, const List<Value>& 
     }
 
     if (!hasRequestedInput(playerID, prompt)) {
-        addPendingRequest(ChoiceInputRequest{playerID, prompt, choices});
+        addPendingRequest(GameMessage{GetChoiceInputMessage{playerID, prompt, choices}});
     }
 
     return std::nullopt;
@@ -52,7 +52,7 @@ InputManager::getRangeInput(String playerID, String prompt, Integer minValue, In
     }
 
     if (!hasRequestedInput(playerID, prompt)) {
-        addPendingRequest(RangeInputRequest{playerID, prompt, minValue, maxValue});
+        addPendingRequest(GameMessage{GetRangeInputMessage{playerID, prompt, minValue, maxValue}});
     }
 
     return std::nullopt;
@@ -67,7 +67,7 @@ InputManager::getVoteInput(String playerID, String prompt, const List<Value>& ch
     }
 
     if (!hasRequestedInput(playerID, prompt)) {
-        addPendingRequest(VoteInputRequest{playerID, prompt, choices});
+        addPendingRequest(GameMessage{GetVoteInputMessage{playerID, prompt, choices}});
     }
 
     return std::nullopt;
@@ -96,49 +96,7 @@ InputManager::handleIncomingMessages(const std::vector<GameMessage>& messages)
 std::vector<GameMessage>
 InputManager::getPendingRequests()
 {
-    std::vector<GameMessage> messages;
-
-    for (const auto& request : m_pendingRequests) {
-        if (const auto* textReq = std::get_if<TextInputRequest>(&request)) {
-            messages.push_back(GameMessage{
-                GetTextInputMessage{textReq->playerID, textReq->prompt}
-            });
-            //m_sentRequests[textReq->playerID].insert(textReq->prompt);
-        }
-        else if (const auto* choiceReq = std::get_if<ChoiceInputRequest>(&request)) {
-            messages.push_back(GameMessage{
-                GetChoiceInputMessage{
-                    choiceReq->playerID,
-                    choiceReq->prompt,
-                    choiceReq->choices
-                }
-            });
-            m_sentRequests[choiceReq->playerID].insert(choiceReq->prompt);
-        }
-        else if (const auto* rangeReq = std::get_if<RangeInputRequest>(&request)) {
-            messages.push_back(GameMessage{
-                GetRangeInputMessage{
-                    rangeReq->playerID,
-                    rangeReq->prompt,
-                    rangeReq->minValue,
-                    rangeReq->maxValue
-                }
-            });
-            m_sentRequests[rangeReq->playerID].insert(rangeReq->prompt);
-        }
-        else if (const auto* voteReq = std::get_if<VoteInputRequest>(&request)) {
-            messages.push_back(GameMessage{
-                GetVoteInputMessage{
-                    voteReq->playerID,
-                    voteReq->prompt,
-                    voteReq->choices
-                }
-            });
-            m_sentRequests[voteReq->playerID].insert(voteReq->prompt);
-        }
-    }
-
-    return messages;
+    return m_pendingRequests;
 }
 
 void
@@ -174,18 +132,18 @@ InputManager::hasRequestedInput(const String& playerID, const String& prompt) co
 }
 
 void
-InputManager::addPendingRequest(InputRequest request)
+InputManager::addPendingRequest(GameMessage request)
 {
-    if (const auto* textReq = std::get_if<TextInputRequest>(&request)) {
+    if (const auto* textReq = std::get_if<GetTextInputMessage>(&request.inner)) {
         m_sentRequests[textReq->playerID].insert(textReq->prompt);
     }
-    else if (const auto* choiceReq = std::get_if<ChoiceInputRequest>(&request)) {
+    else if (const auto* choiceReq = std::get_if<GetChoiceInputMessage>(&request.inner)) {
         m_sentRequests[choiceReq->playerID].insert(choiceReq->prompt);
     }
-    else if (const auto* rangeReq = std::get_if<RangeInputRequest>(&request)) {
+    else if (const auto* rangeReq = std::get_if<GetRangeInputMessage>(&request.inner)) {
         m_sentRequests[rangeReq->playerID].insert(rangeReq->prompt);
     }
-    else if (const auto* voteReq = std::get_if<VoteInputRequest>(&request)) {
+    else if (const auto* voteReq = std::get_if<GetVoteInputMessage>(&request.inner)) {
         m_sentRequests[voteReq->playerID].insert(voteReq->prompt);
     }
 

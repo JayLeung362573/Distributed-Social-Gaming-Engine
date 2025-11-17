@@ -27,8 +27,8 @@ struct GetRangeInputMessage
 {
     String playerID;
     String prompt;
-    int minValue;
-    int maxValue;
+    Integer minValue;
+    Integer maxValue;
 };
 
 struct GetVoteInputMessage
@@ -58,7 +58,7 @@ struct RangeInputMessage
 {
     String playerID;
     String prompt;
-    int value;
+    Integer value;
 };
 
 struct VoteInputMessage
@@ -73,11 +73,11 @@ struct VoteInputMessage
 struct GameMessage
 {
     std::variant<
-        GetChoiceInputMessage, 
+        GetChoiceInputMessage,
         GetTextInputMessage,
         GetRangeInputMessage,
         GetVoteInputMessage,
-        ChoiceInputMessage, 
+        ChoiceInputMessage,
         TextInputMessage,
         RangeInputMessage,
         VoteInputMessage

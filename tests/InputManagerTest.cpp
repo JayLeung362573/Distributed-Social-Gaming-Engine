@@ -57,14 +57,14 @@ TEST_F(InputManagerTest, MultiplePlayers) {
     inputManager.getTextInput(String{"p1"}, String{"Q1"});
     inputManager.getTextInput(String{"p2"}, String{"Q1"});
     inputManager.getTextInput(String{"p3"}, String{"Q1"});
-    
+
     std::vector<GameMessage> responses = {
         GameMessage{TextInputMessage{String{"p1"}, String{"Q1"}, String{"A1"}}},
         GameMessage{TextInputMessage{String{"p2"}, String{"Q1"}, String{"A2"}}},
         GameMessage{TextInputMessage{String{"p3"}, String{"Q1"}, String{"A3"}}}
     };
     inputManager.handleIncomingMessages(responses);
-    
+
     EXPECT_EQ(inputManager.getTextInput(String{"p1"}, String{"Q1"}), String{"A1"});
     EXPECT_EQ(inputManager.getTextInput(String{"p2"}, String{"Q1"}), String{"A2"});
     EXPECT_EQ(inputManager.getTextInput(String{"p3"}, String{"Q1"}), String{"A3"});
@@ -74,9 +74,9 @@ TEST_F(InputManagerTest, ChoiceRequest) {
     List<Value> choices;
     choices.value.push_back(Value{String{"Rock"}});
     choices.value.push_back(Value{String{"Paper"}});
-    
+
     inputManager.getChoiceInput(String{"p1"}, String{"Choose"}, choices);
-    
+
     auto messages = inputManager.getPendingRequests();
     auto* getChoice = std::get_if<GetChoiceInputMessage>(&messages[0].inner);
     ASSERT_NE(getChoice, nullptr);
@@ -87,48 +87,48 @@ TEST_F(InputManagerTest, ChoiceResponse) {
     List<Value> choices;
     choices.value.push_back(Value{String{"Rock"}});
     inputManager.getChoiceInput(String{"p1"}, String{"Choose"}, choices);
-    
+
     std::vector<GameMessage> responses = {
         GameMessage{ChoiceInputMessage{String{"p1"}, String{"Choose"}, String{"Rock"}}}
     };
     inputManager.handleIncomingMessages(responses);
-    
+
     auto response = inputManager.getChoiceInput(String{"p1"}, String{"Choose"}, choices);
     ASSERT_TRUE(response.has_value());
     EXPECT_EQ(*response, String{"Rock"});
 }
 
 TEST_F(InputManagerTest, RangeValid) {
-    inputManager.getRangeInput(String{"p1"}, String{"Pick"}, 1, 10);
-    
+    inputManager.getRangeInput(String{"p1"}, String{"Pick"}, Integer{1}, Integer{10});
+
     std::vector<GameMessage> responses = {
         GameMessage{RangeInputMessage{String{"p1"}, String{"Pick"}, 5}}
     };
     inputManager.handleIncomingMessages(responses);
-    
-    auto response = inputManager.getRangeInput(String{"p1"}, String{"Pick"}, 1, 10);
+
+    auto response = inputManager.getRangeInput(String{"p1"}, String{"Pick"}, Integer{1}, Integer{10});
     ASSERT_TRUE(response.has_value());
-    EXPECT_EQ(*response, 5);
+    EXPECT_EQ(*response, Integer{5});
 }
 
 TEST_F(InputManagerTest, RangeOnOutOfRange) {
     std::vector<GameMessage> responses = {
-        GameMessage{RangeInputMessage{String{"p1"}, String{"Pick"}, 15}}  //out of range
+        GameMessage{RangeInputMessage{String{"p1"}, String{"Pick"}, Integer{15}}}  //out of range
     };
     inputManager.handleIncomingMessages(responses);
-    
+
     EXPECT_THROW({
-        inputManager.getRangeInput(String{"p1"}, String{"Pick"}, 1, 10);
+        inputManager.getRangeInput(String{"p1"}, String{"Pick"}, Integer{1}, Integer{10});
     }, std::runtime_error);
 }
 
 TEST_F(InputManagerTest, ClearPendingRequests) {
     inputManager.getTextInput(String{"p1"}, String{"Q1"});
     inputManager.getTextInput(String{"p2"}, String{"Q2"});
-    
+
     auto messages1 = inputManager.getPendingRequests();
     EXPECT_EQ(messages1.size(), 2);
-    
+
     inputManager.clearPendingRequests();
     auto messages2 = inputManager.getPendingRequests();
     EXPECT_EQ(messages2.size(), 0);
@@ -136,12 +136,12 @@ TEST_F(InputManagerTest, ClearPendingRequests) {
 
 TEST_F(InputManagerTest, ResponsesPersistAfterClear) {
     inputManager.getTextInput(String{"p1"}, String{"Name?"});
-    
+
     std::vector<GameMessage> responses = {
         GameMessage{TextInputMessage{String{"p1"}, String{"Name?"}, String{"Alice"}}}
     };
     inputManager.handleIncomingMessages(responses);
-    
+
     inputManager.clearPendingRequests();
     auto response = inputManager.getTextInput(String{"p1"}, String{"Name?"});
     ASSERT_TRUE(response.has_value());
@@ -158,9 +158,9 @@ TEST_F(InputManagerTest, UnmatchedResponse) {
     std::vector<GameMessage> responses = {
         GameMessage{TextInputMessage{String{"p1"}, String{"Random?"}, String{"Value"}}}
     };
-    
+
     EXPECT_NO_THROW(inputManager.handleIncomingMessages(responses));
-    
+
     auto response = inputManager.getTextInput(String{"p1"}, String{"Random?"});
     EXPECT_TRUE(response.has_value());
 }

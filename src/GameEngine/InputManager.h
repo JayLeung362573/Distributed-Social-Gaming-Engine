@@ -26,8 +26,8 @@ struct RangeInputRequest
 {
     String playerID;
     String prompt;
-    int minValue;
-    int maxValue;
+    Integer minValue;
+    Integer maxValue;
 };
 
 struct VoteInputRequest
@@ -50,7 +50,7 @@ public:
 
     std::optional<String> getTextInput(String playerID, String prompt);
     std::optional<String> getChoiceInput(String playerID, String prompt, const List<Value>& choices);
-    std::optional<int> getRangeInput(String playerID, String prompt, int minValue, int maxValue);
+    std::optional<Integer> getRangeInput(String playerID, String prompt, Integer minValue, Integer maxValue);
     std::optional<String> getVoteInput(String playerID, String prompt, const List<Value>& choices);
 
     void handleIncomingMessages(const std::vector<GameMessage>& messages);

@@ -32,16 +32,16 @@ InputManager::getChoiceInput(String playerID, String prompt, const List<Value>& 
     return std::nullopt;
 }
 
-std::optional<int>
-InputManager::getRangeInput(String playerID, String prompt, int minValue, int maxValue)
+std::optional<Integer>
+InputManager::getRangeInput(String playerID, String prompt, Integer minValue, Integer maxValue)
 {
     auto response = findResponse(playerID, prompt);
     if (response) {
         try {
-            int value = std::stoi(response->value);
-            if (value < minValue || value > maxValue) {
+            Integer value = Integer{std::stoi(response->value)};
+            if (value < minValue || maxValue < value) {
                 std::ostringstream oss;
-                oss << "Range input " << value 
+                oss << "Range input " << value
                     << " is outside valid range (" << minValue << ", " << maxValue << ")";
                 throw std::runtime_error(oss.str());
             }
@@ -73,8 +73,8 @@ InputManager::getVoteInput(String playerID, String prompt, const List<Value>& ch
     return std::nullopt;
 }
 
-void 
-InputManager::handleIncomingMessages(const std::vector<GameMessage>& messages) 
+void
+InputManager::handleIncomingMessages(const std::vector<GameMessage>& messages)
 {
     for (const auto& msg : messages) {
         if (const auto* textInput = std::get_if<TextInputMessage>(&msg.inner)) {
@@ -84,8 +84,8 @@ InputManager::handleIncomingMessages(const std::vector<GameMessage>& messages)
             m_responses[choiceInput->playerID][choiceInput->prompt] = choiceInput->choice;
         }
         else if (const auto* rangeInput = std::get_if<RangeInputMessage>(&msg.inner)) {
-            m_responses[rangeInput->playerID][rangeInput->prompt] = 
-                String{std::to_string(rangeInput->value)};
+            m_responses[rangeInput->playerID][rangeInput->prompt] =
+                String{std::to_string(rangeInput->value.value)};
         }
         else if (const auto* voteInput = std::get_if<VoteInputMessage>(&msg.inner)) {
             m_responses[voteInput->playerID][voteInput->prompt] = voteInput->vote;
@@ -97,7 +97,7 @@ std::vector<GameMessage>
 InputManager::getPendingRequests()
 {
     std::vector<GameMessage> messages;
-    
+
     for (const auto& request : m_pendingRequests) {
         if (const auto* textReq = std::get_if<TextInputRequest>(&request)) {
             messages.push_back(GameMessage{
@@ -108,8 +108,8 @@ InputManager::getPendingRequests()
         else if (const auto* choiceReq = std::get_if<ChoiceInputRequest>(&request)) {
             messages.push_back(GameMessage{
                 GetChoiceInputMessage{
-                    choiceReq->playerID, 
-                    choiceReq->prompt, 
+                    choiceReq->playerID,
+                    choiceReq->prompt,
                     choiceReq->choices
                 }
             });
@@ -118,9 +118,9 @@ InputManager::getPendingRequests()
         else if (const auto* rangeReq = std::get_if<RangeInputRequest>(&request)) {
             messages.push_back(GameMessage{
                 GetRangeInputMessage{
-                    rangeReq->playerID, 
-                    rangeReq->prompt, 
-                    rangeReq->minValue, 
+                    rangeReq->playerID,
+                    rangeReq->prompt,
+                    rangeReq->minValue,
                     rangeReq->maxValue
                 }
             });
@@ -129,15 +129,15 @@ InputManager::getPendingRequests()
         else if (const auto* voteReq = std::get_if<VoteInputRequest>(&request)) {
             messages.push_back(GameMessage{
                 GetVoteInputMessage{
-                    voteReq->playerID, 
-                    voteReq->prompt, 
+                    voteReq->playerID,
+                    voteReq->prompt,
                     voteReq->choices
                 }
             });
             m_sentRequests[voteReq->playerID].insert(voteReq->prompt);
         }
     }
-    
+
     return messages;
 }
 

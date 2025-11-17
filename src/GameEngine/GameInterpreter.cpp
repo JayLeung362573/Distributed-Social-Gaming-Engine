@@ -339,49 +339,24 @@ GameInterpreter::visit(const ast::InputRangeStatement& inputRangeStatement)
     String prompt = inputRangeStatement.getPrompt();
     auto minExpr = inputRangeStatement.getMinValue();
     auto maxExpr = inputRangeStatement.getMaxValue();
-    
+
     String playerID = getPlayerAttribute(*playerVar, String{"id"}).asString();
-    
-    // Evaluate min & max expressions
-    // assume values are constants and handle them as Strings
-    VisitResult minResult = evaluateExpression(*minExpr);
-    VisitResult maxResult = evaluateExpression(*maxExpr);
-    
-    // temporarily convert from String
-    int minValue = 0;
-    int maxValue = 10;
-    
-    // attempt conversion if minExpr is a constant and its value is a string
-    if (auto constMin = ast::castExpressionToConstant(minExpr))
-    {
-        Value minVal = constMin->getValue();
-        if (minVal.isString())
-        {
-            minValue = std::stoi(minVal.asString().value);
-        }
-    }
-    
-    if (auto constMax = ast::castExpressionToConstant(maxExpr))
-    {
-        Value maxVal = constMax->getValue();
-        if (maxVal.isString())
-        {
-            maxValue = std::stoi(maxVal.asString().value);
-        }
-    }
-    
-    auto maybeValue = m_inputManager.getRangeInput(playerID, prompt, minValue, maxValue);
-    
-    if (!maybeValue)
+
+    Value minValue = evaluateExpression(*minExpr).getValue();
+    Value maxValue = evaluateExpression(*maxExpr).getValue();
+
+    auto rangeInput = m_inputManager.getRangeInput(
+        playerID, prompt, minValue.asInteger(), maxValue.asInteger()
+    );
+
+    if (!rangeInput)
     {
         return VisitResult{VisitResult::Status::Pending, {}};
     }
 
-    // numbers are stored as Strings for now
-    Value rangeValue{String{std::to_string(*maybeValue)}};
     auto assignment = ast::makeAssignment(
         ast::cloneExpression(targetExpr),
-        ast::makeConstant(rangeValue)
+        ast::makeConstant(Value{*rangeInput})
     );
     assignment->accept(*this);
 
@@ -396,21 +371,21 @@ GameInterpreter::visit(const ast::InputVoteStatement& inputVoteStatement)
     auto targetExpr = inputVoteStatement.getTarget();
     String prompt = inputVoteStatement.getPrompt();
     auto choicesExpr = inputVoteStatement.getChoices();
-    
+
     String playerID = getPlayerAttribute(*playerVar, String{"id"}).asString();
-    
+
     VisitResult choicesResult = evaluateExpression(*choicesExpr);
     Value& choicesValue = choicesResult.getValue();
-    
+
     if (!choicesValue.isList())
     {
         throw std::runtime_error("Vote choices must evaluate to a list");
     }
-    
+
     List<Value> choices = choicesValue.asList();
-    
+
     auto maybeVote = m_inputManager.getVoteInput(playerID, prompt, choices);
-    
+
     if (!maybeVote)
     {
         return VisitResult{VisitResult::Status::Pending, {}};

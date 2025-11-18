@@ -4,13 +4,15 @@
 
 #include "Types.h"
 #include "VariableMap.h"
+#include "InputManager.h"
 #include "GameMessage.h"
 #include "Rules.h"
 
 class GameInterpreter : public ast::ASTVisitor
 {
     public:
-        GameInterpreter() = default;
+        GameInterpreter(InputManager& inputManager)
+            : m_inputManager(inputManager) {}
 
         VisitResult visit(const ast::ASTNode& node) override;
 
@@ -156,30 +158,22 @@ class GameInterpreter : public ast::ASTVisitor
 
         /**
          * @brief Prompts and stores player text input.
-         *
-         * This method checks for player input in inGameMessages. If there's no input,
-         * it pushes a message to outGameMessages to prompt the player. If input is
-         * found, it assigns the input to the target variable or attribute.
-         *
-         * Note: This setup with the in/out messages may not be very practical??
-         *       Might add complexity if we need to handle not sending duplicate messages.
-         *       Maybe we need some kind of InputManager?
-         *
-         * @param inputTextStatement The InputTextStatement to visit.
-         * @return VisitResult Status of the input processing (Done or Pending).
-         *
-         * @pre The player variable exists in the Variable Map and has an "id" attribute.
-         * @post The player's input is assigned to the target variable or attribute.
          */
-        VisitResult visit(const ast::InputTextStatement& inputTextStatement) override;
-
-        void setInGameMessages(const std::vector<GameMessage>& inGameMessages);
-        std::vector<GameMessage> consumeOutGameMessages();
+        VisitResult visit(const ast::InputText& inputText) override;
+        /**
+         * @brief Prompts and stores player choice input.
+         */
+        VisitResult visit(const ast::InputChoice& inputChoice) override;
+        /**
+         * @brief Prompts and stores player range input.
+         */
+        VisitResult visit(const ast::InputRange& inputRange) override;
+        /**
+         * @brief Prompts and stores player vote input.
+         */
+        VisitResult visit(const ast::InputVote& inputVote) override;
 
     private:
-        std::optional<TextInputMessage>
-        getTextInputMsg(String playerID, String prompt) const;
-
         Value
         getPlayerAttribute(const ast::Variable& playerVar, String attr);
 
@@ -206,7 +200,5 @@ class GameInterpreter : public ast::ASTVisitor
 
     private:
         VariableMap m_variableMap;
-
-        std::vector<GameMessage> m_inGameMessages;
-        std::vector<GameMessage> m_outGameMessages;
+        InputManager& m_inputManager;
 };

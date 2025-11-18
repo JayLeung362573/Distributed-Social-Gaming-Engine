@@ -32,6 +32,7 @@ add_executable(unit_tests
   RulesTest.cpp
   GameSpecLoaderTest.cpp
   LobbyRegistryTest.cpp
+  InputManagerTest.cpp
 )
 
 # Link with gtest (the Quickstart uses GTest::gtest_main)
@@ -42,7 +43,7 @@ target_compile_features(unit_tests PRIVATE cxx_std_23)
 target_include_directories(unit_tests PRIVATE
         ${PROJECT_SOURCE_DIR}/src
         ${PROJECT_SOURCE_DIR}/src/lib)
-        
+
 # Use CTest integration (can use to discover tests automatically)
 include(GoogleTest)
 gtest_discover_tests(unit_tests)

@@ -73,9 +73,9 @@ TEST(MatchTest, NoMatch)
     interpreter.execute();
 
     EXPECT_THROW({
-        // x shouldn't be defined because assignment statement shouldn't have executed
-        loadVariable(interpreter, Name{"x"});
-    }, std::runtime_error);
+                     // x shouldn't be defined because assignment statement shouldn't have executed
+                     loadVariable(interpreter, Name{"x"});
+                 }, std::runtime_error);
 }
 
 

@@ -46,4 +46,10 @@ target_include_directories(unit_tests PRIVATE
 
 # Use CTest integration (can use to discover tests automatically)
 include(GoogleTest)
-gtest_discover_tests(unit_tests)
+
+gtest_discover_tests(unit_tests
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
+
+
+

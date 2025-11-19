@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.28.2)
 
 project(main)
 
+# Define GAMES_DIR macro to point to the games directory
+add_compile_definitions(GAMES_DIR="${CMAKE_SOURCE_DIR}/games")
+
 # Default to Debug build if not specified
 if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug CACHE

@@ -280,7 +280,19 @@ GameServer::handleStartGameMessages(uintptr_t clientID, const StartGameMessage& 
 
 std::vector<ClientMessage>
 GameServer::tick(const std::vector<ClientMessage> &incomingMessages) {
-    return handleClientMessages(incomingMessages);
+    std::vector<ClientMessage> outgoing = handleClientMessages(incomingMessages);
+
+    for (auto& [lobbyID, session] : m_activeSessions) {
+
+        auto sessionUpdates = session->tick(incomingMessages);
+
+        outgoing.insert(outgoing.end(), sessionUpdates.begin(), sessionUpdates.end());
+
+        if (session->isFinished()) {
+            /// TODO: handle game end
+        }
+    }
+    return outgoing;
 }
 
 ast::GameRules

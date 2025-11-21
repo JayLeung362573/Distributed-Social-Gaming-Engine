@@ -6,6 +6,7 @@
 #include "Message.h"
 #include "Lobby.h"
 #include "LobbyRegistry.h"
+#include "GameSession.h"
 
 
 class NetworkingInterface;
@@ -31,4 +32,6 @@ public:
 
 private:
     LobbyRegistry m_lobbyRegistry;
+    std::unordered_map<LobbyID, std::unique_ptr<GameSession>> m_activeSessions;
+    ast::GameRules createGameRules();
 };

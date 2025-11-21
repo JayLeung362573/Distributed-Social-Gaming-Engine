@@ -10,7 +10,7 @@
 enum class MessageType : uint8_t
 {
     Empty = 0,
-    JoinGame,
+    StartGame,
     UpdateCycle,
 
     /// Lobby messages

@@ -15,7 +15,8 @@
  */
 class GameRuntime {
     public:
-        GameRuntime(ast::GameRules& rules) : m_interpreter(rules) {}
+        // Use explicit constructor to enforce a single construction, preventing deviation
+        explicit GameRuntime(ast::GameRules& rules) : m_interpreter(rules) {}
 
         // Run all rules of the game.
         // TODO: Doesn't support inputting or outputting game messages, because
@@ -28,7 +29,11 @@ class GameRuntime {
             {
                 throw std::runtime_error("Calling run() on a finished game");
             }
-            m_interpreter.run();
+            try { // employ try/catch wrapping to fast fail bugs 
+                m_interpreter.run();
+            } catch (const std::exception& e) {
+                throw std::runtime_error(std::string("[Game Runtime] Runtime error: ") + e.what());
+            }
         }
 
         // getGameState (read-only)

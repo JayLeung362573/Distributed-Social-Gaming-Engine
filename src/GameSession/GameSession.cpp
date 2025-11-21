@@ -13,6 +13,12 @@ GameSession::GameSession(LobbyID lobbyID, ast::GameRules rules, std::vector<Lobb
 
 void
 GameSession::start() {
+    // Ensure m_runtime is available
+    if (!m_runtime || m_runtime == nullptr) {
+        std::cerr << "[GameSession] No runtime available\n";
+        return;
+    }
+
     if(m_runtime->isFinished()){
         std::cout << "[GameSession] Cannot start: already finished or inactive\n";
         return;
@@ -20,7 +26,11 @@ GameSession::start() {
     // TODO: simulate simple game without player input first
 
     // TODO: then use tick() with player input
-    m_runtime->run();
+    try { // employ try/catch wrapping to fast fail bugs 
+        m_runtime->run();
+    } catch (const std::exception& e) {
+        std::cerr << "[GameSession] Runtime error: " << e.what() << "\n";
+    }
 
     std::cout << "[GameSession] Game for lobby " << m_lobbyID << " finished\n";
 }

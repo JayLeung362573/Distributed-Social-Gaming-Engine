@@ -31,6 +31,7 @@ add_executable(unit_tests
   GameInterpreterTests/ProgramTest.cpp
   TypesTest.cpp
   RulesTest.cpp
+  MessageTranslatorTest.cpp
   GameSpecLoaderTest.cpp
   LobbyRegistryTest.cpp
   InputManagerTest.cpp

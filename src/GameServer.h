@@ -30,6 +30,9 @@ public:
     std::vector<ClientMessage> handleGetLobbyStateMessages(uintptr_t clientID, const GetLobbyStateMessage& getLobbyMsg) const;
     std::vector<ClientMessage> handleBrowseLobbiesMessages(uintptr_t clientID, const BrowseLobbiesMessage& browseLobbyMsg) const;
 
+    // Getters functions for testing purposes
+    size_t getActiveSessionCountForTest() const { return m_activeSessions.size(); }
+    LobbyRegistry* getLobbyRegistryForTest() { return &m_lobbyRegistry; }
 private:
     LobbyRegistry m_lobbyRegistry;
     std::unordered_map<LobbyID, std::unique_ptr<GameSession>> m_activeSessions;

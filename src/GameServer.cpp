@@ -26,8 +26,8 @@ struct MessageHandlerVisitor {
         responses = server->handleBrowseLobbiesMessages(clientID, data);
     }
 
-    void operator()(const JoinGameMessage& data) {
-        responses = server->handleJoinGameMessages(clientID, data);
+    void operator()(const StartGameMessage& data) {
+        responses = server->handleStartGameMessages(clientID, data);
     }
 
     void operator()(const std::monostate& data) {}
@@ -204,14 +204,14 @@ GameServer::handleBrowseLobbiesMessages(uintptr_t clientID, const BrowseLobbiesM
 }
 
 std::vector<ClientMessage>
-GameServer::handleJoinGameMessages(uintptr_t clientID, const JoinGameMessage& joinGameMsg){
+GameServer::handleStartGameMessages(uintptr_t clientID, const StartGameMessage& joinGameMsg){
     std::cout << "[GameServer] JoinGame: " << joinGameMsg.playerName << "\n";
 
     // TODO start the game
 
     Message response;
     response.type = MessageType::JoinGame;
-    response.data = JoinGameMessage{joinGameMsg.playerName};
+    response.data = StartGameMessage{joinGameMsg.playerName};
     return {ClientMessage{clientID, response}};
 }
 

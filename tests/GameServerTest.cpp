@@ -6,7 +6,7 @@ TEST(GameServerTest, SingleClientJoinGame){
     GameServer server;
 
     std::vector<ClientMessage> incoming = {
-            {1, {MessageType::JoinGame, JoinGameMessage{"player 1"}}}
+            {1, {MessageType::JoinGame, StartGameMessage{"player 1"}}}
     };
 
     std::vector<ClientMessage> outgoingMsg = server.tick(incoming);
@@ -16,7 +16,7 @@ TEST(GameServerTest, SingleClientJoinGame){
     ASSERT_EQ(outgoingMsg[0].message.type, MessageType::JoinGame);
 
     auto& firstResponse = outgoingMsg[0];
-    auto& responseMsg = std::get<JoinGameMessage>(firstResponse.message.data);
+    auto& responseMsg = std::get<StartGameMessage>(firstResponse.message.data);
     ASSERT_EQ(responseMsg.playerName, "player 1");
 }
 
@@ -24,9 +24,9 @@ TEST(GameServerTest, MultipleClientsJoinGame){
     GameServer server;
 
     std::vector<ClientMessage> incoming = {
-            {1, {MessageType::JoinGame, JoinGameMessage{"player 1"}}},
-            {2, {MessageType::JoinGame, JoinGameMessage{"player 2"}}},
-            {3, {MessageType::JoinGame, JoinGameMessage{"player 3"}}},
+            {1, {MessageType::JoinGame, StartGameMessage{"player 1"}}},
+            {2, {MessageType::JoinGame, StartGameMessage{"player 2"}}},
+            {3, {MessageType::JoinGame, StartGameMessage{"player 3"}}},
 
     };
 

@@ -9,7 +9,7 @@
 TEST(GameInterpreterTest, InputTextStatementOutputsMessageToGetInput)
 {
     InputManager inputManager;
-    GameInterpreter interpreter(inputManager);
+    GameInterpreter interpreter(inputManager, {});
 
     Map<String, Value> playerMap{};
     Name playerMapName{"player"};
@@ -29,11 +29,9 @@ TEST(GameInterpreterTest, InputTextStatementOutputsMessageToGetInput)
     );
 
     VisitResult result = inputTextStmt->accept(interpreter);
-    EXPECT_TRUE(result.isPending());
     EXPECT_FALSE(result.hasValue());
 
     std::vector<GameMessage> outMessages = inputManager.getPendingRequests();
-    //std::vector<GameMessage> outMessages = interpreter.consumeOutGameMessages();
     ASSERT_EQ(outMessages.size(), 1);
 
     auto& msg = outMessages[0].inner;
@@ -47,7 +45,7 @@ TEST(GameInterpreterTest, InputTextStatementOutputsMessageToGetInput)
 TEST(GameInterpreterTest, InputTextStatementHandlesInput)
 {
     InputManager inputManager;
-    GameInterpreter interpreter(inputManager);
+    GameInterpreter interpreter(inputManager, {});
 
     Map<String, Value> playerMap{};
     Name playerMapName{"player"};
@@ -73,11 +71,9 @@ TEST(GameInterpreterTest, InputTextStatementHandlesInput)
     };
 
     std::vector<GameMessage> inMessages{GameMessage{giveInputMsg}};
-    //interpreter.setInGameMessages(inMessages);
     inputManager.handleIncomingMessages(inMessages);
 
     VisitResult result = inputTextStmt->accept(interpreter);
-    EXPECT_TRUE(result.isDone());
     EXPECT_FALSE(result.hasValue());
 
     std::vector<GameMessage> outMessages = inputManager.getPendingRequests();

@@ -9,7 +9,7 @@
 TEST(ExtendTest, ExtendList)
 {
     InputManager inputManager;
-    GameInterpreter interpreter(inputManager);
+    GameInterpreter interpreter(inputManager, {});
 
     List<Value> list1{Value{String{"a"}}, Value{String{"b"}}};
     List<Value> list2{Value{String{"c"}}};
@@ -38,7 +38,7 @@ TEST(ExtendTest, ExtendList)
 TEST(ExtendTest, ExtendTargetNotAList)
 {
     InputManager inputManager;
-    GameInterpreter interpreter(inputManager);
+    GameInterpreter interpreter(inputManager, {});
 
     List<Value> list{Value{String{"c"}}};
 
@@ -61,7 +61,7 @@ TEST(ExtendTest, ExtendTargetNotAList)
 TEST(ExtendTest, ExtendValueNotAList)
 {
     InputManager inputManager;
-    GameInterpreter interpreter(inputManager);
+    GameInterpreter interpreter(inputManager, {});
 
     List<Value> list{Value{String{"a"}}, Value{String{"b"}}};
 

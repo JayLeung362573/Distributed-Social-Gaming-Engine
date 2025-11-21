@@ -9,7 +9,7 @@
 TEST(UnaryOperationTest, NotOnFalse)
 {
     InputManager inputManager;
-    GameInterpreter interpreter(inputManager);
+    GameInterpreter interpreter(inputManager, {});
 
     auto unaryOp = ast::makeUnaryOperation(
         // false
@@ -30,7 +30,7 @@ TEST(UnaryOperationTest, NotOnFalse)
 TEST(UnaryOperationTest, NotOnTrue)
 {
     InputManager inputManager;
-    GameInterpreter interpreter(inputManager);
+    GameInterpreter interpreter(inputManager, {});
 
     auto unaryOp = ast::makeUnaryOperation(
         // true

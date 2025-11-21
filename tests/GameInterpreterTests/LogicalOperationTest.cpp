@@ -9,7 +9,7 @@
 TEST(LogicalOperationTest, OrIsTrue)
 {
     InputManager inputManager;
-    GameInterpreter interpreter(inputManager);
+    GameInterpreter interpreter(inputManager, {});
 
     auto logicalOp = ast::makeLogicalOperation(
         // false
@@ -36,7 +36,7 @@ TEST(LogicalOperationTest, OrIsTrue)
 TEST(LogicalOperationTest, OrIsFalse)
 {
     InputManager inputManager;
-    GameInterpreter interpreter(inputManager);
+    GameInterpreter interpreter(inputManager, {});
 
     auto logicalOp = ast::makeLogicalOperation(
         // false

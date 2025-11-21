@@ -9,38 +9,37 @@
 TEST(MatchTest, MatchWithMultipleCandidates)
 {
     InputManager inputManager;
-    GameInterpreter interpreter(inputManager);
 
+    ast::StatementsBuilder programBuilder;
     ast::StatementsBuilder statementsBuilder;
     ast::MatchBuilder matchBuilder;
 
-    auto match = matchBuilder
-                .setTarget(ast::makeConstant(Value{String{"2"}}))
-                .addCandidatePair(
-                    {
-                        ast::makeConstant(Value{String{"1"}}),
-                        statementsBuilder.addStatement(
-                            ast::makeAssignment(
-                                ast::makeVariable(Name{"x"}),
-                                ast::makeConstant(Value{String{"Path 1 taken!"}})
-                            )
-                        ).build()
-                    }
-                )
-                .addCandidatePair(
-                    {
-                        ast::makeConstant(Value{String{"2"}}),
-                        statementsBuilder.addStatement(
-                            ast::makeAssignment(
-                                ast::makeVariable(Name{"x"}),
-                                ast::makeConstant(Value{String{"Path 2 taken!"}})
-                            )
-                        ).build()
-                    }
-                )
-                .build();
+    auto statements = programBuilder
+        .addStatement(
+            matchBuilder
+            .setTarget(ast::makeConstant(Value{String{"2"}}))
+            .addCandidatePair(
+                ast::makeConstant(Value{String{"1"}}),
+                statementsBuilder.addStatement(
+                    ast::makeAssignment(
+                        ast::makeVariable(Name{"x"}),
+                        ast::makeConstant(Value{String{"Path 1 taken!"}})
+                    )
+                ).build()
+            ).addCandidatePair(
+                ast::makeConstant(Value{String{"2"}}),
+                statementsBuilder.addStatement(
+                    ast::makeAssignment(
+                        ast::makeVariable(Name{"x"}),
+                        ast::makeConstant(Value{String{"Path 2 taken!"}})
+                    )
+                ).build()
+            ).build()
+        ).build();
 
-    doMatch(interpreter, std::move(match));
+    GameInterpreter interpreter(inputManager, Program{std::move(statements)});
+
+    interpreter.execute();
 
     auto storedX = loadVariable(interpreter, Name{"x"});
     EXPECT_EQ(storedX.asString(), String{"Path 2 taken!"});
@@ -49,27 +48,29 @@ TEST(MatchTest, MatchWithMultipleCandidates)
 TEST(MatchTest, NoMatch)
 {
     InputManager inputManager;
-    GameInterpreter interpreter(inputManager);
 
+    ast::StatementsBuilder programBuilder;
     ast::StatementsBuilder statementsBuilder;
     ast::MatchBuilder matchBuilder;
 
-    auto match = matchBuilder
-                .setTarget(ast::makeConstant(Value{String{"2"}}))
-                .addCandidatePair(
-                    {
-                        ast::makeConstant(Value{String{"1"}}),
-                        statementsBuilder.addStatement(
-                            ast::makeAssignment(
-                                ast::makeVariable(Name{"x"}),
-                                ast::makeConstant(Value{String{"Path 1 taken!"}})
-                            )
-                        ).build()
-                    }
-                )
-                .build();
+    auto statements = programBuilder
+        .addStatement(
+            matchBuilder
+            .setTarget(ast::makeConstant(Value{String{"2"}}))
+            .addCandidatePair(
+                ast::makeConstant(Value{String{"1"}}),
+                statementsBuilder.addStatement(
+                    ast::makeAssignment(
+                        ast::makeVariable(Name{"x"}),
+                        ast::makeConstant(Value{String{"Path 1 taken!"}})
+                    )
+                ).build()
+            ).build()
+        ).build();
 
-    doMatch(interpreter, std::move(match));
+    GameInterpreter interpreter(inputManager, Program{std::move(statements)});
+
+    interpreter.execute();
 
     EXPECT_THROW({
         // x shouldn't be defined because assignment statement shouldn't have executed
@@ -81,32 +82,34 @@ TEST(MatchTest, NoMatch)
 TEST(MatchTest, MultipleStatements)
 {
     InputManager inputManager;
-    GameInterpreter interpreter(inputManager);
 
+    ast::StatementsBuilder programBuilder;
     ast::StatementsBuilder statementsBuilder;
     ast::MatchBuilder matchBuilder;
 
-    auto match = matchBuilder
-                .setTarget(ast::makeConstant(Value{String{"1"}}))
-                .addCandidatePair(
-                    {
-                        ast::makeConstant(Value{String{"1"}}),
-                        statementsBuilder.addStatement(
-                            ast::makeAssignment(
-                                ast::makeVariable(Name{"x"}),
-                                ast::makeConstant(Value{String{"Path 1 taken!"}})
-                            )
-                        ).addStatement(
-                            ast::makeAssignment(
-                                ast::makeVariable(Name{"y"}),
-                                ast::makeConstant(Value{String{"Path 1 taken!"}})
-                            )
-                        ).build()
-                    }
-                )
-                .build();
+    auto statements = programBuilder
+        .addStatement(
+            matchBuilder
+            .setTarget(ast::makeConstant(Value{String{"1"}}))
+            .addCandidatePair(
+                ast::makeConstant(Value{String{"1"}}),
+                statementsBuilder.addStatement(
+                    ast::makeAssignment(
+                        ast::makeVariable(Name{"x"}),
+                        ast::makeConstant(Value{String{"Path 1 taken!"}})
+                    )
+                ).addStatement(
+                    ast::makeAssignment(
+                        ast::makeVariable(Name{"y"}),
+                        ast::makeConstant(Value{String{"Path 1 taken!"}})
+                    )
+                ).build()
+            ).build()
+        ).build();
 
-    doMatch(interpreter, std::move(match));
+    GameInterpreter interpreter(inputManager, Program{std::move(statements)});
+
+    interpreter.execute();
 
     auto storedX = loadVariable(interpreter, Name{"x"});
     auto storedY = loadVariable(interpreter, Name{"y"});
@@ -117,38 +120,37 @@ TEST(MatchTest, MultipleStatements)
 TEST(MatchTest, MatchesMoreThanOneCandidate)
 {
     InputManager inputManager;
-    GameInterpreter interpreter(inputManager);
 
+    ast::StatementsBuilder programBuilder;
     ast::StatementsBuilder statementsBuilder;
     ast::MatchBuilder matchBuilder;
 
-    auto match = matchBuilder
-                .setTarget(ast::makeConstant(Value{String{"1"}}))
-                .addCandidatePair(
-                    {
-                        ast::makeConstant(Value{String{"1"}}),
-                        statementsBuilder.addStatement(
-                            ast::makeAssignment(
-                                ast::makeVariable(Name{"x"}),
-                                ast::makeConstant(Value{String{"Path 1a taken!"}})
-                            )
-                        ).build()
-                    }
-                )
-                .addCandidatePair(
-                    {
-                        ast::makeConstant(Value{String{"1"}}),
-                        statementsBuilder.addStatement(
-                            ast::makeAssignment(
-                                ast::makeVariable(Name{"x"}),
-                                ast::makeConstant(Value{String{"Path 1b taken!"}})
-                            )
-                        ).build()
-                    }
-                )
-                .build();
+    auto statements = programBuilder
+        .addStatement(
+            matchBuilder
+            .setTarget(ast::makeConstant(Value{String{"1"}}))
+            .addCandidatePair(
+                    ast::makeConstant(Value{String{"1"}}),
+                    statementsBuilder.addStatement(
+                        ast::makeAssignment(
+                            ast::makeVariable(Name{"x"}),
+                            ast::makeConstant(Value{String{"Path 1a taken!"}})
+                        )
+                    ).build()
+            ).addCandidatePair(
+                ast::makeConstant(Value{String{"1"}}),
+                statementsBuilder.addStatement(
+                    ast::makeAssignment(
+                        ast::makeVariable(Name{"x"}),
+                        ast::makeConstant(Value{String{"Path 1b taken!"}})
+                    )
+                ).build()
+            ).build()
+        ).build();
 
-    doMatch(interpreter, std::move(match));
+    GameInterpreter interpreter(inputManager, Program{std::move(statements)});
+
+    interpreter.execute();
 
     auto storedX = loadVariable(interpreter, Name{"x"});
     EXPECT_EQ(storedX.asString(), String{"Path 1a taken!"}); // breaks on first match

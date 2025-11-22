@@ -297,7 +297,7 @@ class GameInterpreter : public ast::ASTVisitor
 
         void execute();
 
-        bool needsIO();
+        bool needsIO() const;
 
     private:
         Value

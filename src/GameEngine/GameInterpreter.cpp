@@ -331,7 +331,7 @@ GameInterpreter::isLessThan(const Value& left, const Value& right)
 }
 
 bool
-GameInterpreter::needsIO()
+GameInterpreter::needsIO() const
 {
     return m_inputManager.getPendingRequests().size() > 0;
 }

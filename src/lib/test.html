@@ -76,6 +76,22 @@
                 $('#send').click();
             });
 
+            $('#sendRock').click(function() {
+                sendMessage.value = "ResponseChoiceInput:Rock|p1_choice";
+                $('#send').click();
+            });
+
+            $('#sendPaper').click(function() {
+                sendMessage.value = "ResponseChoiceInput:Paper|p1_choice";
+                $('#send').click();
+            });
+
+            $('#sendScissors').click(function() {
+                sendMessage.value = "ResponseChoiceInput:Scissors|p1_choice";
+                $('#send').click();
+            });
+
+
         });
     </script>
 </head>
@@ -100,6 +116,13 @@ Chat Server: <input id="uri" size="40">
     Quick Actions:<br />
     <button id="joinLobby">Join Lobby as Player1</button>
     <button id="startGame">Start Game</button>
+</div>
+
+<div style="margin-top: 10px;">
+    Game Inputs (Player 1):<br />
+    <button id="sendRock">Rock</button>
+    <button id="sendPaper">Paper</button>
+    <button id="sendScissors">Scissors</button>
 </div>
 
 </body>

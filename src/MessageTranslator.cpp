@@ -38,12 +38,20 @@ struct MessageTraits<JoinLobbyMessage> {
     static constexpr std::string_view prefix = "JoinLobby:";
 
     static std::string serialize(const JoinLobbyMessage& d) {
-        return std::string(prefix) + d.playerName;
+        return std::string(prefix) + d.playerName + "|" + d.lobbyName;
     }
 
     static Message deserialize(const std::string& payload) {
-        std::string name = payload.substr(prefix.size());
-        return { MessageType::JoinLobby, JoinLobbyMessage{name}};
+        std::string content = payload.substr(prefix.size());
+        size_t delimiter = content.find('|');
+
+        if (delimiter == std::string::npos) {
+            return { MessageType::JoinLobby, JoinLobbyMessage{content, ""} };
+        } else {
+            std::string playerName = content.substr(0, delimiter);
+            std::string lobbyName = content.substr(delimiter + 1);
+            return { MessageType::JoinLobby, JoinLobbyMessage{playerName, lobbyName} };
+        }
     }
 };
 

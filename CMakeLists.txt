@@ -2,14 +2,8 @@ cmake_minimum_required(VERSION 3.28.2)
 
 project(main)
 
-<<<<<<< HEAD
 # Define GAMES_DIR macro to point to the games directory
 add_compile_definitions(GAMES_DIR="${CMAKE_SOURCE_DIR}/games")
-=======
-# Ensure targets (including external/static deps) are built with position independent code
-# This helps avoid "recompile with -fPIC" errors when linking static libraries into shared ones
-set(CMAKE_POSITION_INDEPENDENT_CODE ON CACHE BOOL "Build all targets with position independent code (PIC)" FORCE)
->>>>>>> 1f80f4e (added flag to help with compilation error related to linking static libraries)
 
 # Default to Debug build if not specified
 if (NOT CMAKE_BUILD_TYPE)

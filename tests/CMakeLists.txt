@@ -47,7 +47,6 @@ target_include_directories(unit_tests PRIVATE
 
 # Use CTest integration (can use to discover tests automatically)
 include(GoogleTest)
-<<<<<<< HEAD
 
 gtest_discover_tests(unit_tests
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
@@ -55,7 +54,6 @@ gtest_discover_tests(unit_tests
 
 
 
-=======
 gtest_discover_tests(unit_tests)
 
 add_executable(Logger_test
@@ -66,4 +64,3 @@ target_include_directories(Logger_test PRIVATE ${PROJECT_SOURCE_DIR}/src ${PROJE
 target_compile_features(Logger_test PRIVATE cxx_std_23)
 include(GoogleTest)
 gtest_discover_tests(Logger_test)
->>>>>>> 70e18e4 (made logger work with cmake without external repo directory)

@@ -286,7 +286,9 @@ GameServer::tick(const std::vector<ClientMessage> &incomingMessages) {
 
         auto sessionUpdates = session->tick(incomingMessages);
 
-        outgoing.insert(outgoing.end(), sessionUpdates.begin(), sessionUpdates.end());
+        outgoing.insert(outgoing.end(),
+                        sessionUpdates.begin(),
+                        sessionUpdates.end());
 
         if (session->isFinished()) {
             /// TODO: handle game end

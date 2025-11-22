@@ -19,13 +19,6 @@ int main(int argc, char* argv[])
         std::cout << "Using Web socket network" << "\n";
     }
 
-    int CLIENT_1_ID = 100;
-    int CLIENT_2_ID = 101;
-
-    // Send JoinGame messages from clients to server
-    Message msg1{ MessageType::StartGame, StartGameMessage{"joe"} };
-    Message msg2{ MessageType::StartGame, StartGameMessage{"amy"} };
-
     if (useWebSocket) {
         auto networking = std::make_shared<WebSocketNetworking>(8080, "../test.html");
         auto server = std::make_unique<GameServer>();
@@ -55,17 +48,7 @@ int main(int argc, char* argv[])
                 networking->sendToClient(clientMsg.clientID, clientMsg.message);
             }
 
-            auto now = std::chrono::steady_clock::now();
-            if (now - last >= std::chrono::seconds(1)) {
-                auto clientIDs = networking->getConnectedClientIDs();
-                Message updateMsg{MessageType::UpdateCycle, UpdateCycleMessage{cycle}};
-                for(uintptr_t clientID : clientIDs){
-                    networking->sendToClient(clientID, updateMsg);
-                }
-                cycle++;
-                last = now;
-            }
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            std::this_thread::sleep_for(std::chrono::milliseconds(16));
         }
     }
     return 0;

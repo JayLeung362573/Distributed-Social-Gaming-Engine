@@ -8,7 +8,7 @@ struct MessageTraits;
 template<>
 struct MessageTraits<StartGameMessage> {
     // Call statics to enable compile time, so we don't need to instantiate the object and just use it as a container
-    static constexpr std::string_view prefix = "JoinGame:"; // instiatiate it as pure compile time constant
+    static constexpr std::string_view prefix = "StartGame:"; // instiatiate it as pure compile time constant
     static std::string serialize(const StartGameMessage& d) {
         return std::string(prefix) + d.playerName;
     }

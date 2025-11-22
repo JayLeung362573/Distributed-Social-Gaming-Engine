@@ -5,7 +5,7 @@
 #include <string>
 #include <cstdint>
 #include <utility>
-#include "Lobby.h"
+#include "Lobby/Lobby.h"
 
 enum class MessageType : uint8_t
 {

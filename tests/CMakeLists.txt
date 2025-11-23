@@ -14,6 +14,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/tests")
 # Copy game files to build/tests/games for testing
 file(COPY ${CMAKE_SOURCE_DIR}/games
         DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+# Also copy to build/ so tests work when run from there
+file(COPY ${CMAKE_SOURCE_DIR}/games
+        DESTINATION ${PROJECT_BINARY_DIR})
 
 FetchContent_MakeAvailable(googletest)
 

@@ -390,8 +390,10 @@ GameInterpreter::visit(const ast::InputChoice& inputChoice)
     auto maybeChoice = m_inputManager.getChoiceInput(playerID, prompt, choices);
     if (!maybeChoice)
     {
+        m_waitingForInput = true;
         return {};
     }
+    m_waitingForInput = false;
 
     Value choiceValue{*maybeChoice};
     auto assignment = ast::makeAssignment(
@@ -423,8 +425,10 @@ GameInterpreter::visit(const ast::InputRange& inputRange)
 
     if (!maybeRange)
     {
+        m_waitingForInput = true;
         return {};
     }
+    m_waitingForInput = false;
 
     auto assignment = ast::makeAssignment(
         ast::cloneExpression(targetExpr),
@@ -459,8 +463,10 @@ GameInterpreter::visit(const ast::InputVote& inputVote)
 
     if (!maybeVote)
     {
+        m_waitingForInput = true;
         return {};
     }
+    m_waitingForInput = false;
 
     Value voteValue{*maybeVote};
     auto assignment = ast::makeAssignment(

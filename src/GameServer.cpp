@@ -322,17 +322,74 @@ ast::GameRules
 GameServer::createGameRules() {
     std::vector<std::unique_ptr<ast::Statement>> statements;
 
-    auto playerVar = ast::makeVariable(Name{"player1"});
+    auto player1Var = ast::makeVariable(Name{"player1"});
+    auto player2Var = ast::makeVariable(Name{"player2"});
 
-    auto targetVar = ast::makeVariable(Name{"response"});
+    /// ask player 1 and 2 for number input
+    statements.push_back(ast::makeInputRange(
+            ast::cloneVariable(player1Var.get()),
+            ast::makeVariable(Name{"p1_val"}),
+            String{"Player1: Enter your number"},
+            ast::makeConstant(Value{Integer{0}}),
+            ast::makeConstant(Value{Integer{100}})
+            ));
+    statements.push_back(ast::makeInputRange(
+            ast::cloneVariable(player2Var.get()),
+            ast::makeVariable(Name{"p2_val"}),
+            String{"Player2: Enter your number"},
+            ast::makeConstant(Value{Integer{0}}),
+            ast::makeConstant(Value{Integer{100}})
+    ));
 
-    statements.push_back(
-            ast::makeInputText(
-                    std::move(playerVar),
-                    std::move(targetVar),
-                    String{"What is your name?"}
-            )
+    std::vector<ast::Match::Candidate> candidates;
+
+    auto P1Wins = ast::makeComparison(
+            ast::makeVariable(Name{"p2_val"}),
+            ast::makeVariable(Name{"p1_val"}),
+            ast::Comparison::Kind::LT
     );
+    std::vector<std::unique_ptr<ast::Statement>> statementP1Wins;
+    statementP1Wins.push_back(ast::makeInputText(
+            ast::cloneVariable(player1Var.get()),
+            ast::makeVariable(Name{"result"}),
+            String{"You WON!"}
+    ));
+
+    candidates.push_back({std::move(P1Wins), std::move(statementP1Wins)});
+
+    auto P2Wins = ast::makeComparison(
+            ast::makeVariable(Name{"p1_val"}),
+            ast::makeVariable(Name{"p2_val"}),
+            ast::Comparison::Kind::LT
+    );
+    std::vector<std::unique_ptr<ast::Statement>> statementP2Wins;
+    statementP2Wins.push_back(ast::makeInputText(
+            ast::cloneVariable(player2Var.get()),
+            ast::makeVariable(Name{"result"}),
+            String{"You WON!"}
+    ));
+
+    candidates.push_back({std::move(P2Wins), std::move(statementP2Wins)});
+
+    auto Tie = ast::makeComparison(
+            ast::makeVariable(Name{"p1_val"}),
+            ast::makeVariable(Name{"p2_val"}),
+            ast::Comparison::Kind::EQ
+    );
+    std::vector<std::unique_ptr<ast::Statement>> statementTie;
+    statementTie.push_back(ast::makeInputText(
+            ast::cloneVariable(player1Var.get()),
+            ast::makeVariable(Name{"result"}),
+            String{"It is a TIE!"}
+    ));
+
+    candidates.push_back({std::move(Tie), std::move(statementTie)});
+
+    statements.push_back(ast::makeMatch(
+            ast::makeConstant(Value{Boolean{true}}),
+            std::move(candidates)
+    ));
+
     std::cout << "[GameServer] Created simple game with "
               << statements.size() << " statements\n";
 

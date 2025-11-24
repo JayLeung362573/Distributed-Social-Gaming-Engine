@@ -50,6 +50,10 @@ struct MessageHandlerVisitor {
     void operator()(const RequestTextInputMessage&) {}
     void operator()(const RequestChoiceInputMessage&) {}
     void operator()(const RequestRangeInputMessage&) {}
+
+    // Game output and game over message
+    void operator()(const GameOutputMessage&) {}
+    void operator()(const GameOverMessage&) {}
 };
 
 std::vector<ClientMessage>

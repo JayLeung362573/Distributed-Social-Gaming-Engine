@@ -30,6 +30,10 @@ enum class MessageType : uint8_t
     ResponseTextInput,
     ResponseChoiceInput,
     ResponseRangeInput,
+
+    /// game message/prompt from the game
+    GameOutput,
+    GameOver,
 };
 
 struct StartGameMessage
@@ -98,6 +102,14 @@ struct ResponseRangeInputMessage {
     std::string promptRef;
 };
 
+struct GameOutputMessage{
+    std::string message;
+};
+
+struct GameOverMessage{
+    std::string winner;
+};
+
 using MessageData = std::variant<
         std::monostate,
         StartGameMessage,
@@ -116,7 +128,10 @@ using MessageData = std::variant<
 
         ResponseTextInputMessage,
         ResponseChoiceInputMessage,
-        ResponseRangeInputMessage
+        ResponseRangeInputMessage,
+
+        GameOutputMessage,
+        GameOverMessage
         >;
 
 struct Message

@@ -105,6 +105,18 @@ InputManager::clearPendingRequests()
     m_pendingRequests.clear();
 }
 
+void
+InputManager::sendOutput(const String &message) {
+    m_pendingOutputs.push_back(message.value);
+}
+
+std::vector<std::string>
+InputManager::popPendingOutputs() {
+    std::vector<std::string> out = std::move(m_pendingOutputs);
+    m_pendingOutputs.clear();
+    return out;
+}
+
 std::optional<String>
 InputManager::findResponse(const String& playerID, const String& prompt) const
 {

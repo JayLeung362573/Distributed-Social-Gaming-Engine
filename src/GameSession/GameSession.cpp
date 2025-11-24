@@ -21,7 +21,7 @@ uintptr_t getClientID(const std::string& playerID, const std::vector<LobbyMember
 std::vector<ClientMessage>
 GameSession::start() {
     std::cout << "[GameSession] Starting game execution\n";
-
+    m_inputManager.sendOutput(String{"Hello, world!"});
     m_interpreter.execute();
 
     return collectOutgoingMessages();
@@ -137,6 +137,17 @@ std::vector<ClientMessage>
 GameSession::collectOutgoingMessages() {
     std::vector<ClientMessage> outgoing;
 
+    auto outputs = m_inputManager.popPendingOutputs();
+    for(const auto& text : outputs){
+        Message gameOutputMsg;
+        gameOutputMsg.type = MessageType::GameOutput;
+        gameOutputMsg.data = GameOutputMessage{text};
+
+        for(const auto& player : m_players){
+            outgoing.push_back(ClientMessage{player.clientID, gameOutputMsg});
+        }
+    }
+
     if (!m_interpreter.needsIO()) {
         return outgoing;
     }
@@ -170,6 +181,16 @@ GameSession::collectOutgoingMessages() {
     }
 
     m_inputManager.clearPendingRequests();
+
+    if(isFinished()){
+        Message gameOverMsg;
+        gameOverMsg.type = MessageType::GameOver;
+        gameOverMsg.data = GameOverMessage{"Game Over"};
+
+        for(const auto& player : m_players){
+            outgoing.push_back(ClientMessage{player.clientID, gameOverMsg});
+        }
+    }
 
     return outgoing;
 }

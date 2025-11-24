@@ -199,6 +199,34 @@ struct MessageTraits<ResponseRangeInputMessage> {
 };
 
 template<>
+struct MessageTraits<GameOutputMessage> {
+    static constexpr std::string_view prefix = "GameOutput:";
+
+    static std::string serialize(const GameOutputMessage& gameOutputMsg) {
+        return std::string(prefix) + gameOutputMsg.message;
+    }
+
+    static Message deserialize(const std::string& payload) {
+        std::string msg = payload.substr(prefix.size());
+        return { MessageType::GameOutput, GameOutputMessage{msg} };
+    }
+};
+
+template<>
+struct MessageTraits<GameOverMessage> {
+    static constexpr std::string_view prefix = "GameOver:";
+
+    static std::string serialize(const GameOverMessage& gameOverMsg) {
+        return std::string(prefix) + gameOverMsg.winner;
+    }
+
+    static Message deserialize(const std::string& payload) {
+        std::string winner = payload.substr(prefix.size());
+        return { MessageType::GameOver, GameOverMessage{winner} };
+    }
+};
+
+template<>
 struct MessageTraits<ErrorMessage>{
     static constexpr std::string_view prefix = "Error:";
     static std::string serialize(const ErrorMessage& errorMsg) {
@@ -253,7 +281,7 @@ Message MessageTranslator::deserialize(const std::string& payload)
     else if(payload.starts_with(MessageTraits<ErrorMessage>::prefix)) {
         return MessageTraits<ErrorMessage>::deserialize(payload);
     }
-    /// Game Request and Inputs
+    /// Game Request
     else if (payload.starts_with(MessageTraits<RequestTextInputMessage>::prefix)) {
         return MessageTraits<RequestTextInputMessage>::deserialize(payload);
     }
@@ -263,14 +291,22 @@ Message MessageTranslator::deserialize(const std::string& payload)
     else if (payload.starts_with(MessageTraits<RequestRangeInputMessage>::prefix)) {
         return MessageTraits<RequestRangeInputMessage>::deserialize(payload);
     }
-    else if (payload.starts_with(MessageTraits<RequestTextInputMessage>::prefix)) {
-        return MessageTraits<RequestTextInputMessage>::deserialize(payload);
+    /// game response
+    else if (payload.starts_with(MessageTraits<ResponseTextInputMessage>::prefix)) {
+        return MessageTraits<ResponseTextInputMessage>::deserialize(payload);
     }
     else if (payload.starts_with(MessageTraits<ResponseChoiceInputMessage>::prefix)) {
         return MessageTraits<ResponseChoiceInputMessage>::deserialize(payload);
     }
     else if (payload.starts_with(MessageTraits<ResponseRangeInputMessage>::prefix)) {
         return MessageTraits<ResponseRangeInputMessage>::deserialize(payload);
+    }
+    /// game output and game over message
+    else if (payload.starts_with(MessageTraits<GameOutputMessage>::prefix)) {
+        return MessageTraits<GameOutputMessage>::deserialize(payload);
+    }
+    else if (payload.starts_with(MessageTraits<GameOverMessage>::prefix)) {
+        return MessageTraits<GameOverMessage>::deserialize(payload);
     }
     else {
         return { MessageType::Empty, {} };

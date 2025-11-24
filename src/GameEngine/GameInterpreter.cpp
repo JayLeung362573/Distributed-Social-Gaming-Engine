@@ -5,6 +5,10 @@
 
 #include "GameInterpreter.h"
 
+void GameInterpreter::setVariable(const String& name, Value value) {
+    m_variableMap.store(Name{name.value}, value);
+}
+
 VisitResult
 GameInterpreter::visit(const ast::ASTNode& node)
 {
@@ -262,6 +266,7 @@ GameInterpreter::doAttributeAssignment(ast::Attribute& attrTarget, Value valueTo
 void
 GameInterpreter::execute()
 {
+    m_waitingForInput = false;
     if (!m_program.has_value())
     {
         throw std::runtime_error("No program to execute");
@@ -333,7 +338,7 @@ GameInterpreter::isLessThan(const Value& left, const Value& right)
 bool
 GameInterpreter::needsIO() const
 {
-    return m_inputManager.getPendingRequests().size() > 0;
+    return m_inputManager.getPendingRequests().size() > 0 || m_waitingForInput;
 }
 
 VisitResult
@@ -347,8 +352,11 @@ GameInterpreter::visit(const ast::InputText& inputText)
     auto maybeText = m_inputManager.getTextInput(playerID, prompt);
     if (!maybeText)
     {
+        m_waitingForInput = true;
         return {};
     }
+
+    m_waitingForInput = false;
 
     Value input{*maybeText};
     auto assignment = ast::makeAssignment(

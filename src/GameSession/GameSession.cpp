@@ -7,6 +7,17 @@ GameSession::GameSession(LobbyID lobbyID, ast::GameRules rules, std::vector<Lobb
     , m_players(std::move(players))
     , m_interpreter(m_inputManager, convertRulesToProgram(rules))
     {
+        for (size_t i = 0; i < m_players.size(); ++i) {
+            Map<String, Value> playerMap;
+
+            playerMap.setAttribute(String{"id"}, Value{String{std::to_string(m_players[i].clientID)}});
+            playerMap.setAttribute(String{"name"}, Value{String{m_players[i].name}});
+
+            std::string varName = "player" + std::to_string(i + 1);
+            m_interpreter.setVariable(String{varName}, Value{playerMap});
+
+            std::cout << "[GameSession] Registered " << varName << " -> Client " << m_players[i].clientID << "\n";
+        }
 
     std::cout << "[GameSession] Created session for lobby " << m_lobbyID
               << " with " << m_players.size() << " players\n";}
@@ -14,6 +25,10 @@ GameSession::GameSession(LobbyID lobbyID, ast::GameRules rules, std::vector<Lobb
 uintptr_t getClientID(const std::string& playerID, const std::vector<LobbyMember>& players) {
     for (const auto& p : players) {
         if (p.name == playerID) return p.clientID;
+
+        if (std::to_string(p.clientID) == playerID) {
+            return p.clientID;
+        }
     }
     return 0;
 }
@@ -146,10 +161,6 @@ GameSession::collectOutgoingMessages() {
         for(const auto& player : m_players){
             outgoing.push_back(ClientMessage{player.clientID, gameOutputMsg});
         }
-    }
-
-    if (!m_interpreter.needsIO()) {
-        return outgoing;
     }
 
     auto requests = m_inputManager.getPendingRequests();

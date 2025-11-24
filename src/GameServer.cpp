@@ -321,12 +321,16 @@ GameServer::tick(const std::vector<ClientMessage> &incomingMessages) {
 ast::GameRules
 GameServer::createGameRules() {
     std::vector<std::unique_ptr<ast::Statement>> statements;
-    statements.clear();
+
+    auto playerVar = ast::makeVariable(Name{"player1"});
+
+    auto targetVar = ast::makeVariable(Name{"response"});
 
     statements.push_back(
-            ast::makeAssignment(
-                    ast::makeVariable(Name{"winner"}),
-                    ast::makeConstant(Value{String{"player1"}})
+            ast::makeInputText(
+                    std::move(playerVar),
+                    std::move(targetVar),
+                    String{"What is your name?"}
             )
     );
     std::cout << "[GameServer] Created simple game with "

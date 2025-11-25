@@ -1,6 +1,7 @@
 #include <iostream>
 #include "GameServer.h"
 #include "Message.h"
+#include <unordered_map>
 
 GameServer::GameServer() = default;
 
@@ -302,13 +303,42 @@ std::vector<ClientMessage>
 GameServer::tick(const std::vector<ClientMessage> &incomingMessages) {
     std::vector<ClientMessage> outgoing = handleClientMessages(incomingMessages);
 
+    /// group game messages by LobbyID
+    std::unordered_map<LobbyID, std::vector<ClientMessage>> sessionInputs;
+
+    for(const auto& msg : incomingMessages){
+        /// ignore non-game message, such as Join/LeaveLobby
+        if(!isGameInputMessage(msg.message)){
+            continue;
+        }
+
+        /// find target lobby for this message
+        auto lobbyID = m_lobbyRegistry.findLobbyForClient(msg.clientID);
+        if(lobbyID){
+            sessionInputs[*lobbyID].push_back(msg);
+        }
+    }
+
+    /// tick session with the specific messages in this specific lobby
     auto it = m_activeSessions.begin();
     while(it != m_activeSessions.end()){
         if(it->second->isFinished()){
             std::cout << "[GameServer] Session " << it->first << " finished and get cleaned\n";
             it = m_activeSessions.erase(it);
         } else{
-            auto sessionUpdates = it->second->tick(incomingMessages);
+            /// check if it has input waiting for this specific lobby
+            /// if not, initialize it with an empty vector
+            static std::vector<ClientMessage> empty;
+
+            std::vector<ClientMessage>& specificMessages =
+                    sessionInputs.count(it->first) ? sessionInputs[it->first]: empty;
+
+            if(sessionInputs.count(it->first)){
+                specificMessages = sessionInputs[it->first];
+            }
+
+            auto sessionUpdates = it->second->tick(specificMessages);
+
             outgoing.insert(outgoing.end(),
                             sessionUpdates.begin(),
                             sessionUpdates.end());
@@ -316,6 +346,26 @@ GameServer::tick(const std::vector<ClientMessage> &incomingMessages) {
         }
     }
     return outgoing;
+}
+
+bool
+GameServer::isGameInputMessage(const Message &msg) const {
+    switch(msg.type){
+        case MessageType::ResponseChoiceInput:
+        {
+            return true;
+        }
+        case MessageType::ResponseRangeInput:
+        {
+            return true;
+        }
+        case MessageType::ResponseTextInput:
+        {
+            return true;
+        }
+        default:
+            return false;
+    }
 }
 
 ast::GameRules

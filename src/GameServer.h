@@ -34,4 +34,5 @@ private:
     LobbyRegistry m_lobbyRegistry;
     std::unordered_map<LobbyID, std::unique_ptr<GameSession>> m_activeSessions;
     ast::GameRules createGameRules();
+    bool isGameInputMessage(const Message& msg) const;
 };

@@ -30,4 +30,4 @@ target_include_directories(parser PUBLIC
 )
 
 # Link the generated grammar into our loader
-target_link_libraries(parser PUBLIC ts_socialgaming)
+target_link_libraries(parser PUBLIC ts_socialgaming spdlog::spdlog)

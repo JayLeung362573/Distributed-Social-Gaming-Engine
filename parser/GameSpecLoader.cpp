@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <cstring>
 #include <iostream>
+#include <spdlog/spdlog.h>
 
 
 //for now we will just parse the config
@@ -78,16 +79,13 @@ bool GameSpecLoader::HelloWorldSmokeTest(const char *path) {
         TSTree *tree = ts_parser_parse_string(parser, nullptr, src.c_str(), static_cast<uint32_t>(src.size()));
 
         if (!tree) {
-            std::cerr << "Parse failed: " << path << std::endl;
+            spdlog::error("Parse failed: {}", path);
             ts_parser_delete(parser);
             return false;
         }
 
         TSNode root = ts_tree_root_node(tree);
-        std::cout << "Parsed OK: " << path
-                  << " | root =" << ts_node_type(root)
-                  << " | children=" << ts_node_child_count(root)
-                  << std::endl;
+        spdlog::info("Parsed OK: {} | root ={} | children={}", path, ts_node_type(root), ts_node_child_count(root));
 
         //display the snippet of what the config file says so we can check if it parses
         uint32_t child_count = ts_node_child_count(root);
@@ -100,19 +98,17 @@ bool GameSpecLoader::HelloWorldSmokeTest(const char *path) {
                     snippet.erase(200);
                     snippet.append("...");
                 }
-                std::cout << "\n Configuration snippet \n"
-                          << snippet
-                          << "\n";
+                spdlog::info("Configuration snippet:\n{}", snippet);
             }
         }
         ts_tree_delete(tree);
         ts_parser_delete(parser);
         return true;
     } catch (const std::exception &e) {
-        std::cerr << "HelloWorldSmokeTest error: " << e.what() << std::endl;
+        spdlog::error("HelloWorldSmokeTest error: {}", e.what());
         return false;
     } catch (...) {
-        std::cerr << "HelloWorldSmokeTest error: unknown exception" << std::endl;
+        spdlog::error("HelloWorldSmokeTest error: unknown exception");
         return false;
     }
 

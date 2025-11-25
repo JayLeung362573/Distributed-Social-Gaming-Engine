@@ -44,10 +44,19 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 enable_testing()
-
-# Tree-sitter C runtime library - using FetchContent
 include(FetchContent)
 
+# Fetch spdlog from GitHub so spdlog::spdlog target is available (used by logging)
+if(NOT TARGET spdlog AND NOT TARGET "spdlog::spdlog")
+  FetchContent_Declare(
+    spdlog
+    GIT_REPOSITORY https://github.com/gabime/spdlog.git
+    GIT_TAG        v1.12.0
+  )
+  FetchContent_MakeAvailable(spdlog)
+endif()
+
+# Tree-sitter C runtime library - using FetchContent
 FetchContent_Declare(
   tree-sitter
   GIT_REPOSITORY https://github.com/tree-sitter/tree-sitter.git

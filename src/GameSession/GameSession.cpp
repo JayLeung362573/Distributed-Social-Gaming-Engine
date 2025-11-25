@@ -22,7 +22,8 @@ GameSession::GameSession(LobbyID lobbyID, ast::GameRules rules, std::vector<Lobb
     std::cout << "[GameSession] Created session for lobby " << m_lobbyID
               << " with " << m_players.size() << " players\n";}
 
-uintptr_t getClientID(const std::string& playerID, const std::vector<LobbyMember>& players) {
+std::optional<uintptr_t>
+getClientID(const std::string& playerID, const std::vector<LobbyMember>& players) {
     for (const auto& p : players) {
         if (p.name == playerID) return p.clientID;
 
@@ -30,7 +31,7 @@ uintptr_t getClientID(const std::string& playerID, const std::vector<LobbyMember
             return p.clientID;
         }
     }
-    return 0;
+    return std::nullopt;
 }
 
 std::vector<ClientMessage>
@@ -182,10 +183,10 @@ GameSession::collectOutgoingMessages() {
             targetPlayerID = v->playerID.value;
         }
 
-        uintptr_t targetClientID = getClientID(targetPlayerID, m_players);
+        auto targetClientID = getClientID(targetPlayerID, m_players);
 
         if (targetClientID != 0) {
-            outgoing.push_back(ClientMessage{targetClientID, netMsg});
+            outgoing.push_back(ClientMessage{*targetClientID, netMsg});
         } else {
             std::cerr << "[GameSession] Warning: Could not find client for player ID: " << targetPlayerID << "\n";
         }

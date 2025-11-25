@@ -341,6 +341,15 @@ GameInterpreter::needsIO() const
     return m_inputManager.getPendingRequests().size() > 0 || m_waitingForInput;
 }
 
+bool
+GameInterpreter::isDone() const {
+    if(!m_program.has_value()) return true;
+
+    if(!m_iterator) return true;
+
+    return m_iterator->currentStatement() == nullptr;
+}
+
 VisitResult
 GameInterpreter::visit(const ast::InputText& inputText)
 {

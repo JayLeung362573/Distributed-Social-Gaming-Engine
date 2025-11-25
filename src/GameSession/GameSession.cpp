@@ -56,7 +56,7 @@ GameSession::start() {
 
 bool
 GameSession::isFinished() const {
-    return !m_interpreter.needsIO();
+    return m_interpreter.isDone();
 }
 
 std::optional<Program>

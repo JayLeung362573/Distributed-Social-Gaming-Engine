@@ -301,6 +301,8 @@ class GameInterpreter : public ast::ASTVisitor
 
         bool needsIO() const;
 
+        bool isDone() const;
+
     private:
         Value
         getPlayerAttribute(const ast::Variable& playerVar, String attr);

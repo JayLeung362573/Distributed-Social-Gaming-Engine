@@ -136,6 +136,8 @@ class GameInterpreter : public ast::ASTVisitor
             }
         }
 
+        void setVariable(const String& name, Value value);
+
         VisitResult visit(const ast::ASTNode& node) override;
 
         /**
@@ -297,7 +299,9 @@ class GameInterpreter : public ast::ASTVisitor
 
         void execute();
 
-        bool needsIO();
+        bool needsIO() const;
+
+        bool isDone() const;
 
     private:
         Value
@@ -333,4 +337,5 @@ class GameInterpreter : public ast::ASTVisitor
         std::optional<Program> m_program;
         std::unique_ptr<ProgramIterator> m_iterator;
         ProgramIterator* m_currentIterator;
+        bool m_waitingForInput = false;
 };

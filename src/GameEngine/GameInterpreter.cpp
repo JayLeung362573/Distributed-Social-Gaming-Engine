@@ -5,6 +5,10 @@
 
 #include "GameInterpreter.h"
 
+void GameInterpreter::setVariable(const String& name, Value value) {
+    m_variableMap.store(Name{name.value}, value);
+}
+
 VisitResult
 GameInterpreter::visit(const ast::ASTNode& node)
 {
@@ -262,6 +266,7 @@ GameInterpreter::doAttributeAssignment(ast::Attribute& attrTarget, Value valueTo
 void
 GameInterpreter::execute()
 {
+    m_waitingForInput = false;
     if (!m_program.has_value())
     {
         throw std::runtime_error("No program to execute");
@@ -331,9 +336,18 @@ GameInterpreter::isLessThan(const Value& left, const Value& right)
 }
 
 bool
-GameInterpreter::needsIO()
+GameInterpreter::needsIO() const
 {
-    return m_inputManager.getPendingRequests().size() > 0;
+    return m_inputManager.getPendingRequests().size() > 0 || m_waitingForInput;
+}
+
+bool
+GameInterpreter::isDone() const {
+    if(!m_program.has_value()) return true;
+
+    if(!m_iterator) return true;
+
+    return m_iterator->currentStatement() == nullptr;
 }
 
 VisitResult
@@ -347,8 +361,11 @@ GameInterpreter::visit(const ast::InputText& inputText)
     auto maybeText = m_inputManager.getTextInput(playerID, prompt);
     if (!maybeText)
     {
+        m_waitingForInput = true;
         return {};
     }
+
+    m_waitingForInput = false;
 
     Value input{*maybeText};
     auto assignment = ast::makeAssignment(
@@ -382,8 +399,10 @@ GameInterpreter::visit(const ast::InputChoice& inputChoice)
     auto maybeChoice = m_inputManager.getChoiceInput(playerID, prompt, choices);
     if (!maybeChoice)
     {
+        m_waitingForInput = true;
         return {};
     }
+    m_waitingForInput = false;
 
     Value choiceValue{*maybeChoice};
     auto assignment = ast::makeAssignment(
@@ -415,8 +434,10 @@ GameInterpreter::visit(const ast::InputRange& inputRange)
 
     if (!maybeRange)
     {
+        m_waitingForInput = true;
         return {};
     }
+    m_waitingForInput = false;
 
     auto assignment = ast::makeAssignment(
         ast::cloneExpression(targetExpr),
@@ -451,8 +472,10 @@ GameInterpreter::visit(const ast::InputVote& inputVote)
 
     if (!maybeVote)
     {
+        m_waitingForInput = true;
         return {};
     }
+    m_waitingForInput = false;
 
     Value voteValue{*maybeVote};
     auto assignment = ast::makeAssignment(

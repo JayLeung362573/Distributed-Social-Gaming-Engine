@@ -7,8 +7,10 @@ using LobbyID = std::string;
 using GameID = std::string;
 
 enum class GameType{
-    Default,
+    Default = 0,
     /// RockPaperScissor
+    NumberBattle = 1,
+    ChoiceBattle = 2
 };
 
 enum class LobbyState{

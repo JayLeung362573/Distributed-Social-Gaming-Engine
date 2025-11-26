@@ -6,6 +6,7 @@
 #include "Message.h"
 #include "Lobby.h"
 #include "LobbyRegistry.h"
+#include "GameSession.h"
 
 
 class NetworkingInterface;
@@ -24,11 +25,17 @@ public:
 
     std::vector<ClientMessage> handleJoinLobbyMessages(uintptr_t clientID, const JoinLobbyMessage& joinLobbyMsg);
     std::vector<ClientMessage> handleLeaveLobbyMessages(uintptr_t clientID, const LeaveLobbyMessage& leaveLobbyMsg);
-    std::vector<ClientMessage> handleJoinGameMessages(uintptr_t clientID, const JoinGameMessage& joinGameMsg);
+    std::vector<ClientMessage> handleStartGameMessages(uintptr_t clientID, const StartGameMessage& joinGameMsg);
 
     std::vector<ClientMessage> handleGetLobbyStateMessages(uintptr_t clientID, const GetLobbyStateMessage& getLobbyMsg) const;
     std::vector<ClientMessage> handleBrowseLobbiesMessages(uintptr_t clientID, const BrowseLobbiesMessage& browseLobbyMsg) const;
 
 private:
     LobbyRegistry m_lobbyRegistry;
+    std::unordered_map<LobbyID, std::unique_ptr<GameSession>> m_activeSessions;
+    ast::GameRules createGameRules(GameType type);
+    bool isGameInputMessage(const Message& msg) const;
+
+    ast::GameRules createNumberBattleRules();
+    ast::GameRules createChoiceBattleRules();
 };

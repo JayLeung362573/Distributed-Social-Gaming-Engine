@@ -23,6 +23,9 @@ public:
     std::vector<GameMessage> getPendingRequests();
     void clearPendingRequests();
 
+    void sendOutput(const String& message);
+    std::vector<std::string> popPendingOutputs();
+
 private:
     std::optional<String> findResponse(const String& playerID, const String& prompt) const;
     bool hasRequestedInput(const String& playerID, const String& prompt) const;
@@ -32,4 +35,5 @@ private:
     std::unordered_map<String, std::unordered_map<String, String>> m_responses;
     std::vector<GameMessage> m_pendingRequests;
     std::unordered_map<String, std::unordered_set<String>> m_sentRequests;
+    std::vector<std::string> m_pendingOutputs;
 };

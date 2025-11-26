@@ -197,12 +197,21 @@ struct MessageTraits<ResponseChoiceInputMessage> {
     static constexpr std::string_view prefix = "ResponseChoiceInput:";
 
     static std::string serialize(const ResponseChoiceInputMessage& responseChoiceInputMsg) {
-        return std::string(prefix) + responseChoiceInputMsg.choice + responseChoiceInputMsg.promptRef;
+        return std::string(prefix) + responseChoiceInputMsg.choice + "|" + responseChoiceInputMsg.promptRef;
     }
 
     static Message deserialize(const std::string& payload) {
         std::string prompt = payload.substr(prefix.size());
-        return { MessageType::ResponseChoiceInput, ResponseChoiceInputMessage{prompt} };
+        size_t delimiter = prompt.find('|');
+
+        if (delimiter == std::string::npos) {
+            return { MessageType::Empty, {} };
+        }
+
+        return { MessageType::ResponseChoiceInput,
+                 ResponseChoiceInputMessage{
+            prompt.substr(0, delimiter),
+            prompt.substr(delimiter + 1)}};
     }
 };
 

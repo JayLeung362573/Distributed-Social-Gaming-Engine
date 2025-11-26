@@ -37,7 +37,7 @@ getClientID(const std::string& playerID, const std::vector<LobbyMember>& players
 std::vector<ClientMessage>
 GameSession::start() {
     std::cout << "[GameSession] Starting game execution\n";
-    m_inputManager.sendOutput(String{"Hello, world!"});
+
     m_interpreter.execute();
 
     return collectOutgoingMessages();

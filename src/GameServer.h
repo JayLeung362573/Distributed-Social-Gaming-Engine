@@ -33,6 +33,9 @@ public:
 private:
     LobbyRegistry m_lobbyRegistry;
     std::unordered_map<LobbyID, std::unique_ptr<GameSession>> m_activeSessions;
-    ast::GameRules createGameRules();
+    ast::GameRules createGameRules(GameType type);
     bool isGameInputMessage(const Message& msg) const;
+
+    ast::GameRules createNumberBattleRules();
+    ast::GameRules createChoiceBattleRules();
 };

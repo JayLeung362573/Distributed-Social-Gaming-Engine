@@ -49,6 +49,7 @@ struct UpdateCycleMessage
 struct JoinLobbyMessage{
     std::string playerName;
     std::string lobbyName;
+    int gameType = 0;
 };
 
 struct LeaveLobbyMessage{

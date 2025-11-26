@@ -1,6 +1,6 @@
 #include "MessageTranslator.h"
 
-// Use template for each Message for easy scalability. We expect more meesage and changes to happen in the future
+// Use template for each Message for easy scalability. We expect more message and changes to happen in the future
 template<typename T>
 struct MessageTraits;
 
@@ -8,7 +8,7 @@ struct MessageTraits;
 template<>
 struct MessageTraits<StartGameMessage> {
     // Call statics to enable compile time, so we don't need to instantiate the object and just use it as a container
-    static constexpr std::string_view prefix = "StartGame:"; // instiatiate it as pure compile time constant
+    static constexpr std::string_view prefix = "StartGame:"; // instantiate it as pure compile time constant
     static std::string serialize(const StartGameMessage& d) {
         return std::string(prefix) + d.playerName;
     }
@@ -21,7 +21,7 @@ struct MessageTraits<StartGameMessage> {
 template<>
 struct MessageTraits<UpdateCycleMessage> {
     // Call statics to enable compile time, so we don't need to instantiate the object and just use it as a container
-    static constexpr std::string_view prefix = "UpdateCycle:"; // instiatiate it as pure compile time constant
+    static constexpr std::string_view prefix = "UpdateCycle:"; // instantiate it as pure compile time constant
 
     static std::string serialize(const UpdateCycleMessage& d) {
         return std::string(prefix) + std::to_string(d.cycle);
@@ -33,25 +33,51 @@ struct MessageTraits<UpdateCycleMessage> {
     }
 };
 
+/// Message format: JoinLobby:PlayerName|LobbyName|GameType
 template<>
 struct MessageTraits<JoinLobbyMessage> {
     static constexpr std::string_view prefix = "JoinLobby:";
 
     static std::string serialize(const JoinLobbyMessage& d) {
-        return std::string(prefix) + d.playerName + "|" + d.lobbyName;
+        return std::string(prefix) + d.playerName + "|" + d.lobbyName + "|" + std::to_string(d.gameType);
     }
 
     static Message deserialize(const std::string& payload) {
         std::string content = payload.substr(prefix.size());
-        size_t delimiter = content.find('|');
+        size_t firstDelimiter = content.find('|');
+        /// split PlayerName|LobbyName|GameType
+        std::string playerName;
+        std::string lobbyName;
+        int type = 0;
 
-        if (delimiter == std::string::npos) {
-            return { MessageType::JoinLobby, JoinLobbyMessage{content, ""} };
-        } else {
-            std::string playerName = content.substr(0, delimiter);
-            std::string lobbyName = content.substr(delimiter + 1);
-            return { MessageType::JoinLobby, JoinLobbyMessage{playerName, lobbyName} };
+        /// PlayerName only
+        if(firstDelimiter == std::string::npos){
+            playerName = content;
         }
+        else{
+            /// PlayerName|...
+            playerName = content.substr(0, firstDelimiter);
+
+            size_t secondDelimiter = content.find('|', firstDelimiter + 1);
+
+            if(secondDelimiter == std::string::npos){
+                lobbyName = content.substr(firstDelimiter + 1);
+            }
+            else{
+                /// PlayerName|LobbyName|GameType
+                lobbyName = content.substr(firstDelimiter + 1, secondDelimiter -(firstDelimiter + 1));
+
+                std::string typeStr = content.substr(secondDelimiter + 1);
+                if (!typeStr.empty()) {
+                    try {
+                        type = std::stoi(typeStr); // Convert string to int
+                    } catch (...) {
+                        type = 0; // Fallback on error
+                    }
+                }
+            }
+        }
+        return {MessageType::JoinLobby, JoinLobbyMessage{playerName, lobbyName, type}};
     }
 };
 

@@ -1,6 +1,7 @@
 #include "Message.h"
 #include "GameServer.h"
 #include "WebSocketNetworking.h"
+#include "NetworkManager.h"
 
 #include <thread>
 #include <chrono>
@@ -19,49 +20,19 @@ int main(int argc, char* argv[])
 
     if (useWebSocket) {
         auto networking = std::make_shared<WebSocketNetworking>(8080, "../test.html");
-        auto server = std::make_unique<GameServer>();
+        auto server = std::make_shared<GameServer>();
+        NetworkManager manager(networking, server);
 
         networking->startServer();
-
-        std::set<uintptr_t> knownClients;
 
         auto last = std::chrono::steady_clock::now();
 
         while (true) {
             networking->update();
 
-            auto currentClients = networking->getConnectedClientIDs();
-            for (uintptr_t clientID : currentClients) {
-                if (knownClients.find(clientID) == knownClients.end()) {
-                    std::cout << "[Main] New Client Detected: " << clientID << "\n";
+            manager.processNewConnections();
 
-                    auto responses = server->showCurrentLobbies(clientID);
-
-                    // Process and Send
-                    for(auto& response : responses) {
-                        networking->sendToClient(response.clientID, response.message);
-                    }
-
-                    knownClients.insert(clientID);
-                }
-            }
-
-            // pass incoming network messages to game server
-            auto incomingMessages = networking->receiveFromClients();
-
-            std::vector<ClientMessage> clientMessages;
-            for(auto& [clientID, message] : incomingMessages){
-                std::cout << "[Network] Processing incoming messages" << '\n';
-                clientMessages.push_back({clientID, message});
-            }
-
-            // process game logic in game server
-            auto outgoingMessages = server->tick(clientMessages);
-
-            // send outgoing processed gameServer messages
-            for(const auto& clientMsg : outgoingMessages){
-                networking->sendToClient(clientMsg.clientID, clientMsg.message);
-            }
+            manager.processIncomingMessages();
 
             std::this_thread::sleep_for(std::chrono::milliseconds(16));
         }

@@ -8,6 +8,7 @@ add_subdirectory(Network)
 add_library(core_lib
   GameClient.cpp
   GameServer.cpp
+  Network/NetworkManager.cpp
 )
 
 target_include_directories(core_lib PUBLIC

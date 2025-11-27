@@ -289,6 +289,15 @@ GameServer::handleStartGameMessages(uintptr_t clientID, const StartGameMessage& 
 
     /// 5. get all players (host and players, excluding audience)
     auto players = lobby->getAllPlayer();
+
+    if (players.size() < 2) {
+        std::cout << "[GameServer] Error: Not enough players to start (Requires 2)\n";
+        Message errorMsg;
+        errorMsg.type = MessageType::Error;
+        errorMsg.data = ErrorMessage{"Not enough players to start. You need at least 2."};
+        return {ClientMessage{clientID, errorMsg}};
+    }
+
     std::cout << "[GameServer] Starting game for lobby " << *lobbyID
               << " with " << players.size() << " players\n";
 

@@ -23,6 +23,16 @@ namespace {
         };
         return converters;
     }
+
+    // extract string from prompt expression node (grammar wraps it but AST expects raw string)
+    String extractPromptString(const std::string& src, TSNode promptNode) {
+        auto promptExpr = ASTConverter::convertExpression(src, promptNode);
+        auto* constantNode = static_cast<ast::Constant*>(promptExpr.get());
+        if (!constantNode->getValue().isString()) {
+            throw std::runtime_error("Input prompt must be a string literal");
+        }
+        return std::get<String>(constantNode->getValue().value);
+    }
 }
 
 std::string ASTConverter::extractText(const std::string &src, TSNode node) {
@@ -463,25 +473,108 @@ ASTConverter::convertMatch(const std::string &src, TSNode node) {
 
 std::unique_ptr<ast::InputChoice>
 ASTConverter::convertInputChoice(const std::string &src, TSNode node) {
-    // TODO: Implement input choice parsing
-    // Requires understanding the grammar structure for input blocks
-    throw std::runtime_error("InputChoice conversion not yet implemented");
+    // input_choice has 4 named children: player, prompt, choices, target
+    uint32_t childCount = ts_node_named_child_count(node);
+    if (childCount < 4) {
+        throw std::runtime_error("InputChoice requires 4 children");
+    }
+
+    TSNode playerNode = ts_node_named_child(node, 0);
+    TSNode promptNode = ts_node_named_child(node, 1);
+    TSNode choicesNode = ts_node_named_child(node, 2);
+    TSNode targetNode = ts_node_named_child(node, 3);
+
+    auto playerExpr = convertExpression(src, playerNode);
+    auto choicesExpr = convertExpression(src, choicesNode);
+    auto targetExpr = convertExpression(src, targetNode);
+
+    String prompt = extractPromptString(src, promptNode);
+
+    return ast::makeInputChoice(
+        std::unique_ptr<ast::Variable>(static_cast<ast::Variable*>(playerExpr.release())),
+        std::move(targetExpr),
+        prompt,
+        std::move(choicesExpr)
+    );
 }
 
 std::unique_ptr<ast::InputText>
 ASTConverter::convertInputText(const std::string &src, TSNode node) {
-    // TODO: Implement input text parsing
-    throw std::runtime_error("InputText conversion not yet implemented");
+    // input_text has 3 named children: player, prompt, target
+    uint32_t childCount = ts_node_named_child_count(node);
+    if (childCount < 3) {
+        throw std::runtime_error("InputText requires 3 children");
+    }
+
+    TSNode playerNode = ts_node_named_child(node, 0);
+    TSNode promptNode = ts_node_named_child(node, 1);
+    TSNode targetNode = ts_node_named_child(node, 2);
+
+    auto playerExpr = convertExpression(src, playerNode);
+    auto targetExpr = convertExpression(src, targetNode);
+
+    String prompt = extractPromptString(src, promptNode);
+
+    return ast::makeInputText(
+        std::unique_ptr<ast::Variable>(static_cast<ast::Variable*>(playerExpr.release())),
+        std::move(targetExpr),
+        prompt
+    );
 }
 
 std::unique_ptr<ast::InputRange>
 ASTConverter::convertInputRange(const std::string &src, TSNode node) {
-    // TODO: Implement input range parsing
-    throw std::runtime_error("InputRange conversion not yet implemented");
+    // input_range has 5 named children: player, prompt, min, max, target
+    uint32_t childCount = ts_node_named_child_count(node);
+    if (childCount < 5) {
+        throw std::runtime_error("InputRange requires 5 children");
+    }
+
+    TSNode playerNode = ts_node_named_child(node, 0);
+    TSNode promptNode = ts_node_named_child(node, 1);
+    TSNode minNode = ts_node_named_child(node, 2);
+    TSNode maxNode = ts_node_named_child(node, 3);
+    TSNode targetNode = ts_node_named_child(node, 4);
+
+    auto playerExpr = convertExpression(src, playerNode);
+    auto minExpr = convertExpression(src, minNode);
+    auto maxExpr = convertExpression(src, maxNode);
+    auto targetExpr = convertExpression(src, targetNode);
+
+    String prompt = extractPromptString(src, promptNode);
+
+    return ast::makeInputRange(
+        std::unique_ptr<ast::Variable>(static_cast<ast::Variable*>(playerExpr.release())),
+        std::move(targetExpr),
+        prompt,
+        std::move(minExpr),
+        std::move(maxExpr)
+    );
 }
 
 std::unique_ptr<ast::InputVote>
 ASTConverter::convertInputVote(const std::string &src, TSNode node) {
-    // TODO: Implement input vote parsing
-    throw std::runtime_error("InputVote conversion not yet implemented");
+    // input_vote has 4 named children: player, prompt, choices, target
+    uint32_t childCount = ts_node_named_child_count(node);
+    if (childCount < 4) {
+        throw std::runtime_error("InputVote requires 4 children");
+    }
+
+    TSNode playerNode = ts_node_named_child(node, 0);
+    TSNode promptNode = ts_node_named_child(node, 1);
+    TSNode choicesNode = ts_node_named_child(node, 2);
+    TSNode targetNode = ts_node_named_child(node, 3);
+
+    auto playerExpr = convertExpression(src, playerNode);
+    auto choicesExpr = convertExpression(src, choicesNode);
+    auto targetExpr = convertExpression(src, targetNode);
+
+    String prompt = extractPromptString(src, promptNode);
+
+    return ast::makeInputVote(
+        std::unique_ptr<ast::Variable>(static_cast<ast::Variable*>(playerExpr.release())),
+        std::move(targetExpr),
+        prompt,
+        std::move(choicesExpr)
+    );
 }

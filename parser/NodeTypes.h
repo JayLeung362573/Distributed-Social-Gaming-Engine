@@ -46,6 +46,22 @@ namespace NodeType {
     inline TSSymbol INPUT_RANGE;
     inline TSSymbol INPUT_VOTE;
 
+    // control flow (not yet supported by interpreter)
+    inline TSSymbol FOR;
+    inline TSSymbol PARALLEL_FOR;
+    inline TSSymbol MESSAGE;
+    inline TSSymbol SCORES;
+    inline TSSymbol COMMENT;
+
+    // method calls / builtins (not yet supported by interpreter)
+    inline TSSymbol BUILTIN;
+    inline TSSymbol ARGUMENT_LIST;
+    inline TSSymbol EXPRESSION_LIST;
+
+    // other stuff
+    inline TSSymbol PLAYER_SET;
+    inline TSSymbol STRING_INTERPOLATION;
+
     inline void init(const TSLanguage* language) {
         INTEGER = ts_language_symbol_for_name(language, "integer", 7, true);
         BOOLEAN = ts_language_symbol_for_name(language, "boolean", 7, true);
@@ -82,5 +98,18 @@ namespace NodeType {
         INPUT_TEXT = ts_language_symbol_for_name(language, "input_text", 10, true);
         INPUT_RANGE = ts_language_symbol_for_name(language, "input_range", 11, true);
         INPUT_VOTE = ts_language_symbol_for_name(language, "input_vote", 10, true);
+
+        FOR = ts_language_symbol_for_name(language, "for", 3, true);
+        PARALLEL_FOR = ts_language_symbol_for_name(language, "parallel_for", 12, true);
+        MESSAGE = ts_language_symbol_for_name(language, "message", 7, true);
+        SCORES = ts_language_symbol_for_name(language, "scores", 6, true);
+        COMMENT = ts_language_symbol_for_name(language, "comment", 7, true);
+
+        BUILTIN = ts_language_symbol_for_name(language, "builtin", 7, true);
+        ARGUMENT_LIST = ts_language_symbol_for_name(language, "argument_list", 13, true);
+        EXPRESSION_LIST = ts_language_symbol_for_name(language, "expression_list", 15, true);
+
+        PLAYER_SET = ts_language_symbol_for_name(language, "player_set", 10, true);
+        STRING_INTERPOLATION = ts_language_symbol_for_name(language, "string_interpolation", 20, true);
     }
 }

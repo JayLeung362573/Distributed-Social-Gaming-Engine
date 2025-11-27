@@ -20,6 +20,11 @@ namespace {
             {NodeType::INPUT_TEXT, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::ASTNode> { return ASTConverter::convertInputText(s, n); }},
             {NodeType::INPUT_RANGE, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::ASTNode> { return ASTConverter::convertInputRange(s, n); }},
             {NodeType::INPUT_VOTE, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::ASTNode> { return ASTConverter::convertInputVote(s, n); }},
+            {NodeType::FOR, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::ASTNode> { return ASTConverter::convertForLoop(s, n); }},
+            {NodeType::PARALLEL_FOR, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::ASTNode> { return ASTConverter::convertParallelFor(s, n); }},
+            {NodeType::MESSAGE, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::ASTNode> { return ASTConverter::convertMessage(s, n); }},
+            {NodeType::SCORES, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::ASTNode> { return ASTConverter::convertScores(s, n); }},
+            {NodeType::COMMENT, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::ASTNode> { return ASTConverter::convertComment(s, n); }},
         };
         return converters;
     }
@@ -84,6 +89,15 @@ ASTConverter::convertExpression(const std::string &src, TSNode node) {
                         return std::make_unique<ast::UnaryOperation>(std::move(operand), ast::UnaryOperation::Kind::NOT);
                     }
                 }
+            }
+        }
+
+        // check for method calls (builtin + argument_list)
+        for (uint32_t i = 0; i < namedCount; ++i) {
+            TSNode child = ts_node_named_child(node, i);
+            if (ts_node_symbol(child) == NodeType::BUILTIN) {
+                std::string methodName = slice(src, child);
+                throw std::runtime_error("Method call ." + methodName + "() not supported by interpreter yet");
             }
         }
 
@@ -577,4 +591,30 @@ ASTConverter::convertInputVote(const std::string &src, TSNode node) {
         prompt,
         std::move(choicesExpr)
     );
+}
+
+// unsupported statements - stubs
+std::unique_ptr<ast::ASTNode>
+ASTConverter::convertForLoop(const std::string &src, TSNode node) {
+    throw std::runtime_error("ForLoop not supported by interpreter yet");
+}
+
+std::unique_ptr<ast::ASTNode>
+ASTConverter::convertParallelFor(const std::string &src, TSNode node) {
+    throw std::runtime_error("ParallelFor not supported by interpreter yet");
+}
+
+std::unique_ptr<ast::ASTNode>
+ASTConverter::convertMessage(const std::string &src, TSNode node) {
+    throw std::runtime_error("Message not supported by interpreter yet");
+}
+
+std::unique_ptr<ast::ASTNode>
+ASTConverter::convertScores(const std::string &src, TSNode node) {
+    throw std::runtime_error("Scores not supported by interpreter yet");
+}
+
+std::unique_ptr<ast::ASTNode>
+ASTConverter::convertComment(const std::string &src, TSNode node) {
+    throw std::runtime_error("Comment not supported by interpreter yet");
 }

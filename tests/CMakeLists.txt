@@ -46,6 +46,11 @@ add_executable(unit_tests
   IntegrationTest.cpp
   RPSMinimalTest.cpp
   InputDebugTest.cpp
+  ForLoopDebugTest.cpp
+  MessageScoresDebugTest.cpp
+  MethodCallDebugTest.cpp
+  FullRPSParseTest.cpp
+  RPSFullConversionTest.cpp
   GameSpecLoaderTest.h
 )
 

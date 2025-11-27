@@ -51,6 +51,22 @@ public:
     static std::unique_ptr<ast::InputVote>
     convertInputVote(const std::string& src, TSNode node);
 
+    // unsupported statements (stub converters - need interpreter AST nodes)
+    static std::unique_ptr<ast::ASTNode>
+    convertForLoop(const std::string& src, TSNode node);
+
+    static std::unique_ptr<ast::ASTNode>
+    convertParallelFor(const std::string& src, TSNode node);
+
+    static std::unique_ptr<ast::ASTNode>
+    convertMessage(const std::string& src, TSNode node);
+
+    static std::unique_ptr<ast::ASTNode>
+    convertScores(const std::string& src, TSNode node);
+
+    static std::unique_ptr<ast::ASTNode>
+    convertComment(const std::string& src, TSNode node);
+
 private:
     // Expression conversions
     static std::unique_ptr<ast::Constant>

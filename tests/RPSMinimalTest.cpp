@@ -296,3 +296,72 @@ rules {
     GameSpec spec = loader.loadString(gameSpec);
     EXPECT_EQ(spec.rulesProgram.size(), 1) << "Should have 1 input choice statement";
 }
+
+TEST(RPSTest, UnsupportedForLoopSkipped) {
+    std::string gameSpec = R"(
+configuration {
+  name: "Test For Loop"
+  player range: (1, 1)
+  audience: false
+  setup: {}
+}
+constants {}
+variables {}
+per-player {}
+per-audience {}
+rules {
+  for player in players {
+    x <- 1;
+  }
+}
+)";
+
+    GameSpecLoader loader;
+    GameSpec spec = loader.loadString(gameSpec);
+    // unsupported statements are caught and skipped, not added to rulesProgram
+    EXPECT_EQ(spec.rulesProgram.size(), 0) << "ForLoop should be skipped (unsupported)";
+}
+
+TEST(RPSTest, UnsupportedMessageSkipped) {
+    std::string gameSpec = R"(
+configuration {
+  name: "Test Message"
+  player range: (1, 1)
+  audience: false
+  setup: {}
+}
+constants {}
+variables {}
+per-player {}
+per-audience {}
+rules {
+  message all "Hello!";
+}
+)";
+
+    GameSpecLoader loader;
+    GameSpec spec = loader.loadString(gameSpec);
+    EXPECT_EQ(spec.rulesProgram.size(), 0) << "Message should be skipped (unsupported)";
+}
+
+TEST(RPSTest, UnsupportedMethodCallSkipped) {
+    std::string gameSpec = R"(
+configuration {
+  name: "Test Method Call"
+  player range: (1, 1)
+  audience: false
+  setup: {}
+}
+constants {}
+variables {}
+per-player {}
+per-audience {}
+rules {
+  x <- players.size();
+}
+)";
+
+    GameSpecLoader loader;
+    GameSpec spec = loader.loadString(gameSpec);
+    EXPECT_EQ(spec.rulesProgram.size(), 0) << "Method call should be skipped (unsupported)";
+}

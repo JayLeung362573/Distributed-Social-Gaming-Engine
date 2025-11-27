@@ -49,7 +49,7 @@ TEST(GameServerTest, MultipleClientsStartGame){
 
 // Helper to add a lobby + host + player
 static void setupLobby(GameServer &server, uintptr_t hostID) {
-    server.tick({{hostID, {MessageType::JoinLobby, JoinLobbyMessage{"Host", "lobby_test"}}}});
+    server.tick({{hostID, {MessageType::JoinLobby, JoinLobbyMessage{"Host", "lobby_test", 0}}}});
 }
 
 // Unit testings for starting the server

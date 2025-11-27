@@ -84,14 +84,39 @@ GameServer::handleJoinLobbyMessages(uintptr_t clientID, const JoinLobbyMessage& 
     std::vector<ClientMessage> outgoingMessages;
 
     if(joinLobbyMsg.lobbyName.empty()){
+        /// Empty name: create new
         lobby = m_lobbyRegistry.createLobby(
                 clientID,
                 static_cast<GameType>(joinLobbyMsg.gameType),
                 joinLobbyMsg.playerName + "'s Lobby"
         );
     } else {
+        /// try joining with lobbyID
         lobbyID = joinLobbyMsg.lobbyName;
         lobby = m_lobbyRegistry.joinLobby(clientID, lobbyID);
+
+        /// try joining with lobbyName
+        if(!lobby){
+            auto lobbies = m_lobbyRegistry.browseLobbies(static_cast<GameType>(joinLobbyMsg.gameType));
+
+            for (const auto& info : lobbies) {
+                if (info.lobbyName == joinLobbyMsg.lobbyName) {
+                    std::cout << "[GameServer] Found lobby by name: " << info.lobbyName << " -> ID: " << info.lobbyID << "\n";
+                    lobby = m_lobbyRegistry.joinLobby(clientID, info.lobbyID);
+                    break;
+                }
+            }
+        }
+
+        /// still not found by id and name
+        if(!lobby){
+            std::cout << "[GameServer] Lobby '" << lobbyID << "' not found. Creating new lobby.\n";
+            lobby = m_lobbyRegistry.createLobby(
+                    clientID,
+                    static_cast<GameType>(joinLobbyMsg.gameType),
+                    joinLobbyMsg.lobbyName
+            );
+        }
     }
 
     if(!lobby){
@@ -102,9 +127,7 @@ GameServer::handleJoinLobbyMessages(uintptr_t clientID, const JoinLobbyMessage& 
         return outgoingMessages;
     }
 
-    if(joinLobbyMsg.lobbyName.empty()){
-        lobbyID = lobby->getInfo().lobbyID;
-    }
+    lobbyID = lobby->getInfo().lobbyID;
 
     Message lobbyStatePayload;
     lobbyStatePayload.type = MessageType::LobbyState;
@@ -283,12 +306,14 @@ GameServer::handleStartGameMessages(uintptr_t clientID, const StartGameMessage& 
     /// the networking will receive this 'responses' and send(notify) to each player
     /// and initial game prompt for inputs
     std::vector<ClientMessage> responses;
-    Message startMsg;
-    startMsg.type = MessageType::GameOutput;
-    startMsg.data = GameOutputMessage{"Game started"};
 
     for(const auto& player : players){
         std::cout << "[GameServer] Notifying player " << player.clientID << "\n";
+
+        Message startMsg;
+        startMsg.type = MessageType::StartGame;
+        startMsg.data = StartGameMessage{"Game started"};
+
         responses.push_back(ClientMessage{player.clientID, startMsg});
     }
 

@@ -121,8 +121,8 @@ TEST(GameServerTestIntegrationTest, FullGameFlowTwoPlayers) {
     GameServer server;
 
     // Join lobby
-    server.tick({{1, {MessageType::JoinLobby, JoinLobbyMessage{"P1", "L"}}}});
-    server.tick({{2, {MessageType::JoinLobby, JoinLobbyMessage{"P2", "L"}}}});
+    server.tick({{1, {MessageType::JoinLobby, JoinLobbyMessage{"P1", "L", 0}}}});
+    server.tick({{2, {MessageType::JoinLobby, JoinLobbyMessage{"P2", "L", 0}}}});
 
     // Host starts game
     auto startOut = server.handleStartGameMessages( 1, StartGameMessage{"P1"});

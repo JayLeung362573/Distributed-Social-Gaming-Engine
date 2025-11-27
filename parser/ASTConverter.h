@@ -17,6 +17,40 @@ public:
     static std::unique_ptr<ast::ASTNode>
     convertStatement(const std::string& src, TSNode node);
 
+    // Statement conversions
+    static std::unique_ptr<ast::Assignment>
+    convertAssignment(const std::string& src, TSNode node);
+
+    static std::unique_ptr<ast::Discard>
+    convertDiscard(const std::string& src, TSNode node);
+
+    static std::unique_ptr<ast::Extend>
+    convertExtend(const std::string& src, TSNode node);
+
+    static std::unique_ptr<ast::Reverse>
+    convertReverse(const std::string& src, TSNode node);
+
+    static std::unique_ptr<ast::Shuffle>
+    convertShuffle(const std::string& src, TSNode node);
+
+    static std::unique_ptr<ast::Sort>
+    convertSort(const std::string& src, TSNode node);
+
+    static std::unique_ptr<ast::Match>
+    convertMatch(const std::string& src, TSNode node);
+
+    static std::unique_ptr<ast::InputChoice>
+    convertInputChoice(const std::string& src, TSNode node);
+
+    static std::unique_ptr<ast::InputText>
+    convertInputText(const std::string& src, TSNode node);
+
+    static std::unique_ptr<ast::InputRange>
+    convertInputRange(const std::string& src, TSNode node);
+
+    static std::unique_ptr<ast::InputVote>
+    convertInputVote(const std::string& src, TSNode node);
+
 private:
     // Expression conversions
     static std::unique_ptr<ast::Constant>
@@ -32,10 +66,6 @@ private:
     static Value convertValue(const std::string& src, TSNode node);
     static Value convertListLiteral(const std::string& src, TSNode node);
     static Value convertValueMap(const std::string& src, TSNode node);
-
-    // Statement conversions
-    static std::unique_ptr<ast::Assignment>
-    convertAssignment(const std::string& src, TSNode node);
 
     // Utilities
     static std::string extractText(const std::string& src, TSNode node);

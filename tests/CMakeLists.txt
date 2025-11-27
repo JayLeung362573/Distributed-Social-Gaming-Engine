@@ -42,6 +42,10 @@ add_executable(unit_tests
   InputManagerTest.cpp
   GameSessionTest.cpp
   GameInterpreterSmokeTest.cpp
+  ASTConverterTest.cpp
+  IntegrationTest.cpp
+  RPSMinimalTest.cpp
+        GameSpecLoaderTest.h
 )
 
 # Link with gtest (the Quickstart uses GTest::gtest_main)

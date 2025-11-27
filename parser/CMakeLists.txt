@@ -22,6 +22,7 @@ add_library(parser STATIC
     GameSpecLoader.cpp
     ParserUtil.cpp
     ASTConverter.cpp
+        ASTConverter.cpp
 
 )
 

@@ -1,4 +1,5 @@
 #include "GameSpecLoader.h"
+#include "ASTConverter.h"
 #include <tree_sitter/api.h>
 #include <fstream>
 #include <sstream>
@@ -189,34 +190,20 @@ void GameSpecLoader::parsePlayerRange(const std::string &src, TSNode node, GameS
 
 void GameSpecLoader::parseSetup(const std::string &src, TSNode node, GameSpec &spec) {
     // For now, we'll just capture the setup rules without deep parsing
-    uint32_t child_count = ts_node_child_count(node);
-
-    for (uint32_t i = 0; i < child_count; ++i) {
-        TSNode child = ts_node_child(node, i);
-        const char* field_name = ts_node_field_name_for_child(node, i);
-
-        if (!field_name) continue;
-
-        // Look for setup rule definitions
-        // Each rule will have fields like: id, kind, prompt, and optional range
-        // TODO: Implement parsing for setup rules based on field names
-
-    }
+    // TODO: Implement parsing for setup rules based on field names
+    (void)src;
+    (void)node;
+    (void)spec;
 }
 
-//TODO: PARSE RULES
-// AS they are read create an AST from that.
-
-
-//TODO: Change the couts into logging
 void GameSpecLoader::parseRules(const std::string &src, TSNode node, GameSpec &spec) {
     // The rules node might contain a body node, so we need to check
     uint32_t child_count = ts_node_named_child_count(node);
 
-    std::cout << "\nPARSING RULES " << std::endl;
+    std::cout << "\nPARSING RULES AND BUILDING AST" << std::endl;
 
     // If there's only one child and it's a body, parse that instead.
-    // This is specified in the grammar, it's a hidden node that comes after the rules bit now ma
+    // This is specified in the grammar, it's a hidden node that comes after the rules bit
     TSNode statementsNode = node;
     if (child_count == 1) {
         TSNode firstChild = ts_node_named_child(node, 0);
@@ -229,46 +216,21 @@ void GameSpecLoader::parseRules(const std::string &src, TSNode node, GameSpec &s
 
     std::cout << "Found " << child_count << " statements" << std::endl;
 
+    // Convert each statement to AST
     for (uint32_t i = 0; i < child_count; ++i) {
         TSNode child = ts_node_named_child(statementsNode, i);
-        TSSymbol symbol = ts_node_symbol(child);
 
-        // Each statement might be wrapped in a "rule" node,
-        TSNode statementNode = child;
-        if (symbol == NodeType::RULE) {
-            // Get the actual statement inside the rule wrapper
-            if (ts_node_named_child_count(child) > 0) {
-                statementNode = ts_node_named_child(child, 0);
-                symbol = ts_node_symbol(statementNode);
-            }
-        }
-
-        // Check if this is an assignment
-        if (symbol == NodeType::ASSIGNMENT) {
-            std::cout << "\n[Statement " << i << "] Assignment found" << std::endl;
-
-            // Use field names to get target and value directly
-            TSNode target = ts_node_child_by_field_name(statementNode, "target", 6);
-            TSNode value = ts_node_child_by_field_name(statementNode, "value", 5);
-
-            if (!ts_node_is_null(target) && !ts_node_is_null(value)) {
-                std::string targetText = slice(src, target);
-                std::string valueText = slice(src, value);
-                std::string targetType = ts_node_type(target);
-                std::string valueType = ts_node_type(value);
-
-                std::cout << "  Target: " << targetText << " (type: " << targetType << ")" << std::endl;
-                std::cout << "  Value: " << valueText << " (type: " << valueType << ")" << std::endl;
-
-                // TODO: Build AST nodes from target and value
-            } else {
-                std::cerr << "  Warning: Assignment missing target or value" << std::endl;
-            }
-        } else {
-            // For now, skip non-assignment statements
-            // TODO: Do all non-assignment sections
+        try {
+            std::cout << "[Statement " << i << "] Converting to AST" << std::endl;
+            auto astNode = ASTConverter::convertStatement(src, child);
+            spec.rulesProgram.push_back(std::unique_ptr<ast::Statement>(
+                static_cast<ast::Statement*>(astNode.release())
+            ));
+        } catch (const std::exception& e) {
+            std::cerr << "  Error converting statement: " << e.what() << std::endl;
         }
     }
 
-    std::cout << " END PARSING RULES " << std::endl;
+    std::cout << "Built AST with " << spec.rulesProgram.size() << " statements" << std::endl;
+    std::cout << "END PARSING RULES\n" << std::endl;
 }

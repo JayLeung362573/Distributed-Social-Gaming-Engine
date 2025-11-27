@@ -1,14 +1,28 @@
-/*#include "parser/ASTConverter.h"
+#include "gtest/gtest.h"
+#include "parser/ASTConverter.h"
 #include "parser/NodeTypes.h"
 #include "parser/TreeSitterUtil.h"
+#include "parser/GameSpecLoader.h"
+#include "GameSpecLoaderTest.h"
+
 extern "C" const TSLanguage *tree_sitter_socialgaming();
 
 TEST_F(GameSpecLoaderTest, ASTConverter_BasicAssignments) {
     std::string src = R"(
-        rules {
-            x <- "a"
-            x <- 1
-        }
+configuration {
+  name: "Test"
+  player range: (1, 1)
+  audience: false
+  setup: {}
+}
+constants {}
+variables {}
+per-player {}
+per-audience {}
+rules {
+  x <- "a";
+  x <- 1;
+}
     )";
 
     TSParser *parser = ts_parser_new();
@@ -28,13 +42,19 @@ TEST_F(GameSpecLoaderTest, ASTConverter_BasicAssignments) {
             break;
         }
     }
-    ASSERT_FALSE(ts_node_is_null(rules)) << "No rules block found.";
+    ASSERT_FALSE(ts_node_is_null(rules)) << "No rules block found";
 
-// testing the conversion
+// Get the body node inside rules
+    ASSERT_GT(ts_node_named_child_count(rules), 0) << "Rules node has no children";
+    TSNode body = ts_node_named_child(rules, 0);
+    ASSERT_EQ(ts_node_symbol(body), NodeType::BODY) << "First child of rules should be body";
+
+    // testing the conversion
     int converted = 0;
-    uint32_t n = ts_node_named_child_count(rules);
+    uint32_t n = ts_node_named_child_count(body);
     for (uint32_t i = 0; i < n; ++i) {
-        TSNode st = ts_node_named_child(rules, i);
+        TSNode st = ts_node_named_child(body, i);
+
         if (ts_node_symbol(st) == NodeType::RULE)
             st = ts_node_named_child(st, 0);
 
@@ -49,4 +69,4 @@ TEST_F(GameSpecLoaderTest, ASTConverter_BasicAssignments) {
 
     ts_tree_delete(tree);
     ts_parser_delete(parser);
-}*/
+}

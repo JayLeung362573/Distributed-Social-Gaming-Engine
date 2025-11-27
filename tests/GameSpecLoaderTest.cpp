@@ -2,12 +2,7 @@
 #include "parser/GameSpecLoader.h"
 #include "parser/GameSpec.h"
 #include <filesystem>
-
-
-class GameSpecLoaderTest : public ::testing::Test {
-protected:
-    GameSpecLoader loader;
-};
+#include "GameSpecLoaderTest.h"
 
 TEST_F(GameSpecLoaderTest, LoadGameName) {
     std::filesystem::path filePath = std::filesystem::path(GAMES_DIR) / "hello-test.game";

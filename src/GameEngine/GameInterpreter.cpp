@@ -26,6 +26,10 @@ VisitResult
 GameInterpreter::visit(const ast::Variable& variable)
 {
     Value* value = m_variableMap.load(variable.getName());
+
+    if(value == nullptr){
+        throw std::runtime_error("Variable not found");
+    }
     return VisitResult{value};
 }
 

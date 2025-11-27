@@ -2,22 +2,24 @@
 #include "GameServer.h"
 #include "Message.h"
 
-TEST(GameServerTest, SingleClientStartGame){
+TEST(GameServerTest, StartGameWithoutLobbyFails){
     GameServer server;
+    uintptr_t clientID = 888;
 
     std::vector<ClientMessage> incoming = {
-            {1, {MessageType::StartGame, StartGameMessage{"player 1"}}}
+            {clientID, {MessageType::StartGame, StartGameMessage{"player 1"}}}
     };
 
     std::vector<ClientMessage> outgoingMsg = server.tick(incoming);
 
     ASSERT_GT(outgoingMsg.size(), 0);
-    ASSERT_EQ(outgoingMsg[0].clientID, 1);
-    ASSERT_EQ(outgoingMsg[0].message.type, MessageType::StartGame);
+    ASSERT_EQ(outgoingMsg[0].clientID, clientID);
+    ASSERT_EQ(outgoingMsg[0].message.type, MessageType::Error);
 
-    auto& firstResponse = outgoingMsg[0];
-    auto& responseMsg = std::get<StartGameMessage>(firstResponse.message.data);
-    ASSERT_EQ(responseMsg.playerName, "player 1");
+    ASSERT_TRUE(std::holds_alternative<ErrorMessage>(outgoingMsg[0].message.data));
+    auto& errorPayload = std::get<ErrorMessage>(outgoingMsg[0].message.data);
+
+    ASSERT_EQ(errorPayload.reason, "You must be in a lobby to start a game");
 }
 
 TEST(GameServerTest, MultipleClientsStartGame){

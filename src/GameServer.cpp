@@ -234,7 +234,7 @@ GameServer::handleBrowseLobbiesMessages(uintptr_t clientID, const BrowseLobbiesM
     std::cout << "[GameServer] Client " << clientID
               << " browsing lobbies\n";
 
-    auto lobbies = m_lobbyRegistry.browseLobbies(browseLobbiesMsg.gameType);
+    auto lobbies = m_lobbyRegistry.browseLobbies(std::nullopt);
 
     Message response;
     response.type = MessageType::LobbyState;

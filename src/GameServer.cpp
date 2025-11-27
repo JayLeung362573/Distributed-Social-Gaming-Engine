@@ -426,10 +426,9 @@ GameServer::createNumberBattleRules(){
             ast::Comparison::Kind::LT
     );
     std::vector<std::unique_ptr<ast::Statement>> statementP1Wins;
-    statementP1Wins.push_back(ast::makeInputText(
-            ast::cloneVariable(player1Var.get()),
-            ast::makeVariable(Name{"result"}),
-            String{"You WON!"}
+    statementP1Wins.push_back(ast::makeAssignment(
+            ast::makeVariable(Name{"Game Result"}),
+            ast::makeConstant(Value{String{"P1 won"}})
     ));
 
     candidates.push_back({std::move(P1Wins), std::move(statementP1Wins)});
@@ -440,10 +439,9 @@ GameServer::createNumberBattleRules(){
             ast::Comparison::Kind::LT
     );
     std::vector<std::unique_ptr<ast::Statement>> statementP2Wins;
-    statementP2Wins.push_back(ast::makeInputText(
-            ast::cloneVariable(player2Var.get()),
-            ast::makeVariable(Name{"result"}),
-            String{"You WON!"}
+    statementP2Wins.push_back(ast::makeAssignment(
+            ast::makeVariable(Name{"Game Result"}),
+            ast::makeConstant(Value{String{"P2 won"}})
     ));
 
     candidates.push_back({std::move(P2Wins), std::move(statementP2Wins)});
@@ -454,10 +452,9 @@ GameServer::createNumberBattleRules(){
             ast::Comparison::Kind::EQ
     );
     std::vector<std::unique_ptr<ast::Statement>> statementTie;
-    statementTie.push_back(ast::makeInputText(
-            ast::cloneVariable(player1Var.get()),
-            ast::makeVariable(Name{"result"}),
-            String{"It is a TIE!"}
+    statementTie.push_back(ast::makeAssignment(
+            ast::makeVariable(Name{"Game result"}),
+            ast::makeConstant(Value{String{"Tie"}})
     ));
 
     candidates.push_back({std::move(Tie), std::move(statementTie)});
@@ -509,10 +506,9 @@ GameServer::createChoiceBattleRules(){
             ast::Comparison::Kind::LT
     );
     std::vector<std::unique_ptr<ast::Statement>> statementP1Wins;
-    statementP1Wins.push_back(ast::makeInputText(
-            ast::cloneVariable(player1Var.get()),
-            ast::makeVariable(Name{"result"}),
-            String{"You WON!"}
+    statementP1Wins.push_back(ast::makeAssignment(
+            ast::makeVariable(Name{"Game result"}),
+            ast::makeConstant(Value{String{"P1 wins"}})
     ));
 
     candidates.push_back({std::move(P1Wins), std::move(statementP1Wins)});
@@ -523,10 +519,9 @@ GameServer::createChoiceBattleRules(){
             ast::Comparison::Kind::LT
     );
     std::vector<std::unique_ptr<ast::Statement>> statementP2Wins;
-    statementP2Wins.push_back(ast::makeInputText(
-            ast::cloneVariable(player2Var.get()),
-            ast::makeVariable(Name{"result"}),
-            String{"You WON!"}
+    statementP2Wins.push_back(ast::makeAssignment(
+            ast::makeVariable(Name{"Game result"}),
+            ast::makeConstant(Value{String{"P2 wins"}})
     ));
 
     candidates.push_back({std::move(P2Wins), std::move(statementP2Wins)});
@@ -537,10 +532,9 @@ GameServer::createChoiceBattleRules(){
             ast::Comparison::Kind::EQ
     );
     std::vector<std::unique_ptr<ast::Statement>> statementTie;
-    statementTie.push_back(ast::makeInputText(
-            ast::cloneVariable(player1Var.get()),
-            ast::makeVariable(Name{"result"}),
-            String{"It is a TIE!"}
+    statementTie.push_back(ast::makeAssignment(
+            ast::makeVariable(Name{"Game result"}),
+            ast::makeConstant(Value{String{"Tie"}})
     ));
 
     candidates.push_back({std::move(Tie), std::move(statementTie)});

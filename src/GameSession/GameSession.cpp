@@ -185,7 +185,7 @@ GameSession::collectOutgoingMessages() {
 
         auto targetClientID = getClientID(targetPlayerID, m_players);
 
-        if (targetClientID != 0) {
+        if (targetClientID.has_value()) {
             outgoing.push_back(ClientMessage{*targetClientID, netMsg});
         } else {
             std::cerr << "[GameSession] Warning: Could not find client for player ID: " << targetPlayerID << "\n";

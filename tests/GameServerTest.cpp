@@ -90,6 +90,7 @@ TEST(GameServerStartTest, ErrorIfGameAlreadyStarted) {
 TEST(GameServerStartTest, SuccessfulStartSendsNotifications) {
     GameServer server;
     setupLobby(server, 1);
+    server.tick({{2, {MessageType::JoinLobby, JoinLobbyMessage{"Player2", "lobby_test", 0}}}});
     auto out = server.handleStartGameMessages(1, StartGameMessage{"Host"});
 
     ASSERT_GE(out.size(), 1); // start notifications + initial game messages

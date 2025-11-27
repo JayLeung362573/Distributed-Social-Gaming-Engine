@@ -6,19 +6,7 @@
 #include <chrono>
 #include <set>
 
-std::string formatLobbyList(const std::vector<LobbyInfo>& lobbies) {
-    if (lobbies.empty()) {
-        return "No existing lobbies";
-    }
 
-    std::string output = "Current active lobbies:\n";
-    for (const auto& lobby : lobbies) {
-        output += " - " + lobby.lobbyName + " (ID: " + lobby.lobbyID + ") | " +
-                  "Players: " + std::to_string(lobby.currentPlayers) + "/" +
-                  std::to_string(lobby.maxPlayers) + "\n";
-    }
-    return output;
-}
 
 int main(int argc, char* argv[])
 {
@@ -47,31 +35,10 @@ int main(int argc, char* argv[])
                 if (knownClients.find(clientID) == knownClients.end()) {
                     std::cout << "[Main] New Client Detected: " << clientID << "\n";
 
-                    // 1. Create Fake Browse Request
-                    Message browseMsg;
-                    browseMsg.type = MessageType::BrowseLobbies;
-                    browseMsg.data = BrowseLobbiesMessage{GameType::Default};
+                    auto responses = server->showCurrentLobbies(clientID);
 
-                    std::vector<ClientMessage> fakeInput;
-                    fakeInput.push_back({clientID, browseMsg});
-
-                    // 2. Get Response from Server
-                    auto responses = server->tick(fakeInput);
-
-                    // 3. Process and Send
+                    // Process and Send
                     for(auto& response : responses) {
-                        if (response.message.type == MessageType::LobbyState) {
-                            auto& state = std::get<LobbyStateMessage>(response.message.data);
-
-                            if (state.currentLobbyID.empty()) {
-                                std::string text = formatLobbyList(state.lobbies);
-
-                                // Change message type to GameOutput so client prints it
-                                response.message.type = MessageType::GameOutput;
-                                response.message.data = GameOutputMessage{text};
-                            }
-                        }
-
                         networking->sendToClient(response.clientID, response.message);
                     }
 

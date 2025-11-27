@@ -3,6 +3,22 @@
 #include "Message.h"
 #include <unordered_map>
 
+namespace{
+    std::string formatLobbyList(const std::vector<LobbyInfo>& lobbies) {
+        if (lobbies.empty()) {
+            return "No existing lobbies";
+        }
+
+        std::string output = "Current active lobbies:\n";
+        for (const auto& lobby : lobbies) {
+            output += " - " + lobby.lobbyName + " (ID: " + lobby.lobbyID + ") | " +
+                      "Players: " + std::to_string(lobby.currentPlayers) + "/" +
+                      std::to_string(lobby.maxPlayers) + "\n";
+        }
+        return output;
+    }
+}
+
 GameServer::GameServer() = default;
 
 struct MessageHandlerVisitor {
@@ -236,9 +252,24 @@ GameServer::handleBrowseLobbiesMessages(uintptr_t clientID, const BrowseLobbiesM
 
     auto lobbies = m_lobbyRegistry.browseLobbies(std::nullopt);
 
+    std::string text = formatLobbyList(lobbies);
+
     Message response;
-    response.type = MessageType::LobbyState;
-    response.data = LobbyStateMessage{lobbies, ""};
+    response.type = MessageType::GameOutput;
+    response.data = GameOutputMessage{text};
+    return {ClientMessage{clientID, response}};
+}
+
+std::vector<ClientMessage>
+GameServer::showCurrentLobbies(uintptr_t clientID){
+    auto lobbies = m_lobbyRegistry.browseLobbies(std::nullopt);
+
+    std::string text = formatLobbyList(lobbies);
+
+    Message response;
+    response.type = MessageType::GameOutput;
+    response.data = GameOutputMessage{text};
+
     return {ClientMessage{clientID, response}};
 }
 

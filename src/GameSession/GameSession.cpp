@@ -38,6 +38,8 @@ std::vector<ClientMessage>
 GameSession::start() {
     std::cout << "[GameSession] Starting game execution\n";
 
+    m_inputManager.sendOutput(String{"Game starts!"});
+
     m_interpreter.execute();
 
     return collectOutgoingMessages();

@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 #include "GameServer.h"
-#include "Message.h"
 
 TEST(GameServerTest, StartGameWithoutLobbyFails){
     GameServer server;

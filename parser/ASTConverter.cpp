@@ -38,9 +38,47 @@ ASTConverter::convertExpression(const std::string &src, TSNode node) {
     TSSymbol symbol = ts_node_symbol(node);
     const char* type = ts_node_type(node);
 
-    // sometimes the grammar wraps things in an expression node, just unwrap it
+    // expression nodes can wrap operators or just wrap other expressions
     if (symbol == NodeType::EXPRESSION) {
-        if (ts_node_named_child_count(node) > 0) {
+        uint32_t namedCount = ts_node_named_child_count(node);
+        uint32_t totalCount = ts_node_child_count(node);
+
+        // check if this is an operator expression by looking at anonymous children
+        if (totalCount > namedCount) {
+            // has anonymous children - might be operators
+            for (uint32_t i = 0; i < totalCount; ++i) {
+                TSNode child = ts_node_child(node, i);
+                if (!ts_node_is_named(child)) {
+                    std::string op = slice(src, child);
+
+                    // binary operators
+                    if (op == "=" && namedCount == 2) {
+                        auto left = convertExpression(src, ts_node_named_child(node, 0));
+                        auto right = convertExpression(src, ts_node_named_child(node, 1));
+                        return std::make_unique<ast::Comparison>(std::move(left), std::move(right), ast::Comparison::Kind::EQ);
+                    }
+                    if (op == "<" && namedCount == 2) {
+                        auto left = convertExpression(src, ts_node_named_child(node, 0));
+                        auto right = convertExpression(src, ts_node_named_child(node, 1));
+                        return std::make_unique<ast::Comparison>(std::move(left), std::move(right), ast::Comparison::Kind::LT);
+                    }
+                    if (op == "||" && namedCount == 2) {
+                        auto left = convertExpression(src, ts_node_named_child(node, 0));
+                        auto right = convertExpression(src, ts_node_named_child(node, 1));
+                        return std::make_unique<ast::LogicalOperation>(std::move(left), std::move(right), ast::LogicalOperation::Kind::OR);
+                    }
+
+                    // unary operators
+                    if (op == "!" && namedCount == 1) {
+                        auto operand = convertExpression(src, ts_node_named_child(node, 0));
+                        return std::make_unique<ast::UnaryOperation>(std::move(operand), ast::UnaryOperation::Kind::NOT);
+                    }
+                }
+            }
+        }
+
+        // not an operator, just unwrap
+        if (namedCount > 0) {
             return convertExpression(src, ts_node_named_child(node, 0));
         }
         throw std::runtime_error("Expression node has no children");

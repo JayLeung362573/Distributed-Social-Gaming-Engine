@@ -1,6 +1,7 @@
 #include "ASTConverter.h"
 #include "NodeTypes.h"
 #include "ParserUtil.h"
+#include <cstring>
 #include <unordered_map>
 
 namespace {

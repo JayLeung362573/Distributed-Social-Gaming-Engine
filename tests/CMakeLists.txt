@@ -35,6 +35,7 @@ add_executable(unit_tests
   GameInterpreterTests/SortTest.cpp
   GameInterpreterTests/MatchTest.cpp
   GameInterpreterTests/ProgramTest.cpp
+  GameInterpreterTests/ForLoopTest.cpp
   TypesTest.cpp
   RulesTest.cpp
   LobbyRegistryTest.cpp

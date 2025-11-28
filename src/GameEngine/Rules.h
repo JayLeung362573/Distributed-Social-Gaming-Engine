@@ -162,6 +162,30 @@ namespace ast
             Kind kind;
     };
 
+    class ArithmeticOperation : public Expression
+    {
+        public:
+            enum class Kind { ADD };
+
+            ArithmeticOperation(std::unique_ptr<Expression> left,
+                                std::unique_ptr<Expression> right,
+                                Kind kind)
+            : left(std::move(left))
+            , right(std::move(right))
+            , kind(kind) {}
+
+            VisitResult accept(ASTVisitor &visitor) override;
+            Expression* getLeft() const noexcept { return left.get(); };
+            Expression* getRight() const noexcept { return right.get(); };
+            Kind getKind() const noexcept { return kind; };
+
+        private:
+            std::unique_ptr<Expression> left;
+            std::unique_ptr<Expression> right;
+
+            Kind kind;
+    };
+
     class Assignment : public Statement
     {
         public:
@@ -296,6 +320,40 @@ namespace ast
             std::vector<Candidate> candidates;
     };
 
+    class ForLoop : public Statement
+    {
+        public:
+            ForLoop(std::unique_ptr<Variable> element,
+                        std::unique_ptr<Expression> target,
+                        std::vector<std::unique_ptr<Statement>> statements)
+            : element(std::move(element))
+            , target(std::move(target))
+            , statements(std::move(statements)) {}
+
+            VisitResult accept(ASTVisitor &visitor) override;
+            Variable* getElement() const noexcept { return element.get(); };
+            Expression* getTarget() const noexcept { return target.get(); };
+
+            std::vector<Statement*>
+            getStatements() const
+            {
+                // This logic is also in Match, now duplicating
+                // TODO: Have a StatementList type that stores std::unique_ptr<Statement>,
+                // with raw() method to get vector of Statement* ?
+                std::vector<Statement*> rawStatements;
+                for (auto& statement : statements)
+                {
+                    rawStatements.push_back(statement.get());
+                }
+                return rawStatements;
+            }
+
+        private:
+            std::unique_ptr<Variable> element;
+            std::unique_ptr<Expression> target;
+            std::vector<std::unique_ptr<Statement>> statements;
+    };
+
     class InputText : public Statement
     {
         public:
@@ -407,6 +465,7 @@ namespace ast
             virtual VisitResult visit(const Comparison& comparison) = 0;
             virtual VisitResult visit(const LogicalOperation& logicalOp) = 0;
             virtual VisitResult visit(const UnaryOperation& unaryOp) = 0;
+            virtual VisitResult visit(const ArithmeticOperation& arithmeticOp) = 0;
             virtual VisitResult visit(const Assignment& assignment) = 0;
             virtual VisitResult visit(const Extend& extend) = 0;
             virtual VisitResult visit(const Reverse& reverse) = 0;
@@ -414,6 +473,7 @@ namespace ast
             virtual VisitResult visit(const Discard& discard) = 0;
             virtual VisitResult visit(const Sort& sort) = 0;
             virtual VisitResult visit(const Match& match) = 0;
+            virtual VisitResult visit(const ForLoop& forLoop) = 0;
             virtual VisitResult visit(const InputText& inputText) = 0;
             virtual VisitResult visit(const InputChoice& inputChoice) = 0;
             virtual VisitResult visit(const InputRange& inputRange) = 0;
@@ -443,6 +503,11 @@ namespace ast
     makeUnaryOperation(std::unique_ptr<ast::Expression> target,
                        ast::UnaryOperation::Kind kind);
 
+    std::unique_ptr<ast::ArithmeticOperation>
+    makeArithmeticOperation(std::unique_ptr<ast::Expression> left,
+                            std::unique_ptr<ast::Expression> right,
+                            ast::ArithmeticOperation::Kind kind);
+
     std::unique_ptr<ast::Assignment>
     makeAssignment(std::unique_ptr<ast::Expression> targetExpr,
                 std::unique_ptr<ast::Expression> valueToAssign);
@@ -468,6 +533,11 @@ namespace ast
     std::unique_ptr<ast::Match>
     makeMatch(std::unique_ptr<ast::Expression> target,
               std::vector<ast::Match::Candidate> candidates);
+
+    std::unique_ptr<ast::ForLoop>
+    makeForLoop(std::unique_ptr<Variable> element,
+                std::unique_ptr<ast::Expression> target,
+                std::vector<std::unique_ptr<ast::Statement>> statements);
 
     std::unique_ptr<ast::InputText>
     makeInputText(std::unique_ptr<ast::Variable> playerVar,

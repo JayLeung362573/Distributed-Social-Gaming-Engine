@@ -113,9 +113,14 @@ struct List
     List() = default;
     List(std::initializer_list<T> init) : value(init) {}
 
-    Integer size()
+    size_t size()
     {
-        return Integer{(int)(value.size())};
+        return value.size();
+    }
+
+    T atIndex(size_t index)
+    {
+        return value[index];
     }
 
     void extend(const List<T>& list)
@@ -144,7 +149,7 @@ struct List
         {
             return;
         }
-        int clampedAmount = std::min(amount.value, size().value);
+        int clampedAmount = std::min(amount.value, (int)(size()));
 
         value.erase(value.begin(), value.begin() + clampedAmount);
     }
@@ -395,6 +400,12 @@ inline bool doUnaryNot(const Value& a)
     // TODO: Support truthy for more flexibility? Could look like:
     // return !isTruthy(a);
     return !(a.asBoolean().value);
+}
+
+inline Value doArithmeticAdd(const Value& a, const Value& b)
+{
+    // For now, only integers
+    return Value{Integer{a.asInteger().value + b.asInteger().value}};
 }
 
 inline List<Value> sortList(const List<Value>& list, std::optional<String> key = {})

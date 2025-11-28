@@ -30,6 +30,11 @@ VisitResult ast::UnaryOperation::accept(ASTVisitor &visitor)
     return visitor.visit(*this);
 };
 
+VisitResult ast::ArithmeticOperation::accept(ast::ASTVisitor& visitor)
+{
+    return visitor.visit(*this);
+};
+
 VisitResult ast::Assignment::accept(ast::ASTVisitor& visitor)
 {
     return visitor.visit(*this);
@@ -64,6 +69,11 @@ VisitResult ast::Match::accept(ast::ASTVisitor& visitor)
 {
     return visitor.visit(*this);
 };
+
+VisitResult ast::ForLoop::accept(ast::ASTVisitor& visitor)
+{
+    return visitor.visit(*this);
+}
 
 VisitResult ast::InputText::accept(ast::ASTVisitor& visitor)
 {
@@ -128,6 +138,16 @@ ast::makeUnaryOperation(std::unique_ptr<ast::Expression> target,
     return std::make_unique<ast::UnaryOperation>(std::move(target), kind);
 }
 
+std::unique_ptr<ast::ArithmeticOperation>
+ast::makeArithmeticOperation(std::unique_ptr<ast::Expression> left,
+                             std::unique_ptr<ast::Expression> right,
+                             ast::ArithmeticOperation::Kind kind)
+{
+    return std::make_unique<ast::ArithmeticOperation>(
+        std::move(left), std::move(right), kind
+    );
+}
+
 std::unique_ptr<ast::Assignment>
 ast::makeAssignment(std::unique_ptr<ast::Expression> targetExpr,
                std::unique_ptr<ast::Expression> valueToAssign)
@@ -174,6 +194,18 @@ ast::makeMatch(std::unique_ptr<ast::Expression> target,
                std::vector<ast::Match::Candidate> candidates)
 {
     return std::make_unique<ast::Match>(std::move(target), std::move(candidates));
+}
+
+std::unique_ptr<ast::ForLoop>
+ast::makeForLoop(std::unique_ptr<Variable> element,
+                 std::unique_ptr<ast::Expression> target,
+                 std::vector<std::unique_ptr<ast::Statement>> statements)
+{
+    return std::make_unique<ast::ForLoop>(
+        std::move(element),
+        std::move(target),
+        std::move(statements)
+    );
 }
 
 std::unique_ptr<ast::InputText>

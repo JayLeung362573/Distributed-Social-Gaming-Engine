@@ -51,10 +51,18 @@ class ProgramIterator
     public:
         struct MatchExecutionContext
         {
-            std::unique_ptr<ProgramIterator> iterator;
+            std::unique_ptr<ProgramIterator> iterator; // candidate statements iterator
         };
 
-        using StatementContext = std::variant<std::monostate, MatchExecutionContext>;
+        struct ForLoopExecutionContext
+        {
+            std::unique_ptr<ProgramIterator> iterator; // statements iterator
+            size_t listIndex = 0;
+        };
+
+        using StatementContext = std::variant<std::monostate,
+                                              MatchExecutionContext,
+                                              ForLoopExecutionContext>;
 
     public:
         ProgramIterator(ProgramRaw program) : m_statementIndex(0)
@@ -115,6 +123,17 @@ class ProgramIterator
             m_context = {};
         }
 
+        bool isDone()
+        {
+            return !currentStatement();
+        }
+
+        void reset()
+        {
+            m_statementIndex = 0;
+            m_context = {};
+        }
+
     private:
         ProgramRaw m_program;
         size_t m_statementIndex;
@@ -172,7 +191,7 @@ class GameInterpreter : public ast::ASTVisitor
          * @brief Compares two values and returns a Boolean.
          *
          * @param comparison The Comparison node to visit.
-         * @return VisitResult Containing a Boolean
+         * @return VisitResult Containing a Boolean as the result
          *
          * @pre Values are comparable.
          */
@@ -182,7 +201,7 @@ class GameInterpreter : public ast::ASTVisitor
          * @brief Does a logical operation (e.g., OR) on two values.
          *
          * @param logicalOp The LogicalOperation node to visit.
-         * @return VisitResult Containing a Boolean
+         * @return VisitResult Containing a Boolean as the result
          *
          * @pre Left/right expressions evaluate to a Boolean.
          */
@@ -192,11 +211,21 @@ class GameInterpreter : public ast::ASTVisitor
          * @brief Does a unary operation (e.g., NOT) on a value.
          *
          * @param unaryOp The UnaryOperation node to visit.
-         * @return VisitResult Containing a Boolean
+         * @return VisitResult Containing a Boolean as the result
          *
          * @pre Target expression evaluates to a Boolean.
          */
         VisitResult visit(const ast::UnaryOperation& unaryOp) override;
+
+        /**
+         * @brief Does an arithmetic operation (e.g., ADD) on two values.
+         *
+         * @param arithmeticOp The ArithmeticOperation node to visit.
+         * @return VisitResult Containing a Value as the result
+         *
+         * @pre Left/right expressions evaluate to a Value
+         */
+        VisitResult visit(const ast::ArithmeticOperation& arithmeticOp) override;
 
         /**
          * @brief Assigns an evaluated expression to a target.
@@ -281,6 +310,21 @@ class GameInterpreter : public ast::ASTVisitor
         VisitResult visit(const ast::Match& match) override;
 
         /**
+         * @brief For each element in the `target` expression (list), execute `statements`.
+         * During the iteration, the current element will be loaded at the variable `element`.
+         *
+         * Note: Be careful with the name for the `element` variable, it will be deleted after
+         *       the forLoop finishes executing.
+         *
+         * @param forLoop The ForLoop node to visit.
+         * @return VisitResult
+         *
+         * @pre `target` resolves to a List.
+         * @pre `target` elements are not added/removed/re-ordered during execution.
+         */
+        VisitResult visit(const ast::ForLoop& forLoop) override;
+
+        /**
          * @brief Prompts and stores player text input.
          */
         VisitResult visit(const ast::InputText& inputText) override;
@@ -313,6 +357,9 @@ class GameInterpreter : public ast::ASTVisitor
         void
         doAttributeAssignment(ast::Attribute& attrTarget, Value valueToAssign);
 
+        void
+        deleteVariable(ast::Variable& variable);
+
         VisitResult
         evaluateExpression(ast::Expression& expr);
 
@@ -330,12 +377,24 @@ class GameInterpreter : public ast::ASTVisitor
 
         void executeProgram(ProgramIterator& iterator);
 
+        void assertCurrentIterator();
+
+        std::optional<ProgramIterator::ForLoopExecutionContext*>
+        getCurrentForLoopExecutionContext();
+
+        std::optional<ProgramIterator::MatchExecutionContext*>
+        getCurrentMatchExecutionContext();
+
+        void
+        setCurrentStatementContext(ProgramIterator::StatementContext ctx);
+
     private:
         VariableMap m_variableMap;
+
         InputManager& m_inputManager;
+        bool m_waitingForInput = false;
 
         std::optional<Program> m_program;
         std::unique_ptr<ProgramIterator> m_iterator;
         ProgramIterator* m_currentIterator;
-        bool m_waitingForInput = false;
 };

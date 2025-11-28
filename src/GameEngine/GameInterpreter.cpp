@@ -100,6 +100,22 @@ GameInterpreter::visit(const ast::UnaryOperation& unaryOp)
 }
 
 VisitResult
+GameInterpreter::visit(const ast::ArithmeticOperation& arithmeticOp)
+{
+    Value left = evaluateExpression(*arithmeticOp.getLeft()).getValue();
+    Value right = evaluateExpression(*arithmeticOp.getRight()).getValue();
+
+    Value result;
+
+    switch (arithmeticOp.getKind())
+    {
+        case ast::ArithmeticOperation::Kind::ADD: result = doArithmeticAdd(left, right); break;
+    }
+
+    return VisitResult{result};
+}
+
+VisitResult
 GameInterpreter::visit(const ast::Assignment& assignment)
 {
     Value valueToAssign = assignment.getValue()->accept(*this).getValue();
@@ -186,15 +202,8 @@ GameInterpreter::visit(const ast::Sort& sort)
 VisitResult
 GameInterpreter::visit(const ast::Match& match)
 {
-    if (m_currentIterator == nullptr)
-    {
-        throw std::runtime_error(
-            "Expected m_currentIterator to be set. Is there a program to execute?"
-        );
-    }
-
-    auto maybeCtx = m_currentIterator->currentContext<ProgramIterator::MatchExecutionContext>();
-    bool isFirstVisit = !maybeCtx.has_value();
+    auto ctx = getCurrentMatchExecutionContext();
+    bool isFirstVisit = !ctx.has_value();
 
     if (isFirstVisit)
     {
@@ -208,20 +217,18 @@ GameInterpreter::visit(const ast::Match& match)
         auto iterator = std::make_unique<ProgramIterator>(
             ProgramRaw{{maybeCandidate.value().statements}}
         );
-        m_currentIterator->setCurrentContext(
+        setCurrentStatementContext(
             ProgramIterator::MatchExecutionContext{std::move(iterator)}
         );
     }
 
-    maybeCtx = m_currentIterator->currentContext<ProgramIterator::MatchExecutionContext>();
-    if (!maybeCtx.has_value())
+    ctx = getCurrentMatchExecutionContext();
+    if (!ctx.has_value())
     {
-        throw std::runtime_error(
-            "Expected MatchExecutionContext to be set as the current context"
-        );
+        throw std::runtime_error("Match execution context not found");
     }
 
-    executeProgram(*(maybeCtx.value()->iterator));
+    executeProgram(*(ctx.value()->iterator));
 
     return {};
 }
@@ -243,6 +250,54 @@ GameInterpreter::findMatch(const ast::Match& match)
     return std::nullopt;
 }
 
+VisitResult
+GameInterpreter::visit(const ast::ForLoop& forLoop)
+{
+    auto ctx = getCurrentForLoopExecutionContext();
+    bool isFirstVisit = !ctx.has_value();
+
+    List<Value> target = evaluateExpression(*forLoop.getTarget())
+                        .getValue()
+                        .asList();
+
+    if (isFirstVisit)
+    {
+        auto iterator = std::make_unique<ProgramIterator>(
+            ProgramRaw{{forLoop.getStatements()}}
+        );
+        setCurrentStatementContext(
+            ProgramIterator::ForLoopExecutionContext{std::move(iterator)}
+        );
+    }
+
+    ctx = getCurrentForLoopExecutionContext();
+    if (!ctx.has_value())
+    {
+        throw std::runtime_error("ForLoop execution context not found");
+    }
+
+    while (ctx.value()->listIndex < target.size() && !needsIO())
+    {
+        doVariableAssignment(*forLoop.getElement(), target.atIndex(ctx.value()->listIndex));
+
+        executeProgram(*(ctx.value()->iterator));
+
+        if (ctx.value()->iterator->isDone())
+        {
+            ctx.value()->iterator->reset();
+            ctx.value()->listIndex++;
+        }
+    }
+
+    if (ctx.value()->listIndex == target.size())
+    {
+        // done, clean up
+        deleteVariable(*forLoop.getElement());
+    }
+
+    return {};
+}
+
 void
 GameInterpreter::doVariableAssignment(ast::Variable& varTarget, Value valueToAssign)
 {
@@ -261,6 +316,12 @@ GameInterpreter::doAttributeAssignment(ast::Attribute& attrTarget, Value valueTo
     VisitResult baseResult = resolveExpression(*baseExpr);
     Value& baseValue = baseResult.getValue();
     baseValue.setAttribute(attrTarget.getAttr(), valueToAssign);
+}
+
+void
+GameInterpreter::deleteVariable(ast::Variable& variable)
+{
+    m_variableMap.del(variable.getName());
 }
 
 void
@@ -288,6 +349,37 @@ GameInterpreter::executeProgram(ProgramIterator& iterator)
             iterator.goNext();
         }
     }
+}
+
+void
+GameInterpreter::assertCurrentIterator()
+{
+    if (m_currentIterator == nullptr)
+    {
+        throw std::runtime_error(
+            "Expected m_currentIterator to be set. Is there a program to execute?"
+        );
+    }
+}
+
+std::optional<ProgramIterator::ForLoopExecutionContext*>
+GameInterpreter::getCurrentForLoopExecutionContext()
+{
+    assertCurrentIterator();
+    return m_currentIterator->currentContext<ProgramIterator::ForLoopExecutionContext>();
+}
+
+std::optional<ProgramIterator::MatchExecutionContext*>
+GameInterpreter::getCurrentMatchExecutionContext()
+{
+    assertCurrentIterator();
+    return m_currentIterator->currentContext<ProgramIterator::MatchExecutionContext>();
+}
+
+void
+GameInterpreter::setCurrentStatementContext(ProgramIterator::StatementContext ctx)
+{
+    m_currentIterator->setCurrentContext(std::move(ctx));
 }
 
 VisitResult

@@ -1,4 +1,5 @@
 #include "GameSpecLoader.h"
+#include "ASTConverter.h"
 #include <tree_sitter/api.h>
 #include <fstream>
 #include <sstream>
@@ -13,54 +14,14 @@ extern "C" const TSLanguage *tree_sitter_socialgaming();
 //for tree-sitters TSLLanguage structure, it's rules etc.
 //tree_sitter_socialgaming() will generate when you run "tree-sitter generate" from the terminal
 
-/*
- * Read a file into memory as a single string
- */
+// Read a file into memory as a single string
 static std::string slurp(const std::string &path) {
     std::ifstream in(path, std::ios::binary);
     if (!in) throw std::runtime_error("Cannot open file: " + path);
 
     std::ostringstream ss;
-    ss << in.rdbuf(); // read entire file stream
-    return ss.str(); // return as str
-
-    /*
-     ex: const std::string src = slurp("rock-paper-scissors.game");
-     - This will read the files text into memory and lets Tree-Sitter parse it.
-     */
-}
-
-/*
- * Take the full source text and the TSNode (we has start/end indices) and extract the substring that node has
- */
-static std::string slice(const std::string &src, TSNode node) {
-    auto start = ts_node_start_byte(node);
-    auto end = ts_node_end_byte(node);
-    auto size = static_cast<uint32_t>(src.size());
-
-    //make sure it's valid range
-    if (start >= size || end <= start) return {}; // returns an empty string
-
-    return {src.begin() + start, src.begin() + end};
-
-}
-
-static int parseInteger(const std::string &src, TSNode node) {
-    std::string numStr = slice(src, node);
-    return std::stoi(numStr);
-}
-
-static std::string parseQuotedString(const std::string &src, TSNode node) {
-    std::string withQuotes = slice(src, node);
-    if (withQuotes.size() >= 2) {
-        return withQuotes.substr(1, withQuotes.size() - 2);
-    }
-    return withQuotes;
-}
-
-static bool parseBoolean(const std::string &src, TSNode node) {
-    std::string boolStr = slice(src, node);
-    return boolStr == "true";
+    ss << in.rdbuf();
+    return ss.str();
 }
 
 //this will read the hello-test.game, and print out to the terminal the config snippet, for testing that it can see the config block as a node
@@ -159,6 +120,8 @@ GameSpec GameSpecLoader::loadString(const std::string &text) {
             spec.constants = slice(text, child);
         } else if (strcmp(field_name, "variables") == 0 || ts_node_symbol(child) == NodeType::VARIABLES) {
             spec.variables = slice(text, child);
+        } else if (strcmp(field_name, "rules") == 0 || ts_node_symbol(child) == NodeType::RULES) {
+            parseRules(text, child, spec);
         }
     }
 
@@ -227,19 +190,47 @@ void GameSpecLoader::parsePlayerRange(const std::string &src, TSNode node, GameS
 
 void GameSpecLoader::parseSetup(const std::string &src, TSNode node, GameSpec &spec) {
     // For now, we'll just capture the setup rules without deep parsing
-    uint32_t child_count = ts_node_child_count(node);
-
-    for (uint32_t i = 0; i < child_count; ++i) {
-        TSNode child = ts_node_child(node, i);
-        const char* field_name = ts_node_field_name_for_child(node, i);
-
-        if (!field_name) continue;
-
-        // Look for setup rule definitions
-        // Each rule will have fields like: id, kind, prompt, and optional range
-        // TODO: Implement parsing for setup rules based on field names
-
-    }
+    // TODO: Implement parsing for setup rules based on field names
+    (void)src;
+    (void)node;
+    (void)spec;
 }
 
+void GameSpecLoader::parseRules(const std::string &src, TSNode node, GameSpec &spec) {
+    // The rules node might contain a body node, so we need to check
+    uint32_t child_count = ts_node_named_child_count(node);
 
+    std::cout << "\nPARSING RULES AND BUILDING AST" << std::endl;
+
+    // If there's only one child and it's a body, parse that instead.
+    // This is specified in the grammar, it's a hidden node that comes after the rules bit
+    TSNode statementsNode = node;
+    if (child_count == 1) {
+        TSNode firstChild = ts_node_named_child(node, 0);
+        if (ts_node_symbol(firstChild) == NodeType::BODY) {
+            std::cout << "Rules contains a body node, parsing its contents" << std::endl;
+            statementsNode = firstChild;
+            child_count = ts_node_named_child_count(statementsNode);
+        }
+    }
+
+    std::cout << "Found " << child_count << " statements" << std::endl;
+
+    // Convert each statement to AST
+    for (uint32_t i = 0; i < child_count; ++i) {
+        TSNode child = ts_node_named_child(statementsNode, i);
+
+        try {
+            std::cout << "[Statement " << i << "] Converting to AST" << std::endl;
+            auto astNode = ASTConverter::convertStatement(src, child);
+            spec.rulesProgram.push_back(std::unique_ptr<ast::Statement>(
+                static_cast<ast::Statement*>(astNode.release())
+            ));
+        } catch (const std::exception& e) {
+            std::cerr << "  Error converting statement: " << e.what() << std::endl;
+        }
+    }
+
+    std::cout << "Built AST with " << spec.rulesProgram.size() << " statements" << std::endl;
+    std::cout << "END PARSING RULES\n" << std::endl;
+}

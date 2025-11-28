@@ -11,6 +11,12 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/tests")
 
+# Copy game files to build/tests/games for testing
+file(COPY ${CMAKE_SOURCE_DIR}/games
+        DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+# Also copy to build/ so tests work when run from there
+file(COPY ${CMAKE_SOURCE_DIR}/games
+        DESTINATION ${PROJECT_BINARY_DIR})
 
 FetchContent_MakeAvailable(googletest)
 
@@ -31,16 +37,28 @@ add_executable(unit_tests
   GameInterpreterTests/ProgramTest.cpp
   TypesTest.cpp
   RulesTest.cpp
-  GameSpecLoaderTest.cpp
   LobbyRegistryTest.cpp
   InputManagerTest.cpp
   GameSessionTest.cpp
+  GameInterpreterSmokeTest.cpp
+  ParserTests/GameSpecLoaderTest.cpp
+  ParserTests/ASTConverterTest.cpp
+  ParserTests/IntegrationTest.cpp
+  ParserTests/RPSMinimalTest.cpp
+  ParserTests/FullRPSParseTest.cpp
+  ParserTests/RPSFullConversionTest.cpp
+  ParserTests/InputDebugTest.cpp
+  ParserTests/ForLoopDebugTest.cpp
+  ParserTests/MessageScoresDebugTest.cpp
+  ParserTests/MethodCallDebugTest.cpp
+  ParserTests/GameSpecLoaderTest.h
 )
 
 # Link with gtest (the Quickstart uses GTest::gtest_main)
 target_link_libraries(unit_tests PRIVATE GTest::gtest_main core_lib parser)
 
 target_compile_features(unit_tests PRIVATE cxx_std_23)
+
 
 target_include_directories(unit_tests PRIVATE
         ${PROJECT_SOURCE_DIR}/src

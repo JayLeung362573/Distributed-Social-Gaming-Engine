@@ -47,10 +47,10 @@ add_executable(unit_tests
   ParserTests/RPSMinimalTest.cpp
   ParserTests/FullRPSParseTest.cpp
   ParserTests/RPSFullConversionTest.cpp
-  ParserTests/DebugTests/InputDebugTest.cpp
-  ParserTests/DebugTests/ForLoopDebugTest.cpp
-  ParserTests/DebugTests/MessageScoresDebugTest.cpp
-  ParserTests/DebugTests/MethodCallDebugTest.cpp
+  ParserTests/InputDebugTest.cpp
+  ParserTests/ForLoopDebugTest.cpp
+  ParserTests/MessageScoresDebugTest.cpp
+  ParserTests/MethodCallDebugTest.cpp
   ParserTests/GameSpecLoaderTest.h
 )
 

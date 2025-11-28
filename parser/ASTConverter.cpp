@@ -78,6 +78,11 @@ ASTConverter::convertExpression(const std::string &src, TSNode node) {
                         auto right = convertExpression(src, ts_node_named_child(node, 1));
                         return std::make_unique<ast::Comparison>(std::move(left), std::move(right), ast::Comparison::Kind::LT);
                     }
+                    if (op == "+" && namedCount == 2) {
+                        auto left = convertExpression(src, ts_node_named_child(node, 0));
+                        auto right = convertExpression(src, ts_node_named_child(node, 1));
+                        return std::make_unique<ast::ArithmeticOperation>(std::move(left), std::move(right), ast::ArithmeticOperation::Kind::ADD);
+                    }
                     if (op == "||" && namedCount == 2) {
                         auto left = convertExpression(src, ts_node_named_child(node, 0));
                         auto right = convertExpression(src, ts_node_named_child(node, 1));
@@ -600,7 +605,40 @@ ASTConverter::convertInputVote(const std::string &src, TSNode node) {
 // unsupported statements - stubs
 std::unique_ptr<ast::Statement>
 ASTConverter::convertForLoop(const std::string &src, TSNode node) {
-    throw std::runtime_error("ForLoop not supported by interpreter yet");
+    TSSymbol symbol = ts_node_symbol(node);
+
+    if (symbol != NodeType::FOR) {
+        throw std::runtime_error("Expected FOR node");
+    }
+
+    uint32_t childCount = ts_node_named_child_count(node);
+    if (childCount != 3) {
+        throw std::runtime_error("FOR should have 3 named children (element, target, body)");
+    }
+
+    // Child 0: identifier (loop variable)
+    TSNode elementNode = ts_node_named_child(node, 0);
+    std::string elementName = extractText(src, elementNode);
+    auto elementVar = std::make_unique<ast::Variable>(Name{elementName});
+
+    // Child 1: expression (target list)
+    TSNode targetNode = ts_node_named_child(node, 1);
+    auto targetExpr = convertExpression(src, targetNode);
+
+    // Child 2: body (loop body statements)
+    TSNode bodyNode = ts_node_named_child(node, 2);
+    std::vector<std::unique_ptr<ast::Statement>> statements;
+
+    if (ts_node_symbol(bodyNode) == NodeType::BODY) {
+        uint32_t stmtCount = ts_node_named_child_count(bodyNode);
+        for (uint32_t i = 0; i < stmtCount; ++i) {
+            TSNode stmtNode = ts_node_named_child(bodyNode, i);
+            auto stmt = convertStatement(src, stmtNode);
+            statements.push_back(std::move(stmt));
+        }
+    }
+
+    return ast::makeForLoop(std::move(elementVar), std::move(targetExpr), std::move(statements));
 }
 
 std::unique_ptr<ast::Statement>

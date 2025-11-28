@@ -11,7 +11,6 @@ TEST(RPSFullConversionTest, LoadRockPaperScissors) {
     EXPECT_FALSE(spec.constants.empty());
     EXPECT_FALSE(spec.variables.empty());
 
-    // RPS rules all use unsupported features so nothing converts yet
     EXPECT_EQ(spec.rulesProgram.size(), 0);
 }
 
@@ -24,6 +23,5 @@ TEST(RPSFullConversionTest, LoadGameWithSupportedFeatures) {
     EXPECT_FALSE(spec.constants.empty());
     EXPECT_FALSE(spec.variables.empty());
 
-    // all 9 statements should convert
-    EXPECT_EQ(spec.rulesProgram.size(), 9);
+    EXPECT_EQ(spec.rulesProgram.size(), 12);
 }

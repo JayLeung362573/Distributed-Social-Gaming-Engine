@@ -308,11 +308,11 @@ rules {
     EXPECT_EQ(spec.rulesProgram.size(), 1) << "Should have 1 input choice statement";
 }
 
-TEST(RPSTest, UnsupportedForLoopSkipped) {
+TEST(RPSTest, ForLoop) {
     std::string gameSpec = R"(
 configuration {
-  name: "Test For Loop"
-  player range: (1, 1)
+  name: "Test ForLoop"
+  player range: (1, 4)
   audience: false
   setup: {}
 }
@@ -329,8 +329,8 @@ rules {
 
     GameSpecLoader loader;
     GameSpec spec = loader.loadString(gameSpec);
-    // unsupported statements are caught and skipped, not added to rulesProgram
-    EXPECT_EQ(spec.rulesProgram.size(), 0) << "ForLoop should be skipped (unsupported)";
+
+    EXPECT_EQ(spec.rulesProgram.size(), 1);
 }
 
 TEST(RPSTest, UnsupportedMessageSkipped) {

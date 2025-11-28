@@ -46,6 +46,9 @@ target_include_directories(unit_tests PRIVATE
         ${PROJECT_SOURCE_DIR}/src
         ${PROJECT_SOURCE_DIR}/src/lib)
 
+target_compile_definitions(unit_tests PRIVATE
+        GAMES_DIR=\"${PROJECT_SOURCE_DIR}/games\")
+
 # Use CTest integration (can use to discover tests automatically)
 include(GoogleTest)
 

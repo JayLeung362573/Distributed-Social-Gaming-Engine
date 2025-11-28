@@ -36,7 +36,7 @@ namespace {
         if (!constantNode->getValue().isString()) {
             throw std::runtime_error("Input prompt must be a string literal");
         }
-        return std::get<String>(constantNode->getValue().value);
+        return constantNode->getValue().asString();
     }
 }
 

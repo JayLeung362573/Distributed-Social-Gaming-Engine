@@ -5,26 +5,26 @@
 
 namespace {
     // dispatch table for statement conversions - lazy init to ensure NodeType symbols are ready
-    using ConverterFunc = std::unique_ptr<ast::ASTNode>(*)(const std::string&, TSNode);
+    using ConverterFunc = std::unique_ptr<ast::Statement>(*)(const std::string&, TSNode);
 
     const std::unordered_map<TSSymbol, ConverterFunc>& getStatementConverters() {
         static const std::unordered_map<TSSymbol, ConverterFunc> converters = {
-            {NodeType::ASSIGNMENT, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::ASTNode> { return ASTConverter::convertAssignment(s, n); }},
-            {NodeType::DISCARD, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::ASTNode> { return ASTConverter::convertDiscard(s, n); }},
-            {NodeType::EXTEND, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::ASTNode> { return ASTConverter::convertExtend(s, n); }},
-            {NodeType::REVERSE, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::ASTNode> { return ASTConverter::convertReverse(s, n); }},
-            {NodeType::SHUFFLE, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::ASTNode> { return ASTConverter::convertShuffle(s, n); }},
-            {NodeType::SORT, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::ASTNode> { return ASTConverter::convertSort(s, n); }},
-            {NodeType::MATCH, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::ASTNode> { return ASTConverter::convertMatch(s, n); }},
-            {NodeType::INPUT_CHOICE, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::ASTNode> { return ASTConverter::convertInputChoice(s, n); }},
-            {NodeType::INPUT_TEXT, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::ASTNode> { return ASTConverter::convertInputText(s, n); }},
-            {NodeType::INPUT_RANGE, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::ASTNode> { return ASTConverter::convertInputRange(s, n); }},
-            {NodeType::INPUT_VOTE, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::ASTNode> { return ASTConverter::convertInputVote(s, n); }},
-            {NodeType::FOR, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::ASTNode> { return ASTConverter::convertForLoop(s, n); }},
-            {NodeType::PARALLEL_FOR, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::ASTNode> { return ASTConverter::convertParallelFor(s, n); }},
-            {NodeType::MESSAGE, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::ASTNode> { return ASTConverter::convertMessage(s, n); }},
-            {NodeType::SCORES, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::ASTNode> { return ASTConverter::convertScores(s, n); }},
-            {NodeType::COMMENT, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::ASTNode> { return ASTConverter::convertComment(s, n); }},
+            {NodeType::ASSIGNMENT, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::Statement> { return ASTConverter::convertAssignment(s, n); }},
+            {NodeType::DISCARD, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::Statement> { return ASTConverter::convertDiscard(s, n); }},
+            {NodeType::EXTEND, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::Statement> { return ASTConverter::convertExtend(s, n); }},
+            {NodeType::REVERSE, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::Statement> { return ASTConverter::convertReverse(s, n); }},
+            {NodeType::SHUFFLE, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::Statement> { return ASTConverter::convertShuffle(s, n); }},
+            {NodeType::SORT, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::Statement> { return ASTConverter::convertSort(s, n); }},
+            {NodeType::MATCH, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::Statement> { return ASTConverter::convertMatch(s, n); }},
+            {NodeType::INPUT_CHOICE, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::Statement> { return ASTConverter::convertInputChoice(s, n); }},
+            {NodeType::INPUT_TEXT, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::Statement> { return ASTConverter::convertInputText(s, n); }},
+            {NodeType::INPUT_RANGE, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::Statement> { return ASTConverter::convertInputRange(s, n); }},
+            {NodeType::INPUT_VOTE, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::Statement> { return ASTConverter::convertInputVote(s, n); }},
+            {NodeType::FOR, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::Statement> { return ASTConverter::convertForLoop(s, n); }},
+            {NodeType::PARALLEL_FOR, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::Statement> { return ASTConverter::convertParallelFor(s, n); }},
+            {NodeType::MESSAGE, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::Statement> { return ASTConverter::convertMessage(s, n); }},
+            {NodeType::SCORES, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::Statement> { return ASTConverter::convertScores(s, n); }},
+            {NodeType::COMMENT, [](const std::string& s, TSNode n) -> std::unique_ptr<ast::Statement> { return ASTConverter::convertComment(s, n); }},
         };
         return converters;
     }
@@ -269,7 +269,7 @@ Value ASTConverter::convertValueMap(const std::string &src, TSNode node) {
     return Value{map};
 }
 
-std::unique_ptr<ast::ASTNode>
+std::unique_ptr<ast::Statement>
 ASTConverter::convertStatement(const std::string &src, TSNode node) {
     TSSymbol symbol = ts_node_symbol(node);
 
@@ -594,27 +594,27 @@ ASTConverter::convertInputVote(const std::string &src, TSNode node) {
 }
 
 // unsupported statements - stubs
-std::unique_ptr<ast::ASTNode>
+std::unique_ptr<ast::Statement>
 ASTConverter::convertForLoop(const std::string &src, TSNode node) {
     throw std::runtime_error("ForLoop not supported by interpreter yet");
 }
 
-std::unique_ptr<ast::ASTNode>
+std::unique_ptr<ast::Statement>
 ASTConverter::convertParallelFor(const std::string &src, TSNode node) {
     throw std::runtime_error("ParallelFor not supported by interpreter yet");
 }
 
-std::unique_ptr<ast::ASTNode>
+std::unique_ptr<ast::Statement>
 ASTConverter::convertMessage(const std::string &src, TSNode node) {
     throw std::runtime_error("Message not supported by interpreter yet");
 }
 
-std::unique_ptr<ast::ASTNode>
+std::unique_ptr<ast::Statement>
 ASTConverter::convertScores(const std::string &src, TSNode node) {
     throw std::runtime_error("Scores not supported by interpreter yet");
 }
 
-std::unique_ptr<ast::ASTNode>
+std::unique_ptr<ast::Statement>
 ASTConverter::convertComment(const std::string &src, TSNode node) {
     throw std::runtime_error("Comment not supported by interpreter yet");
 }

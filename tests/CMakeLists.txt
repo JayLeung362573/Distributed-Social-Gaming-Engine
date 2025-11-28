@@ -37,21 +37,21 @@ add_executable(unit_tests
   GameInterpreterTests/ProgramTest.cpp
   TypesTest.cpp
   RulesTest.cpp
-  GameSpecLoaderTest.cpp
   LobbyRegistryTest.cpp
   InputManagerTest.cpp
   GameSessionTest.cpp
   GameInterpreterSmokeTest.cpp
-  ASTConverterTest.cpp
-  IntegrationTest.cpp
-  RPSMinimalTest.cpp
-  InputDebugTest.cpp
-  ForLoopDebugTest.cpp
-  MessageScoresDebugTest.cpp
-  MethodCallDebugTest.cpp
-  FullRPSParseTest.cpp
-  RPSFullConversionTest.cpp
-  GameSpecLoaderTest.h
+  ParserTests/GameSpecLoaderTest.cpp
+  ParserTests/ASTConverterTest.cpp
+  ParserTests/IntegrationTest.cpp
+  ParserTests/RPSMinimalTest.cpp
+  ParserTests/FullRPSParseTest.cpp
+  ParserTests/RPSFullConversionTest.cpp
+  ParserTests/DebugTests/InputDebugTest.cpp
+  ParserTests/DebugTests/ForLoopDebugTest.cpp
+  ParserTests/DebugTests/MessageScoresDebugTest.cpp
+  ParserTests/DebugTests/MethodCallDebugTest.cpp
+  ParserTests/GameSpecLoaderTest.h
 )
 
 # Link with gtest (the Quickstart uses GTest::gtest_main)

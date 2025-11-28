@@ -109,6 +109,7 @@ ASTConverter::convertExpression(const std::string &src, TSNode node) {
     }
 
     // constants - ints, strings, bools
+    // note: grammar produces "number" nodes, even though we register INTEGER symbol
     if (symbol == NodeType::INTEGER || symbol == NodeType::QUOTED_STRING ||
         symbol == NodeType::BOOLEAN || strcmp(type, "number") == 0) {
         return convertConstant(src, node);
@@ -140,6 +141,7 @@ ASTConverter::convertConstant(const std::string &src, TSNode node) {
     TSSymbol symbol = ts_node_symbol(node);
     const char* type = ts_node_type(node);
 
+    // grammar produces "number" nodes for integers
     if (symbol == NodeType::INTEGER || strcmp(type, "number") == 0) {
         int intValue = parseInteger(src, node);
         return std::make_unique<ast::Constant>(Value{Integer{intValue}});
@@ -209,6 +211,7 @@ Value ASTConverter::convertValue(const std::string &src, TSNode node) {
     TSSymbol symbol = ts_node_symbol(node);
     const char* type = ts_node_type(node);
 
+    // grammar produces "number" nodes for integers
     if (symbol == NodeType::INTEGER || strcmp(type, "number") == 0) {
         int intValue = parseInteger(src, node);
         return Value{Integer{intValue}};

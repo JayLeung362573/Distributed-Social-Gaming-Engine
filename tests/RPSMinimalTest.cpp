@@ -69,8 +69,19 @@ rules {
     GameSpecLoader loader;
     GameSpec spec = loader.loadString(gameSpec);
 
-    std::cout << "Parsed " << spec.rulesProgram.size() << " statements" << std::endl;
-    EXPECT_EQ(spec.rulesProgram.size(), 1) << "Should have 1 discard statement";
+    ASSERT_EQ(spec.rulesProgram.size(), 1) << "Should have 1 discard statement";
+
+    // verify it's actually a Discard with correct parameters
+    auto* discard = static_cast<ast::Discard*>(spec.rulesProgram[0].get());
+
+    // check target is Variable "winners"
+    auto* targetVar = static_cast<ast::Variable*>(discard->getTarget());
+    EXPECT_EQ(targetVar->getName().name, "winners");
+
+    // check amount is Constant 1
+    auto* amountConst = static_cast<ast::Constant*>(discard->getAmount());
+    EXPECT_TRUE(amountConst->getValue().isInteger());
+    EXPECT_EQ(amountConst->getValue().asInteger().value, 1);
 }
 
 TEST(RPSTest, SimpleExtendStatement) {

@@ -52,4 +52,16 @@ rules {
       d <- 4;
     }
   }
+
+  for player in players {
+    player.wins <- 0;
+  }
+
+  for weapon in weapons {
+    score <- 1 + 2;
+  }
+
+  for winner in winners {
+    winner.wins <- winner.wins + 1;
+  }
 }

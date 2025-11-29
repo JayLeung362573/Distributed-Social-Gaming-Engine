@@ -3,6 +3,22 @@
 #include "Message.h"
 #include <unordered_map>
 
+namespace{
+    std::string formatLobbyList(const std::vector<LobbyInfo>& lobbies) {
+        if (lobbies.empty()) {
+            return "No existing lobbies";
+        }
+
+        std::string output = "Current active lobbies:\n";
+        for (const auto& lobby : lobbies) {
+            output += " - " + lobby.lobbyName + " (ID: " + lobby.lobbyID + ") | " +
+                      "Players: " + std::to_string(lobby.currentPlayers) + "/" +
+                      std::to_string(lobby.maxPlayers) + "\n";
+        }
+        return output;
+    }
+}
+
 GameServer::GameServer() = default;
 
 struct MessageHandlerVisitor {
@@ -84,14 +100,39 @@ GameServer::handleJoinLobbyMessages(uintptr_t clientID, const JoinLobbyMessage& 
     std::vector<ClientMessage> outgoingMessages;
 
     if(joinLobbyMsg.lobbyName.empty()){
+        /// Empty name: create new
         lobby = m_lobbyRegistry.createLobby(
                 clientID,
                 static_cast<GameType>(joinLobbyMsg.gameType),
                 joinLobbyMsg.playerName + "'s Lobby"
         );
     } else {
+        /// try joining with lobbyID
         lobbyID = joinLobbyMsg.lobbyName;
         lobby = m_lobbyRegistry.joinLobby(clientID, lobbyID);
+
+        /// try joining with lobbyName
+        if(!lobby){
+            auto lobbies = m_lobbyRegistry.browseLobbies(static_cast<GameType>(joinLobbyMsg.gameType));
+
+            for (const auto& info : lobbies) {
+                if (info.lobbyName == joinLobbyMsg.lobbyName) {
+                    std::cout << "[GameServer] Found lobby by name: " << info.lobbyName << " -> ID: " << info.lobbyID << "\n";
+                    lobby = m_lobbyRegistry.joinLobby(clientID, info.lobbyID);
+                    break;
+                }
+            }
+        }
+
+        /// still not found by id and name
+        if(!lobby){
+            std::cout << "[GameServer] Lobby '" << lobbyID << "' not found. Creating new lobby.\n";
+            lobby = m_lobbyRegistry.createLobby(
+                    clientID,
+                    static_cast<GameType>(joinLobbyMsg.gameType),
+                    joinLobbyMsg.lobbyName
+            );
+        }
     }
 
     if(!lobby){
@@ -102,9 +143,7 @@ GameServer::handleJoinLobbyMessages(uintptr_t clientID, const JoinLobbyMessage& 
         return outgoingMessages;
     }
 
-    if(joinLobbyMsg.lobbyName.empty()){
-        lobbyID = lobby->getInfo().lobbyID;
-    }
+    lobbyID = lobby->getInfo().lobbyID;
 
     Message lobbyStatePayload;
     lobbyStatePayload.type = MessageType::LobbyState;
@@ -211,11 +250,26 @@ GameServer::handleBrowseLobbiesMessages(uintptr_t clientID, const BrowseLobbiesM
     std::cout << "[GameServer] Client " << clientID
               << " browsing lobbies\n";
 
-    auto lobbies = m_lobbyRegistry.browseLobbies(browseLobbiesMsg.gameType);
+    auto lobbies = m_lobbyRegistry.browseLobbies(std::nullopt);
+
+    std::string text = formatLobbyList(lobbies);
 
     Message response;
-    response.type = MessageType::LobbyState;
-    response.data = LobbyStateMessage{lobbies, ""};
+    response.type = MessageType::GameOutput;
+    response.data = GameOutputMessage{text};
+    return {ClientMessage{clientID, response}};
+}
+
+std::vector<ClientMessage>
+GameServer::showCurrentLobbies(uintptr_t clientID){
+    auto lobbies = m_lobbyRegistry.browseLobbies(std::nullopt);
+
+    std::string text = formatLobbyList(lobbies);
+
+    Message response;
+    response.type = MessageType::GameOutput;
+    response.data = GameOutputMessage{text};
+
     return {ClientMessage{clientID, response}};
 }
 
@@ -266,6 +320,15 @@ GameServer::handleStartGameMessages(uintptr_t clientID, const StartGameMessage& 
 
     /// 5. get all players (host and players, excluding audience)
     auto players = lobby->getAllPlayer();
+
+    if (players.size() < 2) {
+        std::cout << "[GameServer] Error: Not enough players to start (Requires 2)\n";
+        Message errorMsg;
+        errorMsg.type = MessageType::Error;
+        errorMsg.data = ErrorMessage{"Not enough players to start. You need at least 2."};
+        return {ClientMessage{clientID, errorMsg}};
+    }
+
     std::cout << "[GameServer] Starting game for lobby " << *lobbyID
               << " with " << players.size() << " players\n";
 
@@ -283,12 +346,14 @@ GameServer::handleStartGameMessages(uintptr_t clientID, const StartGameMessage& 
     /// the networking will receive this 'responses' and send(notify) to each player
     /// and initial game prompt for inputs
     std::vector<ClientMessage> responses;
-    Message startMsg;
-    startMsg.type = MessageType::GameOutput;
-    startMsg.data = GameOutputMessage{"Game started"};
 
     for(const auto& player : players){
         std::cout << "[GameServer] Notifying player " << player.clientID << "\n";
+
+        Message startMsg;
+        startMsg.type = MessageType::StartGame;
+        startMsg.data = StartGameMessage{"Game started"};
+
         responses.push_back(ClientMessage{player.clientID, startMsg});
     }
 
@@ -401,10 +466,9 @@ GameServer::createNumberBattleRules(){
             ast::Comparison::Kind::LT
     );
     std::vector<std::unique_ptr<ast::Statement>> statementP1Wins;
-    statementP1Wins.push_back(ast::makeInputText(
-            ast::cloneVariable(player1Var.get()),
-            ast::makeVariable(Name{"result"}),
-            String{"You WON!"}
+    statementP1Wins.push_back(ast::makeAssignment(
+            ast::makeVariable(Name{"Game Result"}),
+            ast::makeConstant(Value{String{"P1 won"}})
     ));
 
     candidates.push_back({std::move(P1Wins), std::move(statementP1Wins)});
@@ -415,10 +479,9 @@ GameServer::createNumberBattleRules(){
             ast::Comparison::Kind::LT
     );
     std::vector<std::unique_ptr<ast::Statement>> statementP2Wins;
-    statementP2Wins.push_back(ast::makeInputText(
-            ast::cloneVariable(player2Var.get()),
-            ast::makeVariable(Name{"result"}),
-            String{"You WON!"}
+    statementP2Wins.push_back(ast::makeAssignment(
+            ast::makeVariable(Name{"Game Result"}),
+            ast::makeConstant(Value{String{"P2 won"}})
     ));
 
     candidates.push_back({std::move(P2Wins), std::move(statementP2Wins)});
@@ -429,10 +492,9 @@ GameServer::createNumberBattleRules(){
             ast::Comparison::Kind::EQ
     );
     std::vector<std::unique_ptr<ast::Statement>> statementTie;
-    statementTie.push_back(ast::makeInputText(
-            ast::cloneVariable(player1Var.get()),
-            ast::makeVariable(Name{"result"}),
-            String{"It is a TIE!"}
+    statementTie.push_back(ast::makeAssignment(
+            ast::makeVariable(Name{"Game result"}),
+            ast::makeConstant(Value{String{"Tie"}})
     ));
 
     candidates.push_back({std::move(Tie), std::move(statementTie)});
@@ -484,10 +546,9 @@ GameServer::createChoiceBattleRules(){
             ast::Comparison::Kind::LT
     );
     std::vector<std::unique_ptr<ast::Statement>> statementP1Wins;
-    statementP1Wins.push_back(ast::makeInputText(
-            ast::cloneVariable(player1Var.get()),
-            ast::makeVariable(Name{"result"}),
-            String{"You WON!"}
+    statementP1Wins.push_back(ast::makeAssignment(
+            ast::makeVariable(Name{"Game result"}),
+            ast::makeConstant(Value{String{"P1 wins"}})
     ));
 
     candidates.push_back({std::move(P1Wins), std::move(statementP1Wins)});
@@ -498,10 +559,9 @@ GameServer::createChoiceBattleRules(){
             ast::Comparison::Kind::LT
     );
     std::vector<std::unique_ptr<ast::Statement>> statementP2Wins;
-    statementP2Wins.push_back(ast::makeInputText(
-            ast::cloneVariable(player2Var.get()),
-            ast::makeVariable(Name{"result"}),
-            String{"You WON!"}
+    statementP2Wins.push_back(ast::makeAssignment(
+            ast::makeVariable(Name{"Game result"}),
+            ast::makeConstant(Value{String{"P2 wins"}})
     ));
 
     candidates.push_back({std::move(P2Wins), std::move(statementP2Wins)});
@@ -512,10 +572,9 @@ GameServer::createChoiceBattleRules(){
             ast::Comparison::Kind::EQ
     );
     std::vector<std::unique_ptr<ast::Statement>> statementTie;
-    statementTie.push_back(ast::makeInputText(
-            ast::cloneVariable(player1Var.get()),
-            ast::makeVariable(Name{"result"}),
-            String{"It is a TIE!"}
+    statementTie.push_back(ast::makeAssignment(
+            ast::makeVariable(Name{"Game result"}),
+            ast::makeConstant(Value{String{"Tie"}})
     ));
 
     candidates.push_back({std::move(Tie), std::move(statementTie)});

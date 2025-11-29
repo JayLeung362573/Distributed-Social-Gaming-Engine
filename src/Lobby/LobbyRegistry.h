@@ -14,7 +14,7 @@ public:
     Lobby* createLobby(ClientID hostID, GameType gameType, const std::string& name);
     bool destroyLobby(const LobbyID& lobbyID);
 
-    std::vector<LobbyInfo> browseLobbies(GameType gameType) const;
+    std::vector<LobbyInfo> browseLobbies(std::optional<GameType> gameType = std::nullopt) const;
 
     Lobby* joinLobby(ClientID playerID, const LobbyID& lobbyID);
     void leaveLobby(ClientID playerID);

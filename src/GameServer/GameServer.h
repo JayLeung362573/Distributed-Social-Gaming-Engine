@@ -30,6 +30,7 @@ public:
     std::vector<ClientMessage> handleGetLobbyStateMessages(uintptr_t clientID, const GetLobbyStateMessage& getLobbyMsg) const;
     std::vector<ClientMessage> handleBrowseLobbiesMessages(uintptr_t clientID, const BrowseLobbiesMessage& browseLobbyMsg) const;
 
+    std::vector<ClientMessage> showCurrentLobbies(uintptr_t clientID);
 private:
     LobbyRegistry m_lobbyRegistry;
     std::unordered_map<LobbyID, std::unique_ptr<GameSession>> m_activeSessions;

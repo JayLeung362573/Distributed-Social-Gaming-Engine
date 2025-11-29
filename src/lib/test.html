@@ -22,6 +22,8 @@
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script>
         $(document).ready(function() {
+            var currentPrompt = "";
+            var currentResponseType = "";
             function appendText(text) {
                 $('#messages').append(text);
                 $('#messages').scrollTop($('#messages')[0].scrollHeight);
@@ -41,7 +43,22 @@
                     appendText("Disconnected!\n");
                 };
                 ws.onmessage = function(ev) {
+                    var msg = ev.data;
                     appendText(ev.data + "\n");
+
+                    if (msg.startsWith("RequestChoiceInput:")) {
+                        currentResponseType = "ResponseChoiceInput";
+                        currentPrompt = msg.substring("RequestChoiceInput:".length);
+                    }
+                    else if (msg.startsWith("RequestTextInput:")) {
+                        currentResponseType = "ResponseTextInput";
+                        currentPrompt = msg.substring("RequestTextInput:".length);
+                    }
+                    else if (msg.startsWith("RequestRangeInput:")) {
+                        currentResponseType = "ResponseRangeInput";
+                        var content = msg.substring("RequestRangeInput:".length);
+                        currentPrompt = content.split('|')[0];
+                    }
                 };
                 ws.onerror = function(ev) {
                     appendText("[error]\n");
@@ -54,9 +71,16 @@
             });
 
             $('#send').click(function () {
-                ws.send(sendMessage.value);
-                appendText("SENT: " + sendMessage.value + "\n");
-                sendMessage.value = "";
+                var input = sendMessage.value;
+                var finalMessage = input;
+
+                if(currentResponseType !== "" && !input.includes(":")){
+                    finalMessage = currentResponseType + ":" + input + "|" + currentPrompt;
+                }
+
+                ws.send(finalMessage);
+                appendText("SENT: " + finalMessage + "\n");
+                $('#sendMessage').val("");
             });
 
             $('#sendMessage').keyup(function(e) {

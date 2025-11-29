@@ -1,23 +1,24 @@
 #include <gtest/gtest.h>
 #include "GameServer.h"
-#include "Message.h"
 
-TEST(GameServerTest, SingleClientStartGame){
+TEST(GameServerTest, StartGameWithoutLobbyFails){
     GameServer server;
+    uintptr_t clientID = 888;
 
     std::vector<ClientMessage> incoming = {
-            {1, {MessageType::StartGame, StartGameMessage{"player 1"}}}
+            {clientID, {MessageType::StartGame, StartGameMessage{"player 1"}}}
     };
 
     std::vector<ClientMessage> outgoingMsg = server.tick(incoming);
 
     ASSERT_GT(outgoingMsg.size(), 0);
-    ASSERT_EQ(outgoingMsg[0].clientID, 1);
-    ASSERT_EQ(outgoingMsg[0].message.type, MessageType::StartGame);
+    ASSERT_EQ(outgoingMsg[0].clientID, clientID);
+    ASSERT_EQ(outgoingMsg[0].message.type, MessageType::Error);
 
-    auto& firstResponse = outgoingMsg[0];
-    auto& responseMsg = std::get<StartGameMessage>(firstResponse.message.data);
-    ASSERT_EQ(responseMsg.playerName, "player 1");
+    ASSERT_TRUE(std::holds_alternative<ErrorMessage>(outgoingMsg[0].message.data));
+    auto& errorPayload = std::get<ErrorMessage>(outgoingMsg[0].message.data);
+
+    ASSERT_EQ(errorPayload.reason, "You must be in a lobby to start a game");
 }
 
 TEST(GameServerTest, MultipleClientsStartGame){
@@ -47,7 +48,7 @@ TEST(GameServerTest, MultipleClientsStartGame){
 
 // Helper to add a lobby + host + player
 static void setupLobby(GameServer &server, uintptr_t hostID) {
-    server.tick({{hostID, {MessageType::JoinLobby, JoinLobbyMessage{"Host", "lobby_test"}}}});
+    server.tick({{hostID, {MessageType::JoinLobby, JoinLobbyMessage{"Host", "lobby_test", 0}}}});
 }
 
 // Unit testings for starting the server
@@ -89,6 +90,7 @@ TEST(GameServerStartTest, ErrorIfGameAlreadyStarted) {
 TEST(GameServerStartTest, SuccessfulStartSendsNotifications) {
     GameServer server;
     setupLobby(server, 1);
+    server.tick({{2, {MessageType::JoinLobby, JoinLobbyMessage{"Player2", "lobby_test", 0}}}});
     auto out = server.handleStartGameMessages(1, StartGameMessage{"Host"});
 
     ASSERT_GE(out.size(), 1); // start notifications + initial game messages
@@ -119,8 +121,8 @@ TEST(GameServerTestIntegrationTest, FullGameFlowTwoPlayers) {
     GameServer server;
 
     // Join lobby
-    server.tick({{1, {MessageType::JoinLobby, JoinLobbyMessage{"P1", "L"}}}});
-    server.tick({{2, {MessageType::JoinLobby, JoinLobbyMessage{"P2", "L"}}}});
+    server.tick({{1, {MessageType::JoinLobby, JoinLobbyMessage{"P1", "L", 0}}}});
+    server.tick({{2, {MessageType::JoinLobby, JoinLobbyMessage{"P2", "L", 0}}}});
 
     // Host starts game
     auto startOut = server.handleStartGameMessages( 1, StartGameMessage{"P1"});

@@ -17,17 +17,17 @@ LobbyRegistry::createLobby(ClientID hostID, GameType gameType, const std::string
 }
 
 std::vector<LobbyInfo>
-LobbyRegistry::browseLobbies(GameType gameType) const {
+LobbyRegistry::browseLobbies(std::optional<GameType> gameType) const {
     std::vector<LobbyInfo> result;
 
     for(const auto& [lobbyID, lobby] : m_lobbies){
-        if(lobby->getGameType() == gameType){
+        if(!gameType.has_value() || lobby->getGameType() == *gameType){
             result.push_back(lobby->getInfo());
         }
     }
 
     std::cout << "[Registry] Found " << result.size() << " lobbies for game type "
-              << static_cast<int>(gameType) << "\n";
+              << (gameType.has_value() ? std::to_string((int)*gameType) : "ALL") << ")\n";
 
     return result;
 }

@@ -1,8 +1,5 @@
 #include <gtest/gtest.h>
 #include "GameSession/GameSession.h"
-#include "Lobby/Lobby.h"
-#include "GameEngine/Rules.h"
-#include "Message.h"
 
 using namespace ast;
 
@@ -49,7 +46,7 @@ TEST(GameSessionTest, StartProducesInitialOutputAndRequests) {
     for (auto &msg : out) {
         if (msg.message.type == MessageType::GameOutput) {
             auto &g = std::get<GameOutputMessage>(msg.message.data);
-            ASSERT_EQ(g.message, "Hello, world!");
+            ASSERT_EQ(g.message, "Game starts!");
             foundOutput = true;
         }
     }

@@ -22,7 +22,7 @@ struct MessageTraits;
 template<>
 struct MessageTraits<StartGameMessage> {
     // Call statics to enable compile time, so we don't need to instantiate the object and just use it as a container
-    static constexpr std::string_view prefix = "StartGame:"; // instantiate it as pure compile time constant
+    static constexpr std::string_view prefix = "StartGame"; // instantiate it as pure compile time constant
     static std::string serialize(const StartGameMessage& d) {
         return std::string(prefix) + d.playerName;
     }
@@ -35,7 +35,7 @@ struct MessageTraits<StartGameMessage> {
 template<>
 struct MessageTraits<UpdateCycleMessage> {
     // Call statics to enable compile time, so we don't need to instantiate the object and just use it as a container
-    static constexpr std::string_view prefix = "UpdateCycle:"; // instantiate it as pure compile time constant
+    static constexpr std::string_view prefix = "UpdateCycle"; // instantiate it as pure compile time constant
 
     static std::string serialize(const UpdateCycleMessage& d) {
         return std::string(prefix) + std::to_string(d.cycle);
@@ -73,7 +73,7 @@ struct MessageTraits<StartJoinLobbyMessage> {
 /// Message format: JoinLobby:PlayerName|LobbyName|GameType
 template<>
 struct MessageTraits<JoinLobbyMessage> {
-    static constexpr std::string_view prefix = "InternalJoinLobby:";
+    static constexpr std::string_view prefix = "InternalJoinLobby";
 
     static std::string serialize(const JoinLobbyMessage& d) {
         return std::string(prefix) + d.playerName + "|" + d.lobbyName + "|" + std::to_string(d.gameType);
@@ -120,7 +120,7 @@ struct MessageTraits<JoinLobbyMessage> {
 
 template<>
 struct MessageTraits<LeaveLobbyMessage>{
-    static constexpr std::string_view prefix = "LeaveLobby:";
+    static constexpr std::string_view prefix = "LeaveLobby";
     static std::string serialize(const LeaveLobbyMessage& d) {
         return std::string(prefix) + d.playerName;
     }
@@ -131,7 +131,7 @@ struct MessageTraits<LeaveLobbyMessage>{
 
 template<>
 struct MessageTraits<LobbyStateMessage>{
-    static constexpr std::string_view prefix = "LobbyState:";
+    static constexpr std::string_view prefix = "LobbyState";
     static std::string serialize(const LobbyStateMessage& d) {
         return std::string(prefix) + d.currentLobbyID;
     }
@@ -144,7 +144,7 @@ struct MessageTraits<LobbyStateMessage>{
 
 template<>
 struct MessageTraits<BrowseLobbiesMessage> {
-    static constexpr std::string_view prefix = "BrowseLobbies:";
+    static constexpr std::string_view prefix = "BrowseLobbies";
     static std::string serialize(const BrowseLobbiesMessage& d) {
         return std::string(prefix) + std::to_string(static_cast<int>(d.gameType));
     }
@@ -157,7 +157,7 @@ struct MessageTraits<BrowseLobbiesMessage> {
 
 template<>
 struct MessageTraits<GetLobbyStateMessage>{
-    static constexpr std::string_view prefix = "GetLobbyState:";
+    static constexpr std::string_view prefix = "GetLobbyState";
     static std::string serialize(const GetLobbyStateMessage& getLobbyStateMsg) {
         return std::string(prefix);
     }

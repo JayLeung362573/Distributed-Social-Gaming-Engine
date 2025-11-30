@@ -195,6 +195,21 @@ GameServer::handleCreationInput(uintptr_t clientID, const Message& creationInput
 
 std::vector<ClientMessage>
 GameServer::handleStartJoinLobbyMessages(uintptr_t clientID){
+    if (m_lobbyRegistry.findLobbyForClient(clientID)) {
+        Message errorMsg;
+        errorMsg.type = MessageType::Error;
+        errorMsg.data = ErrorMessage{"You are already in a lobby. Leave first."};
+        return { ClientMessage{clientID, errorMsg} };
+    }
+
+    auto activeLobbies = m_lobbyRegistry.browseLobbies(std::nullopt);
+    if (activeLobbies.empty()) {
+        Message message;
+        message.type = MessageType::GameOutput;
+        message.data = GameOutputMessage{"No active lobbies found! Please use 'CreateLobby' first."};
+        return { ClientMessage{clientID, message} };
+    }
+
     m_pendingJoins.erase(clientID);
     m_pendingCreations.erase(clientID);
 

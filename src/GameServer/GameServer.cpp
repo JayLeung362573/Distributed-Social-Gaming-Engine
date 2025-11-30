@@ -356,6 +356,54 @@ GameServer::handleJoinLobbyMessages(uintptr_t clientID, const JoinLobbyMessage& 
 }
 
 std::vector<ClientMessage>
+GameServer::handleLeaveLobbyMessages(uintptr_t clientID, const LeaveLobbyMessage& leaveLobbyMsg){
+    std::cout << "[GameServer] Player '" << leaveLobbyMsg.playerName
+              << "' leaving lobby (clientID = " << clientID << ")\n";
+
+    std::vector<ClientMessage> outgoingMessages;
+
+    auto lobbyID = m_lobbyRegistry.findLobbyForClient(clientID);
+    if(!lobbyID){
+        std::cout << "[GameServer] Player not in any lobby\n";
+        Message errorMsg;
+        errorMsg.type = MessageType::Error;
+        errorMsg.data = ErrorMessage{"Not in any lobby"};
+        outgoingMessages.push_back(ClientMessage{clientID, errorMsg});
+        return outgoingMessages;
+    }
+
+    m_lobbyRegistry.leaveLobby(clientID);
+
+    Message leaveConfirmation;
+    leaveConfirmation.type = MessageType::LeaveLobby;
+    leaveConfirmation.data = LeaveLobbyMessage{leaveLobbyMsg.playerName};
+    outgoingMessages.push_back(ClientMessage{clientID, leaveConfirmation});
+
+    auto lobby = m_lobbyRegistry.getLobby(*lobbyID);
+    if (!lobby) {
+        std::cout << "[GameServer] Lobby " << *lobbyID << " was destroyed (empty)\n";
+        return outgoingMessages;
+    }
+
+    Message lobbyStateUpdate;
+    lobbyStateUpdate.type = MessageType::LobbyState;
+    lobbyStateUpdate.data = LobbyStateMessage{
+            {lobby->getInfo()},
+            *lobbyID
+    };
+
+    auto players = lobby->getAllPlayer();
+    std::cout << "[GameServer] Broadcasting lobby state to "
+              << players.size() << " remaining clients\n";
+
+    for(const auto& player : players) {
+        outgoingMessages.push_back(ClientMessage{player.clientID, lobbyStateUpdate});
+    }
+
+    return outgoingMessages;
+}
+
+std::vector<ClientMessage>
 GameServer::handleBrowseLobbiesMessages(uintptr_t clientID, const BrowseLobbiesMessage &browseLobbiesMsg) const {
     std::cout << "[GameServer] Client " << clientID
               << " browsing lobbies\n";
@@ -472,6 +520,39 @@ GameServer::handleStartGameMessages(uintptr_t clientID, const StartGameMessage& 
                      initialGameMessages.end());
 
     return responses;
+}
+
+std::vector<ClientMessage>
+GameServer::handleGetLobbyStateMessages(uintptr_t clientID, const GetLobbyStateMessage& getLobbyMsg) const{
+    std::cout << "[GameServer] Client " << clientID
+              << " requesting lobby state\n";
+
+    auto lobbyID = m_lobbyRegistry.findLobbyForClient(clientID);
+    if(!lobbyID){
+        std::cout << "[GameServer] Client not in any lobby\n";
+        Message errorMsg;
+        errorMsg.type = MessageType::Error;
+        errorMsg.data = ErrorMessage{"Client is not in a lobby"};
+        return {ClientMessage{clientID, errorMsg}};
+    }
+
+    auto lobby = m_lobbyRegistry.getLobby(*lobbyID);
+    if(!lobby){
+        std::cout << "[GameServer] Error: Lobby " << *lobbyID << " not found after find\n";
+        Message errorMsg;
+        errorMsg.type = MessageType::Error;
+        errorMsg.data = ErrorMessage{"handleGetLobbyState: Lobby not found"};
+        return {ClientMessage{clientID, errorMsg}};
+    }
+
+    Message response;
+    response.type = MessageType::LobbyState;
+    response.data = LobbyStateMessage{
+            {lobby->getInfo()},
+            {*lobbyID}
+    };
+
+    return {ClientMessage{clientID, response}};
 }
 
 std::vector<ClientMessage>

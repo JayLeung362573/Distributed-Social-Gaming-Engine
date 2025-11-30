@@ -59,6 +59,10 @@
                         var content = msg.substring("RequestRangeInput:".length);
                         currentPrompt = content.split('|')[0];
                     }
+                    else if (msg.startsWith("LobbyState:") || msg.startsWith("GameOutput:") || msg.startsWith("Error:")) {
+                        currentResponseType = "";
+                        currentPrompt = "";
+                    }
                 };
                 ws.onerror = function(ev) {
                     appendText("[error]\n");

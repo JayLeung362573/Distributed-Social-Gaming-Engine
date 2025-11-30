@@ -131,7 +131,7 @@ struct MessageTraits<LeaveLobbyMessage>{
 
 template<>
 struct MessageTraits<LobbyStateMessage>{
-    static constexpr std::string_view prefix = "LobbyState";
+    static constexpr std::string_view prefix = "LobbyState:";
     static std::string serialize(const LobbyStateMessage& d) {
         return std::string(prefix) + d.currentLobbyID;
     }

@@ -79,8 +79,7 @@
                 var finalMessage = input;
 
                 if(currentResponseType !== "" && !input.includes(":")){
-                    finalMessage = currentResponseType + ":" + input + "|" + currentPrompt;
-                }
+                    finalMessage = currentResponseType + ":" + input;                }
 
                 ws.send(finalMessage);
                 appendText("SENT: " + finalMessage + "\n");

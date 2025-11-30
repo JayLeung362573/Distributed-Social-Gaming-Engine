@@ -241,7 +241,10 @@ struct MessageTraits<ResponseChoiceInputMessage> {
         size_t delimiter = prompt.find('|');
 
         if (delimiter == std::string::npos) {
-            return { MessageType::Empty, {} };
+            return { MessageType::ResponseChoiceInput,
+                     ResponseChoiceInputMessage{
+                std::string(prompt),
+                ""} };
         }
 
         return { MessageType::ResponseChoiceInput,

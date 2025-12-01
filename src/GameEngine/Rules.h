@@ -186,6 +186,40 @@ namespace ast
             Kind kind;
     };
 
+    class Callable : public Expression
+    {
+        public:
+            enum class Kind { SIZE, UP_FROM };
+
+            Callable(std::unique_ptr<Expression> left,
+                     std::vector<std::unique_ptr<Expression>> args,
+                     Kind kind)
+            : left(std::move(left))
+            , args(std::move(args))
+            , kind(std::move(kind)) {}
+
+            VisitResult accept(ASTVisitor &visitor) override;
+            Expression* getLeft() const noexcept { return left.get(); };
+
+            std::vector<Expression*> getArgs() const noexcept
+            {
+                std::vector<Expression*> rawExpressions;
+                for (auto& expression : args)
+                {
+                    rawExpressions.push_back(expression.get());
+                }
+                return rawExpressions;
+            }
+
+            Kind getKind() const noexcept { return kind; };
+
+        private:
+            std::unique_ptr<Expression> left;
+            std::vector<std::unique_ptr<Expression>> args;
+
+            Kind kind;
+    };
+
     class Assignment : public Statement
     {
         public:
@@ -466,6 +500,7 @@ namespace ast
             virtual VisitResult visit(const LogicalOperation& logicalOp) = 0;
             virtual VisitResult visit(const UnaryOperation& unaryOp) = 0;
             virtual VisitResult visit(const ArithmeticOperation& arithmeticOp) = 0;
+            virtual VisitResult visit(const Callable& callable) = 0;
             virtual VisitResult visit(const Assignment& assignment) = 0;
             virtual VisitResult visit(const Extend& extend) = 0;
             virtual VisitResult visit(const Reverse& reverse) = 0;
@@ -508,9 +543,14 @@ namespace ast
                             std::unique_ptr<ast::Expression> right,
                             ast::ArithmeticOperation::Kind kind);
 
+    std::unique_ptr<ast::Callable>
+    makeCallable(std::unique_ptr<ast::Expression> left,
+                 std::vector<std::unique_ptr<Expression>> args,
+                 ast::Callable::Kind kind);
+
     std::unique_ptr<ast::Assignment>
     makeAssignment(std::unique_ptr<ast::Expression> targetExpr,
-                std::unique_ptr<ast::Expression> valueToAssign);
+                   std::unique_ptr<ast::Expression> valueToAssign);
 
     std::unique_ptr<ast::Extend>
     makeExtend(std::unique_ptr<ast::Expression> target,
@@ -601,6 +641,24 @@ namespace ast
 
         private:
             std::vector<std::unique_ptr<ast::Statement>> statements;
+    };
+
+    class ExpressionsBuilder
+    {
+        public:
+            ast::ExpressionsBuilder& addExpression(std::unique_ptr<ast::Expression> expression)
+            {
+                expressions.push_back(std::move(expression));
+                return *this;
+            }
+
+            std::vector<std::unique_ptr<ast::Expression>> build()
+            {
+                return std::move(expressions);
+            }
+
+        private:
+            std::vector<std::unique_ptr<ast::Expression>> expressions;
     };
 
     class MatchBuilder

@@ -5,9 +5,6 @@
 
 #include "GameInterpreter.h"
 
-void GameInterpreter::setVariable(const String& name, Value value) {
-    m_variableMap.store(Name{name.value}, value);
-}
 
 VisitResult
 GameInterpreter::visit(const ast::ASTNode& node)
@@ -113,6 +110,55 @@ GameInterpreter::visit(const ast::ArithmeticOperation& arithmeticOp)
     }
 
     return VisitResult{result};
+}
+
+VisitResult
+GameInterpreter::visit(const ast::Callable& callable)
+{
+    Value result;
+
+    switch (callable.getKind())
+    {
+        case ast::Callable::Kind::SIZE: result = callSizeBuiltin(callable); break;
+        case ast::Callable::Kind::UP_FROM: result = callUpFromBuiltin(callable); break;
+        default: throw std::runtime_error("Unknown callable kind");
+    }
+
+    return VisitResult{result};
+}
+
+Value
+GameInterpreter::callSizeBuiltin(const ast::Callable& callable)
+{
+    auto args = callable.getArgs();
+
+    if (args.size() != 0)
+    {
+        throw std::runtime_error(
+            std::format("size() expects 0 args, got {}", args.size())
+        );
+    }
+
+    List<Value> list = evaluateExpression(*callable.getLeft()).getValue().asList();
+
+    return Value{Integer{static_cast<int>(list.size())}};
+}
+
+Value
+GameInterpreter::callUpFromBuiltin(const ast::Callable& callable)
+{
+    auto args = callable.getArgs();
+
+    if (callable.getArgs().size() != 1)
+    {
+        throw std::runtime_error(
+            std::format("upfrom() expects 1 arg, got {}", args.size())
+        );
+    }
+    Integer fromParam = evaluateExpression(*args[0]).getValue().asInteger();
+    Integer toParam = evaluateExpression(*callable.getLeft()).getValue().asInteger();
+
+    return Value{upFrom(fromParam.value, toParam.value)};
 }
 
 VisitResult
@@ -316,6 +362,11 @@ GameInterpreter::doAttributeAssignment(ast::Attribute& attrTarget, Value valueTo
     VisitResult baseResult = resolveExpression(*baseExpr);
     Value& baseValue = baseResult.getValue();
     baseValue.setAttribute(attrTarget.getAttr(), valueToAssign);
+}
+
+void
+GameInterpreter::storeVariable(const Name& name, Value value) {
+    m_variableMap.store(name, value);
 }
 
 void

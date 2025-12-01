@@ -11,8 +11,12 @@
 #include <algorithm>
 #include <random>
 #include <utility>
+#include <functional>
+#include <format>
 
 #include <iostream>
+
+struct Value;
 
 /// Represents a variable name in the AST.
 /// Used as a key in variable lookups.
@@ -235,7 +239,11 @@ struct Map
 /// through the asString(), asMap(), asList() methods respectively.
 struct Value
 {
-    std::variant<List<Value>, Map<String, Value>, String, Integer, Boolean> value;
+    std::variant<List<Value>,
+                 Map<String, Value>,
+                 String,
+                 Integer,
+                 Boolean> value;
 
     bool isString() const
     {
@@ -444,4 +452,23 @@ inline List<Value> sortList(const List<Value>& list, std::optional<String> key =
     );
 
     return listCopy;
+}
+
+inline List<Value> upFrom(int from, int to)
+{
+    if (from > to)
+    {
+        throw std::runtime_error(
+            std::format("upfrom: 'from' ({}) cannot be greater than 'to' ({})", from, to)
+        );
+    }
+
+    List<Value> list;
+
+    for (int i = from; i <= to; i++)
+    {
+        list.value.push_back(Value{Integer{i}});
+    }
+
+    return list;
 }

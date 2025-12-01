@@ -155,7 +155,8 @@ class GameInterpreter : public ast::ASTVisitor
             }
         }
 
-        void setVariable(const String& name, Value value);
+        void
+        storeVariable(const Name& name, Value value);
 
         VisitResult visit(const ast::ASTNode& node) override;
 
@@ -226,6 +227,17 @@ class GameInterpreter : public ast::ASTVisitor
          * @pre Left/right expressions evaluate to a Value
          */
         VisitResult visit(const ast::ArithmeticOperation& arithmeticOp) override;
+
+        /**
+         * @brief Calls a built-in function on a value (`left`) with `args`
+         * arguments.
+         *
+         * @param callable The Callable node to visit.
+         * @return VisitResult Containing a Value as the result
+         *
+         * @pre `arg` expressions each evaluate to a Value
+         */
+        VisitResult visit(const ast::Callable& callable) override;
 
         /**
          * @brief Assigns an evaluated expression to a target.
@@ -311,7 +323,7 @@ class GameInterpreter : public ast::ASTVisitor
 
         /**
          * @brief For each element in the `target` expression (list), execute `statements`.
-         * During the iteration, the current element will be loaded at the variable `element`.
+         * During the iteration, the current element will be stored at the variable `element`.
          *
          * Note: Be careful with the name for the `element` variable, it will be deleted after
          *       the forLoop finishes executing.
@@ -356,6 +368,12 @@ class GameInterpreter : public ast::ASTVisitor
 
         void
         doAttributeAssignment(ast::Attribute& attrTarget, Value valueToAssign);
+
+        Value
+        callSizeBuiltin(const ast::Callable& callable);
+
+        Value
+        callUpFromBuiltin(const ast::Callable& callable);
 
         void
         deleteVariable(ast::Variable& variable);

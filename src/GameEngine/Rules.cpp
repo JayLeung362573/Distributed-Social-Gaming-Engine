@@ -35,6 +35,11 @@ VisitResult ast::ArithmeticOperation::accept(ast::ASTVisitor& visitor)
     return visitor.visit(*this);
 };
 
+VisitResult ast::Callable::accept(ast::ASTVisitor& visitor)
+{
+    return visitor.visit(*this);
+};
+
 VisitResult ast::Assignment::accept(ast::ASTVisitor& visitor)
 {
     return visitor.visit(*this);
@@ -145,6 +150,16 @@ ast::makeArithmeticOperation(std::unique_ptr<ast::Expression> left,
 {
     return std::make_unique<ast::ArithmeticOperation>(
         std::move(left), std::move(right), kind
+    );
+}
+
+std::unique_ptr<ast::Callable>
+ast::makeCallable(std::unique_ptr<ast::Expression> left,
+                  std::vector<std::unique_ptr<Expression>> args,
+                  ast::Callable::Kind kind)
+{
+    return std::make_unique<Callable>(
+        std::move(left), std::move(args), kind
     );
 }
 

@@ -395,17 +395,11 @@ GameServer::handleJoinLobbyMessages(uintptr_t clientID, const JoinLobbyMessage& 
         return outgoingMessages;
     }
 
-    lobbyID = lobby->getInfo().lobbyID;
-
     Message lobbyStatePayload = createLobbyStateMessage(lobby);
 
-    auto players = lobby->getAllPlayer();
-    std::cout << "[GameServer] Broadcasting new lobby state to "
-              << players.size() << " clients.\n";
-
-    for(const auto& player : players) {
+    lobby->forEachPlayer([&](const LobbyMember& player){
         outgoingMessages.push_back(ClientMessage{player.clientID, lobbyStatePayload});
-    }
+    });
 
     return outgoingMessages;
 }
@@ -442,13 +436,9 @@ GameServer::handleLeaveLobbyMessages(uintptr_t clientID, const LeaveLobbyMessage
 
     Message lobbyStateUpdate = createLobbyStateMessage(lobby);
 
-    auto players = lobby->getAllPlayer();
-    std::cout << "[GameServer] Broadcasting lobby state to "
-              << players.size() << " remaining clients\n";
-
-    for(const auto& player : players) {
+    lobby->forEachPlayer([&](const LobbyMember& player){
         outgoingMessages.push_back(ClientMessage{player.clientID, lobbyStateUpdate});
-    }
+    });
 
     return outgoingMessages;
 }
@@ -527,9 +517,7 @@ GameServer::handleStartGameMessages(uintptr_t clientID, const StartGameMessage& 
     }
 
     /// 5. get all players (host and players, excluding audience)
-    auto players = lobby->getAllPlayer();
-
-    if (players.size() < 2) {
+    if (lobby->getPlayerCount() < 2) {
         std::cout << "[GameServer] Error: Not enough players to start (Requires 2)\n";
         Message errorMsg;
         errorMsg.type = MessageType::Error;
@@ -537,13 +525,11 @@ GameServer::handleStartGameMessages(uintptr_t clientID, const StartGameMessage& 
         return {ClientMessage{clientID, errorMsg}};
     }
 
-    std::cout << "[GameServer] Starting game for lobby " << *lobbyID
-              << " with " << players.size() << " players\n";
-
     /// 6. create game rules
     ast::GameRules rules = createGameRules(lobby->getInfo().gameType);
 
     /// 7. create and start session
+    auto players = lobby->getAllPlayer();
     auto session = std::make_unique<GameSession>(*lobbyID, std::move(rules), players);
     std::vector<ClientMessage> initialGameMessages = session->start();
 
@@ -555,7 +541,7 @@ GameServer::handleStartGameMessages(uintptr_t clientID, const StartGameMessage& 
     /// and initial game prompt for inputs
     std::vector<ClientMessage> responses;
 
-    for(const auto& player : players){
+    lobby->forEachPlayer([&](const LobbyMember& player){
         std::cout << "[GameServer] Notifying player " << player.clientID << "\n";
 
         Message startMsg;
@@ -563,7 +549,7 @@ GameServer::handleStartGameMessages(uintptr_t clientID, const StartGameMessage& 
         startMsg.data = StartGameMessage{"Game started"};
 
         responses.push_back(ClientMessage{player.clientID, startMsg});
-    }
+    });
 
     responses.insert(responses.end(),
                      initialGameMessages.begin(),

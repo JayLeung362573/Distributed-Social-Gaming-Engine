@@ -46,6 +46,10 @@ public:
     GameType getGameType() const {return m_gameType;}
     size_t getPlayerCount() const {return m_players.size();}
     bool isFull() const {return m_players.size() >= m_maxPlayers;}
+
+    /// helper function
+    void forEachPlayer(const std::function<void(const LobbyMember&)>& action) const;
+
 private:
     LobbyID m_lobbyID;
     std::string m_lobbyName;

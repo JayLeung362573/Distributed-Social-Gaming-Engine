@@ -51,6 +51,7 @@ Lobby::getHostID() const {
 std::vector<LobbyMember>
 Lobby::getAllPlayer() const {
     std::vector<LobbyMember> playablePlayers;
+    playablePlayers.reserve(m_players.size());
 
     auto hostIt = m_players.find(m_hostID);
     if (hostIt != m_players.end() && hostIt->second.isPlayable()) {
@@ -84,6 +85,25 @@ Lobby::getInfo() const {
 
     return info;
 }
+
+void
+Lobby::forEachPlayer(const std::function<void(const LobbyMember&)>& action) const{
+    auto hostIt = m_players.find(m_hostID);
+    if (hostIt != m_players.end() && hostIt->second.isPlayable()) {
+        action(hostIt->second);
+    }
+
+    for(const auto& [clientID, player] : m_players){
+        if(clientID == m_hostID) {
+            continue;
+        }
+
+        if(player.isPlayable()){
+            action(player);
+        }
+    }
+}
+
 
 std::optional<LobbyRole>
 Lobby::getMemberRole(uintptr_t clientID) const {

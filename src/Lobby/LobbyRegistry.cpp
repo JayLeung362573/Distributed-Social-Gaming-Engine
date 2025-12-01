@@ -2,10 +2,10 @@
 #include <iostream>
 
 Lobby*
-LobbyRegistry::createLobby(ClientID hostID, GameType gameType, const std::string &lobbyName) {
+LobbyRegistry::createLobby(ClientID hostID, GameType gameType, const std::string &lobbyName, const std::string& hostPlayerName) {
     auto lobbyID = generateLobbyID();
 
-    auto lobby = std::make_unique<Lobby>(lobbyID, gameType, hostID, lobbyName);
+    auto lobby = std::make_unique<Lobby>(lobbyID, gameType, hostID, lobbyName, hostPlayerName);
 
     auto* lobbyPtr = lobby.get();
     m_lobbies[lobbyID] = std::move(lobby);
@@ -33,7 +33,7 @@ LobbyRegistry::browseLobbies(std::optional<GameType> gameType) const {
 }
 
 Lobby*
-LobbyRegistry::joinLobby(ClientID clientID, const LobbyID &lobbyID) {
+LobbyRegistry::joinLobby(ClientID clientID, const LobbyID &lobbyID, const std::string& playerName) {
     if(m_clientLobbyMap.count(clientID)){
         std::cout << "[LobbyRegistry] Client " << clientID << " already in a lobby.\n";
         return nullptr;
@@ -45,7 +45,7 @@ LobbyRegistry::joinLobby(ClientID clientID, const LobbyID &lobbyID) {
         return nullptr;
     }
 
-    bool success = it->second->insertPlayer(clientID);
+    bool success = it->second->insertPlayer(clientID, playerName, LobbyRole::Player);
     if(success){
         std::cout << "[Registry] player: " << clientID << " joined Lobby: " << lobbyID << "\n";
 

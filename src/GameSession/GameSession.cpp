@@ -75,15 +75,20 @@ void
 GameSession::processIncomingMessages(const std::vector<ClientMessage> &messages) {
     std::vector<GameMessage> gameMessages;
 
-    for (const auto &clientMsg: messages) {
-        /// if client(player) isn't in this session, skip
-        if (!m_playerIDs.contains(clientMsg.clientID)) {
-            continue;
-        }
+    // Apply filter and mapping pipeline transformation
+    std::vector<ClientMessage> filtered;
+    filtered.reserve(messages.size());
 
-        auto converted = convertMessageToGameMessage(clientMsg);
-        if (converted) {
-            gameMessages.push_back(*converted);
+    std::ranges::copy_if(
+        messages,
+        std::back_inserter(filtered),
+        [&](auto& clientMsg){ return m_playerIDs.contains(clientMsg.clientID); }
+    );
+
+    // convert to game messages (drop nullopt)
+    for (const auto& m : filtered) {
+        if (auto opt = convertMessageToGameMessage(m)) {
+            gameMessages.push_back(*opt);
         }
     }
 
@@ -93,6 +98,7 @@ GameSession::processIncomingMessages(const std::vector<ClientMessage> &messages)
                   << " input messages\n";
     }
 }
+
 std::optional<GameMessage>
 GameSession::convertMessageToGameMessage(const ClientMessage& clientMsg) const {
     std::string playerID = std::to_string(clientMsg.clientID);

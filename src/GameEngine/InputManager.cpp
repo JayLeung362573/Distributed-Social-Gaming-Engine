@@ -105,7 +105,6 @@ void
 InputManager::clearPendingRequests()
 {
     m_pendingRequests.clear();
-    m_sentRequests.clear();
 }
 
 void

@@ -2,6 +2,7 @@
 #include <string_view>
 #include <string>
 #include <stdexcept>
+#include <iostream>
 
 /// to parse string_view to int, for lobbyID and gameType
 static int parseInt(std::string_view sv) {
@@ -34,7 +35,7 @@ struct MessageTraits<StartGameMessage> {
 template<>
 struct MessageTraits<UpdateCycleMessage> {
     // Call statics to enable compile time, so we don't need to instantiate the object and just use it as a container
-    static constexpr std::string_view prefix = "UpdateCycle:"; // instantiate it as pure compile time constant
+    static constexpr std::string_view prefix = "UpdateCycle"; // instantiate it as pure compile time constant
 
     static std::string serialize(const UpdateCycleMessage& d) {
         return std::string(prefix) + std::to_string(d.cycle);
@@ -46,10 +47,33 @@ struct MessageTraits<UpdateCycleMessage> {
     }
 };
 
+template<>
+struct MessageTraits<CreateLobbyMessage> {
+    static constexpr std::string_view prefix = "CreateLobby";
+
+    static std::string serialize(const CreateLobbyMessage&) {
+        return std::string(prefix);
+    }
+
+    static Message deserialize(std::string_view) {
+        return { MessageType::CreateLobby, CreateLobbyMessage{} };
+    }
+};
+
+template<>
+struct MessageTraits<StartJoinLobbyMessage> {
+    static constexpr std::string_view prefix = "JoinLobby";
+
+    static std::string serialize(const StartJoinLobbyMessage&) { return std::string(prefix); }
+    static Message deserialize(std::string_view) {
+        return { MessageType::StartJoinLobby, StartJoinLobbyMessage{} };
+    }
+};
+
 /// Message format: JoinLobby:PlayerName|LobbyName|GameType
 template<>
 struct MessageTraits<JoinLobbyMessage> {
-    static constexpr std::string_view prefix = "JoinLobby:";
+    static constexpr std::string_view prefix = "InternalJoinLobby";
 
     static std::string serialize(const JoinLobbyMessage& d) {
         return std::string(prefix) + d.playerName + "|" + d.lobbyName + "|" + std::to_string(d.gameType);
@@ -96,7 +120,7 @@ struct MessageTraits<JoinLobbyMessage> {
 
 template<>
 struct MessageTraits<LeaveLobbyMessage>{
-    static constexpr std::string_view prefix = "LeaveLobby:";
+    static constexpr std::string_view prefix = "LeaveLobby";
     static std::string serialize(const LeaveLobbyMessage& d) {
         return std::string(prefix) + d.playerName;
     }
@@ -120,7 +144,7 @@ struct MessageTraits<LobbyStateMessage>{
 
 template<>
 struct MessageTraits<BrowseLobbiesMessage> {
-    static constexpr std::string_view prefix = "BrowseLobbies:";
+    static constexpr std::string_view prefix = "BrowseLobbies";
     static std::string serialize(const BrowseLobbiesMessage& d) {
         return std::string(prefix) + std::to_string(static_cast<int>(d.gameType));
     }
@@ -133,7 +157,7 @@ struct MessageTraits<BrowseLobbiesMessage> {
 
 template<>
 struct MessageTraits<GetLobbyStateMessage>{
-    static constexpr std::string_view prefix = "GetLobbyState:";
+    static constexpr std::string_view prefix = "GetLobbyState";
     static std::string serialize(const GetLobbyStateMessage& getLobbyStateMsg) {
         return std::string(prefix);
     }
@@ -217,7 +241,10 @@ struct MessageTraits<ResponseChoiceInputMessage> {
         size_t delimiter = prompt.find('|');
 
         if (delimiter == std::string::npos) {
-            return { MessageType::Empty, {} };
+            return { MessageType::ResponseChoiceInput,
+                     ResponseChoiceInputMessage{
+                std::string(prompt),
+                ""} };
         }
 
         return { MessageType::ResponseChoiceInput,
@@ -304,11 +331,19 @@ std::string MessageTranslator::serialize(const Message& msg)
 
 Message MessageTranslator::deserialize(std::string_view payload)
 {
+    std::cout << "[Translator] Checking payload: '" << payload << "'\n";
     if (payload.starts_with(MessageTraits<StartGameMessage>::prefix)) {
         return MessageTraits<StartGameMessage>::deserialize(payload);
     }
     else if (payload.starts_with(MessageTraits<UpdateCycleMessage>::prefix)) {
         return MessageTraits<UpdateCycleMessage>::deserialize(payload);
+    }
+    else if (payload.starts_with(MessageTraits<CreateLobbyMessage>::prefix)) {
+        std::cout << "[Translator] Found CreateLobbyMessage!\n";
+        return MessageTraits<CreateLobbyMessage>::deserialize(payload);
+    }
+    else if(payload.starts_with(MessageTraits<StartJoinLobbyMessage>::prefix)) {
+        return MessageTraits<StartJoinLobbyMessage>::deserialize(payload);
     }
     else if(payload.starts_with(MessageTraits<JoinLobbyMessage>::prefix)) {
         return MessageTraits<JoinLobbyMessage>::deserialize(payload);
@@ -356,6 +391,7 @@ Message MessageTranslator::deserialize(std::string_view payload)
         return MessageTraits<GameOverMessage>::deserialize(payload);
     }
     else {
+        std::cout << "[Translator] No matching prefix found. Returning Empty.\n";
         return { MessageType::Empty, {} };
     }
 }

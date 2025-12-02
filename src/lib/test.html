@@ -79,7 +79,7 @@
                 var finalMessage = input;
 
                 if(currentResponseType !== "" && !input.includes(":")){
-                    finalMessage = currentResponseType + ":" + input;                }
+                    finalMessage = currentResponseType + ":" + input + "|" + currentPrompt;}
 
                 ws.send(finalMessage);
                 appendText("SENT: " + finalMessage + "\n");
@@ -99,7 +99,7 @@
             });
 
             $('#startGame').click(function() {
-                sendMessage.value = "StartGame:Player1";
+                sendMessage.value = "StartGame:Host";
                 $('#send').click();
             });
 

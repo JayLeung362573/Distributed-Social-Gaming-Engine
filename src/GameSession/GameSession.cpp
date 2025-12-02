@@ -1,5 +1,7 @@
 #include "GameSession.h"
+
 #include <iostream>
+#include <type_traits>
 #include <utility>
 
 GameSession::GameSession(LobbyID lobbyID, ast::GameRules rules, std::vector<LobbyMember> players)
@@ -7,9 +9,15 @@ GameSession::GameSession(LobbyID lobbyID, ast::GameRules rules, std::vector<Lobb
     , m_players(std::move(players))
     , m_interpreter(m_inputManager, convertRulesToProgram(rules))
     {
+        // caches player lookups
+        m_playerLookup.reserve(m_players.size() * 2);
         /// map player with their id
         for(const auto& player : m_players){
             m_playerIDs.insert(player.clientID);
+            if(!player.name.empty()){
+                m_playerLookup[player.name] = player.clientID;
+            }
+            m_playerLookup[std::to_string(player.clientID)] = player.clientID;
         }
 
         for (size_t i = 0; i < m_players.size(); ++i) {
@@ -26,18 +34,6 @@ GameSession::GameSession(LobbyID lobbyID, ast::GameRules rules, std::vector<Lobb
 
     std::cout << "[GameSession] Created session for lobby " << m_lobbyID
               << " with " << m_players.size() << " players\n";}
-
-std::optional<uintptr_t>
-getClientID(const std::string& playerID, const std::vector<LobbyMember>& players) {
-    for (const auto& p : players) {
-        if (p.name == playerID) return p.clientID;
-
-        if (std::to_string(p.clientID) == playerID) {
-            return p.clientID;
-        }
-    }
-    return std::nullopt;
-}
 
 std::vector<ClientMessage>
 GameSession::start() {
@@ -123,30 +119,42 @@ GameSession::convertMessageToGameMessage(const ClientMessage& clientMsg) const {
     return std::nullopt;
 }
 
+// exposes resolveClientID so prompt routing is a constant-time map lookup
+std::optional<uintptr_t>
+GameSession::resolveClientID(const std::string& playerID) const {
+    auto it = m_playerLookup.find(playerID);
+    if (it != m_playerLookup.end()) {
+        return it->second;
+    }
+    return std::nullopt;
+}
+
 Message
 GameSession::convertGameMessageToMessage(const GameMessage& engineMsg) const {
-    Message msg;
-    msg.type = MessageType::Empty;
+    // use std::visit removes repeated scans from collectOutgoingMessages
+    return std::visit([&](auto&& req) -> Message {
+        using T = std::decay_t<decltype(req)>;
+        Message msg;
+        msg.type = MessageType::Empty;
 
-    if (auto* req = std::get_if<GetTextInputMessage>(&engineMsg.inner)) {
-        msg.type = MessageType::RequestTextInput;
-        msg.data = RequestTextInputMessage{req->prompt.value};
-    }
+        if constexpr (std::is_same_v<T, GetTextInputMessage>) {
+            msg.type = MessageType::RequestTextInput;
+            msg.data = RequestTextInputMessage{req.prompt.value};
+        }
+        else if constexpr (std::is_same_v<T, GetChoiceInputMessage>) {
+            msg.type = MessageType::RequestChoiceInput;
+            msg.data = RequestChoiceInputMessage{req.prompt.value};
+        }
+        else if constexpr (std::is_same_v<T, GetRangeInputMessage>) {
+            msg.type = MessageType::RequestRangeInput;
+            msg.data = RequestRangeInputMessage{
+                req.prompt.value,
+                req.minValue.value,
+                req.maxValue.value};
+        }
 
-    else if (auto* req = std::get_if<GetChoiceInputMessage>(&engineMsg.inner)) {
-        msg.type = MessageType::RequestChoiceInput;
-        msg.data = RequestChoiceInputMessage{req->prompt.value};
-    }
-
-    else if (auto* req = std::get_if<GetRangeInputMessage>(&engineMsg.inner)) {
-        msg.type = MessageType::RequestRangeInput;
-        msg.data = RequestRangeInputMessage{
-            req->prompt.value,
-            req->minValue.value,
-            req->maxValue.value};
-    }
-
-    return msg;
+        return msg;
+    }, engineMsg.inner);
 }
 
 std::vector<ClientMessage>
@@ -183,7 +191,7 @@ GameSession::collectOutgoingMessages() {
             targetPlayerID = v->playerID.value;
         }
 
-        auto targetClientID = getClientID(targetPlayerID, m_players);
+        auto targetClientID = resolveClientID(targetPlayerID);
 
         if (targetClientID.has_value()) {
             outgoing.push_back(ClientMessage{*targetClientID, netMsg});
@@ -206,4 +214,3 @@ GameSession::collectOutgoingMessages() {
 
     return outgoing;
 }
-

@@ -1,5 +1,6 @@
 #include "Lobby.h"
 #include <iostream>
+#include <functional>
 
 Lobby::Lobby(const LobbyID& id, GameType type, ClientID hostID, const std::string& lobbyName, const std::string& hostPlayerName)
         : m_lobbyID(id)

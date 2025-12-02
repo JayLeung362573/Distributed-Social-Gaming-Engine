@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <optional>
 #include <cstdint>
+#include <functional>
 #include "LobbyTypes.h"
 
 enum class LobbyRole{

@@ -4,40 +4,57 @@
 #include <stdexcept>
 #include <iostream>
 
+
 // We can use Table drive design pattern to select our serialization/deserialization instead of 300 lines of if/else parsing
 // Using namespace to keep these implemenetations exclusive, so nothing inside leaks into other .cpp files
+// Forward declare all traits inside anonymous namespace
 namespace {
-
-/// to parse string_view to int, for lobbyID and gameType
-static int parseInt(std::string_view sv) {
-    try {
-        return std::stoi(std::string(sv));
-    }
-    catch (const std::exception&) {
-        return 0;
-    }
+    // Use template for each Message for easy scalability. We expect more message and changes to happen in the future
+    template<typename T>
+    struct MessageTraits;
 }
 
-// Use template for each Message for easy scalability. We expect more message and changes to happen in the future
-template<typename T>
-struct MessageTraits;
-
-// define prefix-driven dispatch to prevent silent corruption.
-struct MessageHandlerEntry {
-    std::string_view prefix;
-    Message (*deserialize)(std::string_view payload); // Function-pointer allow to handle the same function with different type at compile time
+// Concept validating the shape of MessageTraits<T> to use static types to rule out bad states before runtime
+template <typename T>
+concept HasMessageTraits = requires(const T& t, std::string_view sv) {
+    { MessageTraits<T>::prefix } -> std::convertible_to<std::string_view>;
+    { MessageTraits<T>::serialize(t) } -> std::convertible_to<std::string>;
+    { MessageTraits<T>::deserialize(sv) } -> std::same_as<Message>;
 };
 
-// Assignable entries to be handled at compile time
-template<typename T>
-constexpr MessageHandlerEntry makeHandlerEntry() {
-    return {
-        MessageTraits<T>::prefix,
-        MessageTraits<T>::deserialize
+// Parsing ultities
+namespace {
+    /// to parse string_view to int, for lobbyID and gameType
+    static int parseInt(std::string_view sv) {
+        try {
+            return std::stoi(std::string(sv));
+        }
+        catch (const std::exception&) {
+            return 0;
+        }
+    }
+
+    // Handler entry: prefix + function pointer
+    // define prefix-driven dispatch to prevent silent corruption.
+    struct MessageHandlerEntry {
+        std::string_view prefix;
+        Message (*deserialize)(std::string_view); // Function-pointer allow to handle the same function with different type at compile time
     };
+
+    // Assignable entries to be handled at compile time 
+    // Validated by HasMessageTraits<T> at compile time
+    template <HasMessageTraits T>
+    constexpr MessageHandlerEntry makeHandlerEntry() {
+        return {
+            MessageTraits<T>::prefix,
+            MessageTraits<T>::deserialize
+        };
+    }
 }
 
 // Specializations
+namespace {
+
 template<>
 struct MessageTraits<StartGameMessage> {
     // Call statics to enable compile time, so we don't need to instantiate the object and just use it as a container
@@ -351,6 +368,27 @@ constexpr auto Handlers = std::array{
     makeHandlerEntry<GameOverMessage>()
 };
 
+// Statically validate for prefix uniqueness of handler table
+consteval bool prefixesAreUnique() {
+    for (size_t i = 0; i < Handlers.size(); ++i)
+        for (size_t j = 0; j < i; ++j)
+            if (Handlers[i].prefix == Handlers[j].prefix)
+                return false;
+    return true;
+}
+static_assert(prefixesAreUnique(), "Duplicate message prefix detected in Handlers table");
+
+// Statically validate for Prefix for illegal characters (like '|')
+consteval bool prefixesAreValid() {
+    for (auto& h : Handlers) {
+        if (h.prefix.empty()) return false;
+        for (char c : h.prefix)
+            if (c == '|') return false;
+    }
+    return true;
+}
+static_assert(prefixesAreValid(), "Message prefixes must not contain '|' and must not be non-empty");
+
 } // namespace. Keep these implemenetations exclusive, so nothing inside leaks into other .cpp files
 
 
@@ -360,6 +398,9 @@ std::string MessageTranslator::serialize(const Message& msg)
     std::string serializedMessage = std::visit(
         [](auto&& data) -> std::string {
             using T = std::decay_t<decltype(data)>; // Access the variant type
+
+            static_assert(HasMessageTraits<T> || std::is_same_v<T, std::monostate>, "Missing MessageTraits<T> for a Message variant alternative type (except std::monostate)");
+
             if constexpr (!std::is_same_v<T, std::monostate>) {
                 return MessageTraits<T>::serialize(data);
             }

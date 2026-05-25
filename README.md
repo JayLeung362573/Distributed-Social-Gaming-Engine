@@ -18,6 +18,7 @@ GameServer
       │
       ▼
 LobbyRegistry / GameSession
+```
 
 ## Key Features
 

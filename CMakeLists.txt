@@ -26,6 +26,8 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
 # For Remote dependencies
 include(cmake/CPM.cmake)
 
+find_package(Boost REQUIRED)
+
 # compile all static libraries
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 

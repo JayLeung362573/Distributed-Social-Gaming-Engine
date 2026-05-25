@@ -29,3 +29,11 @@ LobbyRegistry / GameSession
 - Lobby create/join/leave/browse flows
 - Server-side session tracking
 - Payload size limits and malformed-message filtering
+
+## Testing
+
+Manual test scenarios are documented in:
+
+```bash
+tests/manual_test_plan.md
+```

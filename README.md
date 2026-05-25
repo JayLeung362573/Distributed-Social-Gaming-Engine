@@ -4,14 +4,19 @@ A C++ WebSocket-based multiplayer game server with typed message dispatching, lo
 
 ## Architecture
 
+```text
 Client Browser
-   ↓ WebSocket
+      │
+      ▼ WebSocket
 WebSocketNetworking
-   ↓ ClientMessage
+      │
+      ▼ ClientMessage
 NetworkManager
-   ↓
+      │
+      ▼
 GameServer
-   ↓
+      │
+      ▼
 LobbyRegistry / GameSession
 
 ## Key Features

@@ -30,6 +30,15 @@ LobbyRegistry / GameSession
 - Server-side session tracking
 - Payload size limits and malformed-message filtering
 
+## Defensive Networking
+
+The WebSocket networking layer includes basic safeguards for server robustness:
+
+- Drops payloads larger than 4096 bytes
+- Caps buffered incoming messages at 2048
+- Filters malformed messages that cannot be deserialized into known message types
+- Removes disconnected clients from the active connection map
+
 ## Testing
 
 Manual test scenarios are documented in:

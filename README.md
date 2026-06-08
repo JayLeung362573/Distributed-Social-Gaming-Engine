@@ -1,6 +1,10 @@
-# Distributed Social Gaming Engine
+# C++ WebSocket Multiplayer Game Server
 
-A C++ WebSocket-based multiplayer game server with typed message dispatching, lobby/session management, and server-side game-state coordination.
+A C++23 WebSocket multiplayer game server with typed protocol handling, lobby/session management, and server-authoritative game state coordination.
+
+This project demonstrates a backend-oriented networking architecture for real-time multiplayer browser clients. The server accepts WebSocket connections, parses structured client messages, routes them through a network manager, manages lobby/session lifecycle state, and applies defensive checks such as payload-size limits and malformed-message filtering.
+
+The current implementation focuses on a single-server architecture. It is designed as a foundation for multiplayer session management rather than a full distributed system with multi-node state replication or horizontal scaling.
 
 ## Architecture
 
@@ -19,6 +23,8 @@ GameServer
       ▼
 LobbyRegistry / GameSession
 ```
+
+The server is authoritative over lobby membership and game session state. Clients send intent-based messages, while the server validates requests, updates server-side state, and broadcasts responses to connected clients.
 
 ## Key Features
 

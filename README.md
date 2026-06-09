@@ -28,6 +28,42 @@ The server is authoritative over lobby membership and game session state. Client
 
 See [docs/protocol.md](docs/protocol.md) for the WebSocket message format and supported protocol prefixes.
 
+## Demo
+
+The server can be run locally with Docker and accessed through the browser client at `http://localhost:8080`.
+
+Example server startup:
+
+```text
+[WebSocket] Server initialized on port 8080
+[WebSocket] Server started.
+```
+
+Example client connection flow:
+
+```text
+[WebSocket] Client connected (id=1)
+[WebSocket] Received: InternalJoinLobbyAlice|Lobby1|0 from client 1
+[Translator] Checking payload: 'InternalJoinLobbyAlice|Lobby1|0'
+[WebSocket] Received: ResponseChoiceInput:Rock|p1_choice from client 1
+[Translator] Checking payload: 'ResponseChoiceInput:Rock|p1_choice'
+```
+
+Example malformed-message handling:
+
+```text
+[WebSocket] Received: DeleteServer:now from client 1
+[Translator] Checking payload: 'DeleteServer:now'
+[Translator] No matching prefix found. Returning Empty.
+[WebSocket] Dropped malformed payload from client 1
+```
+
+This demonstrates the main runtime path:
+
+```text
+Browser client -> WebSocket payload -> MessageTranslator -> typed Message variant -> NetworkManager -> GameServer
+```
+
 ## Key Features
 
 - WebSocket-based client/server communication

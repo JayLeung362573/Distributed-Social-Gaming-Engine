@@ -76,6 +76,8 @@ To run only the protocol tests:
 
 On macOS, building the WebSocket dependency may require a compiler toolchain with newer C++23 ranges support. The Docker environment uses GCC 14 for a more consistent build.
 
+For networking-layer defensive checks such as payload-size limits, incoming-buffer caps, malformed-message filtering, and disconnected-client cleanup, see [docs/networking-safeguards.md](docs/networking-safeguards.md).
+
 ## Running with Docker
 
 This project uses C++23, Boost.Asio, and WebSocket networking. Docker is recommended for a reproducible local build environment.

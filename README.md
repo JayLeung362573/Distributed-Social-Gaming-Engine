@@ -26,6 +26,8 @@ LobbyRegistry / GameSession
 
 The server is authoritative over lobby membership and game session state. Clients send intent-based messages, while the server validates requests, updates server-side state, and broadcasts responses to connected clients.
 
+See [docs/protocol.md](docs/protocol.md) for the WebSocket message format and supported protocol prefixes.
+
 ## Key Features
 
 - WebSocket-based client/server communication

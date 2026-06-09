@@ -22,6 +22,7 @@ FetchContent_MakeAvailable(googletest)
 
 add_executable(unit_tests
   WebSocketNetworkingTest.cpp
+  MessageTranslatorTest.cpp
   GameServerTest.cpp
   GameInterpreterTests/AssignmentTest.cpp
   GameInterpreterTests/ComparisonTest.cpp

@@ -49,11 +49,32 @@ The WebSocket networking layer includes basic safeguards for server robustness:
 
 ## Testing
 
-Manual test scenarios are documented in:
+The project includes automated GoogleTest-based unit tests for core server and protocol behavior.
+
+Current test coverage includes:
+
+- WebSocket networking integration behavior
+- Game server behavior
+- Lobby registry behavior
+- Game session behavior
+- Message translation and protocol serialization/deserialization
+- Unknown protocol prefix handling
+
+To build and run tests:
 
 ```bash
-tests/manual_test_plan.md
+cmake -S . -B build -DBUILD_TESTS=ON
+cmake --build build
+ctest --test-dir build --output-on-failure
 ```
+
+To run only the protocol tests:
+
+```bash
+./build/tests/unit_tests --gtest_filter="MessageTranslatorTest.*"
+```
+
+On macOS, building the WebSocket dependency may require a compiler toolchain with newer C++23 ranges support. The Docker environment uses GCC 14 for a more consistent build.
 
 ## Running with Docker
 

@@ -177,3 +177,17 @@ Open the browser client at:
 ```
 http://localhost:8080
 ```
+
+## Future Work
+
+The current implementation focuses on a single-server WebSocket multiplayer architecture. Future improvements could extend the project toward a more scalable distributed system.
+
+Planned improvements include:
+
+- Add stricter required-field validation for protocol payloads.
+- Add automated tests for payload-size limits and incoming-buffer caps.
+- Add per-client rate limiting to protect against message spam.
+- Add reconnect handling for clients that temporarily disconnect.
+- Add persistent lobby/session recovery after server restart.
+- Explore horizontal scaling with multiple server instances and shared session state.
+- Add matchmaking support for automatically grouping players into compatible lobbies.

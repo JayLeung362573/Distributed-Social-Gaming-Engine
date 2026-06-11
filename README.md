@@ -64,6 +64,33 @@ This demonstrates the main runtime path:
 Browser client -> WebSocket payload -> MessageTranslator -> typed Message variant -> NetworkManager -> GameServer
 ```
 
+### Client Simulation
+
+A lightweight Python script can simulate multiple WebSocket clients and send representative protocol messages to the server.
+
+Install the Python dependency:
+
+```bash
+python3 -m pip install websockets
+```
+
+Run the simulation while the server is running:
+
+```bash
+python3 scripts/simulate_clients.py --clients 5
+```
+
+Example output:
+
+```bash
+Client simulation complete
+WebSocket URI: ws://localhost:8080
+Clients attempted: 5
+Clients connected: 5
+Clients failed: 0
+Messages sent: 25
+```
+
 ## Key Features
 
 - WebSocket-based client/server communication

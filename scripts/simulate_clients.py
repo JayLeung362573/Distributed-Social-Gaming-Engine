@@ -17,7 +17,7 @@ class ClientResult:
 
 DEFAULT_MESSAGES = [
     "CreateLobby",
-    "StartJoinLobby",
+    "JoinLobby",
     "StartGame:Host",
     "ResponseChoiceInput:Rock|p1_choice",
     "DeleteServer:now",

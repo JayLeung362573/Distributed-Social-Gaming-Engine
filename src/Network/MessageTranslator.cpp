@@ -352,6 +352,8 @@ struct MessageTraits<ErrorMessage>{
 constexpr auto Handlers = std::array{
     makeHandlerEntry<StartGameMessage>(),
     makeHandlerEntry<UpdateCycleMessage>(),
+    makeHandlerEntry<CreateLobbyMessage>(), 
+    makeHandlerEntry<StartJoinLobbyMessage>(),
     makeHandlerEntry<JoinLobbyMessage>(),
     makeHandlerEntry<LeaveLobbyMessage>(),
     makeHandlerEntry<LobbyStateMessage>(),

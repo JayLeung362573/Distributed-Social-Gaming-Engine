@@ -107,3 +107,17 @@ TEST(MessageTranslatorTest, SerializesResponseChoiceInputMessage) {
         "ResponseChoiceInput:Rock|p1_choice"
     );
 }
+
+TEST(MessageTranslatorTest, DeserializesCreateLobbyMessage) 
+{ 
+    Message msg = MessageTranslator::deserialize("CreateLobby"); 
+    EXPECT_EQ(msg.type, MessageType::CreateLobby); 
+    EXPECT_TRUE(std::holds_alternative<CreateLobbyMessage>(msg.data)); 
+}
+
+TEST(MessageTranslatorTest, DeserializesStartJoinLobbyMessage) 
+{ 
+    Message msg = MessageTranslator::deserialize("JoinLobby"); 
+    EXPECT_EQ(msg.type, MessageType::StartJoinLobby); 
+    EXPECT_TRUE(std::holds_alternative<StartJoinLobbyMessage>(msg.data)); 
+}

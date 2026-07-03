@@ -66,34 +66,62 @@ Browser client -> WebSocket payload -> MessageTranslator -> typed Message varian
 
 ### Client Simulation
 
-A lightweight Python script can simulate multiple WebSocket clients and send representative protocol messages to the server.
+### Concurrent Client Simulation
 
-Install the Python dependency:
+The repository includes an asynchronous Python workload generator for testing concurrent WebSocket connections, protocol messages, server responses, and malformed-message filtering.
 
-```bash
-python3 -m pip install websockets
-```
-
-Run the simulation while the server is running:
+Install the simulation dependency:
 
 ```bash
-python3 scripts/simulate_clients.py --clients 5
+python3 -m pip install -r scripts/requirements.txt
 ```
 
-Example output:
+Start the C++ server, then run a 50-client workload:
 
 ```bash
-Client simulation complete
-WebSocket URI: ws://localhost:8080
-Clients attempted: 5
-Clients connected: 5
-Clients failed: 0
-Messages sent: 25
+python3 scripts/simulate_clients.py \
+  --clients 50 \
+  --messages-per-client 20 \
+  --response-timeout 15
 ```
+
+Run the larger 100-client workload:
+
+```bash
+python3 scripts/simulate_clients.py \
+  --clients 100 \
+  --messages-per-client 20 \
+  --response-timeout 30
+```
+
+Each client sends a repeatable workload containing recognized protocol messages and intentionally malformed payloads. The simulator waits for the expected server responses instead of disconnecting immediately after sending.
+
+The reported metrics include:
+
+* Connection and workload completion rates
+* Planned, sent, valid, and malformed message counts
+* Expected and received server responses
+* End-to-end workload duration and processing rate
+* Per-client connection or protocol errors
+
+#### Local Benchmark Results
+
+The following results were recorded with the C++ server running in Docker and the Python simulator running on the host machine.
+
+| Concurrent clients | Messages sent | Valid messages | Malformed messages | Responses received | Connection success | Response completion | Elapsed time |
+| -----------------: | ------------: | -------------: | -----------------: | -----------------: | -----------------: | ------------------: | -----------: |
+|                 50 |         1,000 |            800 |                200 |          850 / 850 |               100% |                100% |      9.839 s |
+|                100 |         2,000 |          1,600 |                400 |      1,700 / 1,700 |               100% |                100% |     20.025 s |
+
+For the 100-client run, server logs confirmed that all `2,000` WebSocket payloads reached the networking layer, all `400` intentionally malformed payloads were rejected, and no responses were routed to missing client connections.
+
+These results validate the current single-server implementation under 100 concurrent simulated clients. They are local functional load-test results, not a claim of production-scale capacity or distributed operation.
+
 
 ## Key Features
 
 - WebSocket-based client/server communication
+- Concurrent workload simulation validated with up to 100 WebSocket clients
 - Event-loop server architecture
 - Type-safe message protocol using std::variant
 - Table-driven message serialization/deserialization

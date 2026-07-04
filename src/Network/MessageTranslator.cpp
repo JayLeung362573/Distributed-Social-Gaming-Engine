@@ -3,6 +3,8 @@
 #include <string>
 #include <stdexcept>
 #include <iostream>
+#include <charconv>
+#include <optional>
 
 
 // We can use Table drive design pattern to select our serialization/deserialization instead of 300 lines of if/else parsing
@@ -25,14 +27,45 @@ concept HasMessageTraits = requires(const T& t, std::string_view sv) {
 // Parsing ultities
 namespace {
     /// to parse string_view to int, for lobbyID and gameType
-    static int parseInt(std::string_view sv) {
-        try {
-            return std::stoi(std::string(sv));
-        }
-        catch (const std::exception&) {
-            return 0;
-        }
+    static Message emptyMessage() {
+        return {MessageType::Empty, std::monostate{}};
+}
+
+static std::optional<int> parseStrictInt(std::string_view sv) {
+    if (sv.empty()) {
+        return std::nullopt;
     }
+
+    int value = 0;
+    const char* begin = sv.data();
+    const char* end = sv.data() + sv.size();
+
+    auto [ptr, ec] = std::from_chars(begin, end, value);
+
+    if (ec != std::errc{} || ptr != end) {
+        return std::nullopt;
+    }
+
+    return value;
+}
+
+static bool isValidGameType(int value) {
+    return value >= 0 && value <= 2;
+}
+
+static bool hasNoTrailingPayload(
+    std::string_view payload,
+    std::string_view prefix
+) {
+    return payload == prefix;
+}
+
+static bool hasExactlyOneDelimiter(std::string_view content) {
+    const size_t delimiter = content.find('|');
+
+    return delimiter != std::string_view::npos &&
+           content.find('|', delimiter + 1) == std::string_view::npos;
+}
 
     // Handler entry: prefix + function pointer
     // define prefix-driven dispatch to prevent silent corruption.
@@ -63,9 +96,14 @@ struct MessageTraits<StartGameMessage> {
         return std::string(prefix) + d.playerName;
     }
     static Message deserialize(const std::string_view payload) {
-        std::string_view name = payload.substr(prefix.size());
-        return { MessageType::StartGame, StartGameMessage{std::string(name)} };
+    std::string_view name = payload.substr(prefix.size());
+
+    if (name.empty()) {
+        return emptyMessage();
     }
+
+    return {MessageType::StartGame, StartGameMessage{std::string(name)}};
+}
 };
 
 template<>
@@ -77,10 +115,15 @@ struct MessageTraits<UpdateCycleMessage> {
         return std::string(prefix) + std::to_string(d.cycle);
     }
     static Message deserialize(std::string_view payload) {
-        auto num = payload.substr(prefix.size());
-        int cycle = parseInt(num);
-        return { MessageType::UpdateCycle, UpdateCycleMessage{cycle} };
+    auto num = payload.substr(prefix.size());
+    auto cycle = parseStrictInt(num);
+
+    if (!cycle || *cycle < 0) {
+        return emptyMessage();
     }
+
+    return {MessageType::UpdateCycle, UpdateCycleMessage{*cycle}};
+}
 };
 
 template<>
@@ -91,9 +134,13 @@ struct MessageTraits<CreateLobbyMessage> {
         return std::string(prefix);
     }
 
-    static Message deserialize(std::string_view) {
-        return { MessageType::CreateLobby, CreateLobbyMessage{} };
+    static Message deserialize(std::string_view payload) {
+    if (!hasNoTrailingPayload(payload, prefix)) {
+        return emptyMessage();
     }
+
+    return {MessageType::CreateLobby, CreateLobbyMessage{}};
+}
 };
 
 template<>
@@ -101,9 +148,13 @@ struct MessageTraits<StartJoinLobbyMessage> {
     static constexpr std::string_view prefix = "JoinLobby";
 
     static std::string serialize(const StartJoinLobbyMessage&) { return std::string(prefix); }
-    static Message deserialize(std::string_view) {
-        return { MessageType::StartJoinLobby, StartJoinLobbyMessage{} };
+    static Message deserialize(std::string_view payload) {
+    if (!hasNoTrailingPayload(payload, prefix)) {
+        return emptyMessage();
     }
+
+    return {MessageType::StartJoinLobby, StartJoinLobbyMessage{}};
+}
 };
 
 /// Message format: JoinLobby:PlayerName|LobbyName|GameType
@@ -116,42 +167,47 @@ struct MessageTraits<JoinLobbyMessage> {
     }
 
     static Message deserialize(std::string_view payload) {
-        auto content = payload.substr(prefix.size());
-        size_t firstDelimiter = content.find('|');
-        /// split PlayerName|LobbyName|GameType
-        std::string_view playerName;
-        std::string_view lobbyName;
-        int type = 0;
+    auto content = payload.substr(prefix.size());
 
-        /// PlayerName only
-        if(firstDelimiter == std::string_view::npos){
-            playerName = content;
-        }
-        else{
-            /// PlayerName|...
-            playerName = content.substr(0, firstDelimiter);
-
-            size_t secondDelimiter = content.find('|', firstDelimiter + 1);
-
-            if(secondDelimiter == std::string_view ::npos){
-                lobbyName = content.substr(firstDelimiter + 1);
-            }
-            else{
-                /// PlayerName|LobbyName|GameType
-                lobbyName = content.substr(firstDelimiter + 1, secondDelimiter -(firstDelimiter + 1));
-
-                std::string_view typeStr = content.substr(secondDelimiter + 1);
-                if (!typeStr.empty()) {
-                    try {
-                        type = parseInt(typeStr); // Convert string to int
-                    } catch (...) {
-                        type = 0; // Fallback on error
-                    }
-                }
-            }
-        }
-        return {MessageType::JoinLobby, JoinLobbyMessage{std::string(playerName), std::string(lobbyName), type}};
+    const size_t firstDelimiter = content.find('|');
+    if (firstDelimiter == std::string_view::npos) {
+        return emptyMessage();
     }
+
+    const size_t secondDelimiter = content.find('|', firstDelimiter + 1);
+    if (secondDelimiter == std::string_view::npos) {
+        return emptyMessage();
+    }
+
+    if (content.find('|', secondDelimiter + 1) != std::string_view::npos) {
+        return emptyMessage();
+    }
+
+    std::string_view playerName = content.substr(0, firstDelimiter);
+    std::string_view lobbyName = content.substr(
+        firstDelimiter + 1,
+        secondDelimiter - (firstDelimiter + 1)
+    );
+    std::string_view typeStr = content.substr(secondDelimiter + 1);
+
+    if (playerName.empty() || lobbyName.empty() || typeStr.empty()) {
+        return emptyMessage();
+    }
+
+    auto type = parseStrictInt(typeStr);
+    if (!type || !isValidGameType(*type)) {
+        return emptyMessage();
+    }
+
+    return {
+        MessageType::JoinLobby,
+        JoinLobbyMessage{
+            std::string(playerName),
+            std::string(lobbyName),
+            *type
+        }
+    };
+}
 };
 
 template<>
@@ -161,8 +217,17 @@ struct MessageTraits<LeaveLobbyMessage>{
         return std::string(prefix) + d.playerName;
     }
     static Message deserialize(const std::string_view payload) {
-        return { MessageType::LeaveLobby, LeaveLobbyMessage{std::string(payload.substr(prefix.size()))}};
+    std::string_view playerName = payload.substr(prefix.size());
+
+    if (playerName.empty()) {
+        return emptyMessage();
     }
+
+    return {
+        MessageType::LeaveLobby,
+        LeaveLobbyMessage{std::string(playerName)}
+    };
+}
 };
 
 template<>
@@ -185,10 +250,18 @@ struct MessageTraits<BrowseLobbiesMessage> {
         return std::string(prefix) + std::to_string(static_cast<int>(d.gameType));
     }
     static Message deserialize(const std::string_view payload) {
-        std::string_view gameTypeStr = payload.substr(prefix.size());
-        int gameTypeInt = gameTypeStr.empty() ? 0 : parseInt(gameTypeStr);
-        return { MessageType::BrowseLobbies, BrowseLobbiesMessage{static_cast<GameType>(gameTypeInt)} };
+    std::string_view gameTypeStr = payload.substr(prefix.size());
+
+    auto gameTypeInt = parseStrictInt(gameTypeStr);
+    if (!gameTypeInt || !isValidGameType(*gameTypeInt)) {
+        return emptyMessage();
     }
+
+    return {
+        MessageType::BrowseLobbies,
+        BrowseLobbiesMessage{static_cast<GameType>(*gameTypeInt)}
+    };
+}
 };
 
 template<>
@@ -198,8 +271,12 @@ struct MessageTraits<GetLobbyStateMessage>{
         return std::string(prefix);
     }
     static Message deserialize(const std::string_view payload) {
-        return { MessageType::GetLobbyState, GetLobbyStateMessage{} };
+    if (!hasNoTrailingPayload(payload, prefix)) {
+        return emptyMessage();
     }
+
+    return {MessageType::GetLobbyState, GetLobbyStateMessage{}};
+}
 };
 
 template<>
@@ -256,12 +333,28 @@ struct MessageTraits<ResponseTextInputMessage> {
     }
 
     static Message deserialize(const std::string_view payload) {
-        std::string_view content = payload.substr(prefix.size());
-        size_t delimiter = content.find('|');
-        return { MessageType::ResponseTextInput,
-                 ResponseTextInputMessage{std::string(content.substr(0, delimiter)),
-                                          std::string (content.substr(delimiter + 1))} };
+    std::string_view content = payload.substr(prefix.size());
+
+    if (!hasExactlyOneDelimiter(content)) {
+        return emptyMessage();
     }
+
+    const size_t delimiter = content.find('|');
+    std::string_view input = content.substr(0, delimiter);
+    std::string_view promptReference = content.substr(delimiter + 1);
+
+    if (promptReference.empty()) {
+        return emptyMessage();
+    }
+
+    return {
+        MessageType::ResponseTextInput,
+        ResponseTextInputMessage{
+            std::string(input),
+            std::string(promptReference)
+        }
+    };
+}
 };
 
 template<>
@@ -273,21 +366,28 @@ struct MessageTraits<ResponseChoiceInputMessage> {
     }
 
     static Message deserialize(const std::string_view payload) {
-        std::string_view prompt = payload.substr(prefix.size());
-        size_t delimiter = prompt.find('|');
+    std::string_view content = payload.substr(prefix.size());
 
-        if (delimiter == std::string::npos) {
-            return { MessageType::ResponseChoiceInput,
-                     ResponseChoiceInputMessage{
-                std::string(prompt),
-                ""} };
-        }
-
-        return { MessageType::ResponseChoiceInput,
-                 ResponseChoiceInputMessage{
-            std::string(prompt.substr(0, delimiter)),
-            std::string (prompt.substr(delimiter + 1))}};
+    if (!hasExactlyOneDelimiter(content)) {
+        return emptyMessage();
     }
+
+    const size_t delimiter = content.find('|');
+    std::string_view choice = content.substr(0, delimiter);
+    std::string_view promptRef = content.substr(delimiter + 1);
+
+    if (choice.empty() || promptRef.empty()) {
+        return emptyMessage();
+    }
+
+    return {
+        MessageType::ResponseChoiceInput,
+        ResponseChoiceInputMessage{
+            std::string(choice),
+            std::string(promptRef)
+        }
+    };
+}
 };
 
 template<>
@@ -300,12 +400,30 @@ struct MessageTraits<ResponseRangeInputMessage> {
     }
 
     static Message deserialize(const std::string_view payload) {
-        std::string_view prompt = payload.substr(prefix.size());
-        size_t delimiter = prompt.find('|');
-        int val = parseInt(prompt.substr(0, delimiter));
-        return { MessageType::ResponseRangeInput,
-                 ResponseRangeInputMessage{val, std::string(prompt.substr(delimiter + 1))} };
-        }
+    std::string_view content = payload.substr(prefix.size());
+
+    if (!hasExactlyOneDelimiter(content)) {
+        return emptyMessage();
+    }
+
+    const size_t delimiter = content.find('|');
+    std::string_view valueText = content.substr(0, delimiter);
+    std::string_view promptRef = content.substr(delimiter + 1);
+
+    if (promptRef.empty()) {
+        return emptyMessage();
+    }
+
+    auto value = parseStrictInt(valueText);
+    if (!value) {
+        return emptyMessage();
+    }
+
+    return {
+        MessageType::ResponseRangeInput,
+        ResponseRangeInputMessage{*value, std::string(promptRef)}
+    };
+}
 };
 
 template<>

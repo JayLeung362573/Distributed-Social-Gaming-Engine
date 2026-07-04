@@ -1,7 +1,23 @@
 #include <gtest/gtest.h>
+#include <string_view>
+#include <vector>
 
 #include "Network/MessageTranslator.h"
 #include "Message.h"
+
+namespace {
+
+void expectMalformed(std::string_view payload) {
+    Message msg = MessageTranslator::deserialize(payload);
+
+    EXPECT_EQ(msg.type, MessageType::Empty)
+        << "Expected malformed payload to be rejected: " << payload;
+
+    EXPECT_TRUE(std::holds_alternative<std::monostate>(msg.data))
+        << "Malformed payload should contain monostate: " << payload;
+}
+
+}
 
 TEST(MessageTranslatorTest, DeserializesStartGameMessage) {
     Message msg = MessageTranslator::deserialize("StartGame:Alice");
@@ -120,4 +136,91 @@ TEST(MessageTranslatorTest, DeserializesStartJoinLobbyMessage)
     Message msg = MessageTranslator::deserialize("JoinLobby"); 
     EXPECT_EQ(msg.type, MessageType::StartJoinLobby); 
     EXPECT_TRUE(std::holds_alternative<StartJoinLobbyMessage>(msg.data)); 
+}
+
+TEST(MessageTranslatorTest, RejectsTrailingDataForCommandOnlyMessages) {
+    const std::vector<std::string_view> malformedPayloads{
+        "CreateLobbyExtra",
+        "JoinLobbyExtra",
+        "GetLobbyStateExtra",
+    };
+
+    for (const auto payload : malformedPayloads) {
+        SCOPED_TRACE(payload);
+        expectMalformed(payload);
+    }
+}
+
+TEST(MessageTranslatorTest, RejectsMissingRequiredFields) {
+    const std::vector<std::string_view> malformedPayloads{
+        "StartGame:",
+        "InternalJoinLobbyAlice",
+        "InternalJoinLobbyAlice|Lobby1",
+        "InternalJoinLobby|Lobby1|1",
+        "InternalJoinLobbyAlice||1",
+        "LeaveLobby",
+        "BrowseLobbies",
+        "ResponseTextInput:Alice",
+        "ResponseTextInput:Alice|",
+        "ResponseChoiceInput:Rock",
+        "ResponseChoiceInput:|p1_choice",
+        "ResponseChoiceInput:Rock|",
+        "ResponseRangeInput:5",
+        "ResponseRangeInput:5|",
+    };
+
+    for (const auto payload : malformedPayloads) {
+        SCOPED_TRACE(payload);
+        expectMalformed(payload);
+    }
+}
+
+TEST(MessageTranslatorTest, RejectsInvalidNumericFields) {
+    const std::vector<std::string_view> malformedPayloads{
+        "UpdateCycle",
+        "UpdateCycleabc",
+        "UpdateCycle1abc",
+        "InternalJoinLobbyAlice|Lobby1|abc",
+        "InternalJoinLobbyAlice|Lobby1|1abc",
+        "InternalJoinLobbyAlice|Lobby1|-1",
+        "InternalJoinLobbyAlice|Lobby1|3",
+        "BrowseLobbiesabc",
+        "BrowseLobbies1abc",
+        "BrowseLobbies-1",
+        "BrowseLobbies3",
+        "ResponseRangeInput:abc|range_prompt",
+        "ResponseRangeInput:5abc|range_prompt",
+    };
+
+    for (const auto payload : malformedPayloads) {
+        SCOPED_TRACE(payload);
+        expectMalformed(payload);
+    }
+}
+
+TEST(MessageTranslatorTest, RejectsUnexpectedExtraFields) {
+    const std::vector<std::string_view> malformedPayloads{
+        "InternalJoinLobbyAlice|Lobby1|1|extra",
+        "ResponseTextInput:Alice|name_prompt|extra",
+        "ResponseChoiceInput:Rock|p1_choice|extra",
+        "ResponseRangeInput:5|range_prompt|extra",
+    };
+
+    for (const auto payload : malformedPayloads) {
+        SCOPED_TRACE(payload);
+        expectMalformed(payload);
+    }
+}
+
+TEST(MessageTranslatorTest, AllowsEmptyTextInputForGameLevelValidation) {
+    Message msg = MessageTranslator::deserialize(
+        "ResponseTextInput:|name_prompt"
+    );
+
+    EXPECT_EQ(msg.type, MessageType::ResponseTextInput);
+
+    const auto* data = std::get_if<ResponseTextInputMessage>(&msg.data);
+    ASSERT_NE(data, nullptr);
+    EXPECT_TRUE(data->input.empty());
+    EXPECT_EQ(data->promptReference, "name_prompt");
 }

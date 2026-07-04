@@ -125,6 +125,7 @@ These results validate the current single-server implementation under 100 concur
 - Event-loop server architecture
 - Type-safe message protocol using std::variant
 - Table-driven message serialization/deserialization
+- Strict required-field validation for protocol payloads
 - Lobby create/join/leave/browse flows
 - Server-side session tracking
 - Payload size limits and malformed-message filtering
@@ -137,6 +138,7 @@ The WebSocket networking layer includes basic safeguards for server robustness:
 - Caps buffered incoming messages at 2048
 - Filters malformed messages that cannot be deserialized into known message types
 - Removes disconnected clients from the active connection map
+- Rejects known-prefix messages with missing required fields, invalid numeric fields, or unexpected extra fields
 
 ## Testing
 
@@ -212,7 +214,6 @@ The current implementation focuses on a single-server WebSocket multiplayer arch
 
 Planned improvements include:
 
-- Add stricter required-field validation for protocol payloads.
 - Add automated tests for payload-size limits and incoming-buffer caps.
 - Add per-client rate limiting to protect against message spam.
 - Add reconnect handling for clients that temporarily disconnect.

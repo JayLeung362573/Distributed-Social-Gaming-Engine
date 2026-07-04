@@ -28,12 +28,14 @@ ResponseRangeInput:5|range_prompt
 
 | Action | Wire Format | Meaning |
 |---|---|---|
+| Create lobby flow | `CreateLobby` | Start the interactive lobby creation flow. |
+| Start join lobby flow | `JoinLobby` | Start the interactive lobby join flow. |
 | Start game | `StartGame:<playerName>` | Request starting the game in the current lobby. |
-| Join lobby | `InternalJoinLobby<playerName>\|<lobbyName>\|<gameType>` | Request joining a specific lobby. |
+| Direct join lobby | `InternalJoinLobby<playerName>\|<lobbyName>\|<gameType>` | Request joining a specific lobby using explicit fields. |
 | Leave lobby | `LeaveLobby<playerName>` | Leave the current lobby. |
-| Browse lobbies | `BrowseLobbies<gameType>` | Request available lobbies. |
+| Browse lobbies | `BrowseLobbies<gameType>` | Request available lobbies for a game type. |
 | Get lobby state | `GetLobbyState` | Request the current lobby state. |
-| Send text input | `ResponseTextInput:<input>\|<promptRef>` | Send a text input response. |
+| Send text input | `ResponseTextInput:<input>\|<promptRef>` | Send a text input response. Empty input is allowed, but `promptRef` is required. |
 | Send choice input | `ResponseChoiceInput:<choice>\|<promptRef>` | Send a choice input response. |
 | Send range input | `ResponseRangeInput:<value>\|<promptRef>` | Send a numeric range input response. |
 
@@ -58,6 +60,7 @@ Current safeguards include:
 - Payload-size limit: payloads larger than `4096` bytes are dropped.
 - Incoming buffer limit: the incoming message buffer is capped at `2048` messages.
 - Prefix validation: unknown message prefixes are treated as malformed messages.
+- Required-field validation: messages with missing required fields, empty required fields, invalid numeric fields, or unexpected extra delimiters are rejected.
 - Malformed-message filtering: invalid messages are not passed to `GameServer`.
 - Connection cleanup: disconnected clients are removed from the active connection map.
 
@@ -65,7 +68,24 @@ Current safeguards include:
 
 Unknown prefixes are rejected by returning an empty message before reaching normal game-message handling.
 
-Some malformed payloads are still parsed with default or empty fields by the current translator. For example, `InternalJoinLobbyAlice` can still be parsed as a join-lobby message with missing lobby/game fields. Stricter required-field validation is planned for automated protocol tests.
+The translator also rejects malformed payloads that match a known prefix but fail required-field validation. Rejected cases include:
+
+- Command-only messages with trailing payload data, such as `CreateLobbyExtra`
+- Missing required fields, such as `InternalJoinLobbyAlice`
+- Empty required fields, such as `InternalJoinLobbyAlice||1`
+- Invalid numeric fields, such as `BrowseLobbiesabc`
+- Partially parsed numeric fields, such as `BrowseLobbies1abc`
+- Unexpected extra fields, such as `ResponseChoiceInput:Rock|p1_choice|extra`
+
+Valid game type values are:
+
+| Value | Meaning |
+|---:|---|
+| `0` | Default |
+| `1` | Number Battle |
+| `2` | Choice Battle |
+
+`ResponseTextInput:<input>|<promptRef>` allows an empty text input so game-level validation can decide whether that input is acceptable. The `promptRef` field is still required.
 
 ## Malformed Message Examples
 
@@ -80,6 +100,42 @@ Expected behavior:
 - The translator returns an empty message because no registered prefix matches.
 - No lobby or game state should be modified by normal game-message handling.
 - The server continues running.
+
+### Missing Required Fields
+
+```text
+InternalJoinLobbyAlice
+```
+
+Expected behavior:
+
+- The translator returns an empty message because required lobby and game-type fields are missing.
+- The WebSocket layer drops the malformed payload.
+- No lobby or game state should be modified.
+
+### Invalid Numeric Field
+
+```text
+BrowseLobbies1abc
+```
+
+Expected behavior:
+
+- The translator returns an empty message because numeric parsing must consume the full field.
+- The WebSocket layer drops the malformed payload.
+- No lobby or game state should be modified.
+
+### Unexpected Extra Field
+
+```text
+ResponseChoiceInput:Rock|p1_choice|extra
+```
+
+Expected behavior:
+
+- The translator returns an empty message because the message contains more fields than the protocol allows.
+- The WebSocket layer drops the malformed payload.
+- No lobby or game state should be modified.
 
 ### Oversized Payload
 
